@@ -1,0 +1,7 @@
+{
+  "name": "Copy of Saurashtra residency",
+  "description": "A comprehensive residential society management dashboard for Saurashtra Residency, featuring maintenance tracking, fund management, and building details.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}

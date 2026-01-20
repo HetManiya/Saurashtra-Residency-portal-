@@ -1,0 +1,575 @@
+
+import { Building, FlatType, CommitteeMember, Notice, FundRecord, MaintenanceRecord, PaymentStatus, OccupancyType, Flat, FamilyMember, WingCommittee, Builder, Language, AmenityBooking } from './types';
+
+export const SOCIETY_INFO = {
+  name: "Saurashtra Residency",
+  location: "Pasodara, Surat – 395013",
+  coordinates: { lat: 21.2334861, lng: 72.9421257 }, 
+  googleMapsUrl: "https://maps.app.goo.gl/jZdmVoaupJwwmUd37",
+  totalBuildings: 24,
+  bhk1Count: 6,
+  bhk2Count: 18,
+  maintenanceAmount: 700,
+  penaltyAmount: 100,
+  dueDay: 10,
+  amenities: [
+    { 
+      id: 1, 
+      name: "Luxury Clubhouse", 
+      desc: "Perfect for birthday parties and family gatherings. Accommodates up to 100 guests.", 
+      type: 'utility',
+      capacity: 100,
+      location: "Near Wing A-1",
+      image: "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80&w=800"
+    },
+    { 
+      id: 2, 
+      name: "Central Party Plot", 
+      desc: "Large open-air lawn for weddings and grand community festivals.", 
+      type: 'garden',
+      capacity: 500,
+      location: "Central Courtyard",
+      image: "https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?auto=format&fit=crop&q=80&w=800"
+    },
+    { 
+      id: 3, 
+      name: "Mini Theatre", 
+      desc: "Private 20-seater cinema for residents to enjoy movies with family.", 
+      type: 'utility',
+      capacity: 20,
+      location: "Basement Wing A-12",
+      image: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&q=80&w=800"
+    }
+  ],
+};
+
+export const FACILITY_BOOKINGS: AmenityBooking[] = [
+  {
+    id: 'B1',
+    facilityId: 1,
+    userName: 'Kishan Patel',
+    unitNumber: 'A-1-204',
+    date: '2024-05-25',
+    startTime: '10:00 AM',
+    endTime: '02:00 PM',
+    purpose: "Aaryan's 5th Birthday Party",
+    attendees: 85,
+    isPublic: false,
+    status: 'Confirmed'
+  },
+  {
+    id: 'B2',
+    facilityId: 2,
+    userName: 'Bhavin Vaghani',
+    unitNumber: 'A-15-502',
+    date: '2024-05-26',
+    startTime: '06:00 PM',
+    endTime: '11:00 PM',
+    purpose: 'Sangeet Ceremony',
+    attendees: 350,
+    isPublic: true,
+    status: 'Confirmed'
+  },
+  {
+    id: 'B3',
+    facilityId: 3,
+    userName: 'Nirav Gajera',
+    unitNumber: 'A-8-101',
+    date: '2024-05-24',
+    startTime: '08:00 PM',
+    endTime: '11:00 PM',
+    purpose: 'IPL Final Night Screening',
+    attendees: 20,
+    isPublic: true,
+    status: 'Confirmed'
+  }
+];
+
+export const TRANSLATIONS: Record<Language, any> = {
+  en: {
+    greeting_morning: "Good Morning",
+    greeting_afternoon: "Good Afternoon",
+    greeting_evening: "Good Evening",
+    greeting_night: "Good Night",
+    dashboard: "Command Center",
+    maintenance: "Maintenance Lab",
+    emergency: "Emergency Desk",
+    visitors: "Visitor Access",
+    assets: "Residential Assets",
+    treasury: "Treasury Analytics",
+    audit: "Audit Trail",
+    funds: "Community Funds",
+    notices: "Broadcasts",
+    location: "Atlas & Builders",
+    leadership: "Leadership",
+    residents: "Residents",
+    status_active: "Active",
+    quick_pay: "Quick Pay",
+    day_shift: "Day Shift",
+    night_shift: "Night Shift",
+    saurashtra: "Saurashtra",
+    residency_portal: "Residency Portal",
+    welcome: "Welcome",
+    back: "Back",
+    emergency_contacts: "Emergency Contacts",
+    residential_infra: "Residential Infrastructure",
+    finance_hub: "Finance Hub",
+    society_bulletin: "Society Bulletin",
+    special_funds: "Special Funds & Events",
+    meet_committee: "Meet Our Committee",
+    site_plan: "Site Plan",
+    total_units: "Total Units",
+    search_wing: "Search wing (A-1 to A-24)...",
+    view_wing_mgmt: "View Wing Management",
+    pay_now: "Pay Now",
+    receipt: "Receipt",
+    export: "Export",
+    status_paid: "Paid",
+    status_pending: "Pending",
+    status_overdue: "Overdue",
+    unit: "Unit",
+    amount: "Amount",
+    actions: "Actions",
+    profession_engineer: "Software Engineer",
+    profession_business: "Textile Business",
+    profession_merchant: "Diamond Merchant",
+    profession_teacher: "Teacher",
+    profession_doctor: "Doctor",
+    profession_ca: "Chartered Accountant",
+    profession_govt: "Government Official",
+    profession_retired: "Retired",
+    profession_homemaker: "Homemaker",
+    relation_hof: "Head of Family",
+    relation_spouse: "Spouse",
+    relation_child: "Child",
+    relation_parent: "Parent",
+    relation_other: "Other",
+    visitor_name: "Visitor Name",
+    visitor_phone: "Visitor Phone",
+    visitor_purpose: "Purpose of Visit",
+    visitor_validity: "Pass Validity",
+    visitor_generate: "Generate Access Pass",
+    visitor_auth: "Authorized Entry",
+    visitor_share: "Share Pass",
+    visitor_download: "Download",
+    wing_committee: "Wing Committee Members",
+    floor_map: "Floor Occupancy Map",
+    president: "President",
+    vp: "Vice President",
+    treasurer: "Treasurer",
+    secretary: "Secretary",
+    fund_starts: "Starts",
+    fund_collected: "Collected",
+    fund_target: "Target",
+    fund_contribute: "Make a contribution",
+    fund_how: "How to contribute?",
+    meetings: "Meetings",
+    meetings_title: "Society Assemblies",
+    meetings_desc: "Schedule and coordinate community meetups",
+    meeting_confirm: "Confirm Attendance",
+    meeting_archive: "Archive Center",
+    audit_title: "Activity Audit",
+    audit_desc: "Traceability for administrative action",
+    audit_search: "Search logs...",
+    exp_title: "Society Treasury",
+    exp_desc: "Outflow: Cleaning, Security & Utilities",
+    exp_log_new: "Log New Payout",
+    exp_category: "Filter Categories",
+    total_exp: "Total Expenditure",
+    active_records: "Active Records",
+    awaiting_appr: "Awaiting Approval",
+    logout: "Sign Out",
+    office_hours: "Office Hours",
+    helpline: "Helpline",
+    infrastructure: "Infrastructure",
+    system_health: "System Health",
+    revenue: "Revenue",
+    broadcasts: "Society Broadcasts",
+    launchpad: "Launchpad",
+    sos: "SOS",
+    bills: "Bills",
+    profile: "Profile",
+    facilities: "Amenities",
+    helpdesk: "Helpdesk",
+    book_now: "Book Slot",
+    raise_complaint: "Raise Complaint",
+    complaint_title: "Issue Title",
+    complaint_desc: "Explain the problem",
+    status_resolved: "Resolved",
+    status_in_progress: "In Progress"
+  },
+  gu: {
+    greeting_morning: "સુપ્રભાત",
+    greeting_afternoon: "શુભ બપોર",
+    greeting_evening: "શુભ સાંજ",
+    greeting_night: "શુભ રાત્રિ",
+    dashboard: "કમાન્ડ સેન્ટર",
+    maintenance: "મેન્ટેનન્સ લેબ",
+    emergency: "ઇમરજન્સી ડેસ્ક",
+    visitors: "વિઝિટર એક્સેસ",
+    assets: "રહેણાંક સંપત્તિ",
+    treasury: "તિજોરી વિશ્લેષણ",
+    audit: "ઓડિટ ટ્રેઇલ",
+    funds: "કોમ્યુનિટી ફંડ્સ",
+    notices: "બ્રોડકાસ્ટ્સ",
+    location: "એટલાસ અને બિલ્ડરો",
+    leadership: "નેતૃત્વ",
+    residents: "રહેવાસીઓ",
+    status_active: "સક્રિય",
+    quick_pay: "ઝડપી ચુકવણી",
+    day_shift: "ડે શિફ્ટ",
+    night_shift: "નાઇટ શિફ્ટ",
+    saurashtra: "સૌરાષ્ટ્ર",
+    residency_portal: "રેસીડેન્સી પોર્ટલ",
+    welcome: "સ્વાગત છે",
+    back: "પાછા",
+    emergency_contacts: "ઇમરજન્સી સંપર્ક",
+    residential_infra: "રહેણાંક ઈન્ફ્રાસ્ટ્રક્ચર",
+    finance_hub: "નાણાકીય હબ",
+    society_bulletin: "સોસાયટી બુલેટિન",
+    special_funds: "ખાસ ફંડ અને કાર્યક્રમો",
+    meet_committee: "અમારી સમિતિને મળો",
+    site_plan: "સાઇટ પ્લાન",
+    total_units: "કુલ યુનિટ્સ",
+    search_wing: "વિંગ શોધો (A-1 થી A-24)...",
+    view_wing_mgmt: "વિંગ મેનેજમેન્ટ જુઓ",
+    pay_now: "ચુકવણી કરો",
+    receipt: "રસીદ",
+    export: "નિકાસ",
+    status_paid: "ચૂકવેલ",
+    status_pending: "બાકી",
+    status_overdue: "બાકી સમય વીતી ગયો",
+    unit: "યુનિટ",
+    amount: "રકમ",
+    actions: "ક્રિયાઓ",
+    profession_engineer: "સોફ્ટવેર એન્જિનિયર",
+    profession_business: "ટેક્સટાઇલ બિઝનેસ",
+    profession_merchant: "હીરાના વેપારી",
+    profession_teacher: "શિક્ષક",
+    profession_doctor: "ડોક્ટર",
+    profession_ca: "ચાર્ટર્ડ એકાઉન્ટન્ટ",
+    profession_govt: "સરકારી અધિકારી",
+    profession_retired: "નિવૃત્ત",
+    profession_homemaker: "ગૃહિણી",
+    relation_hof: "પરિવારના વડા",
+    relation_spouse: "જીવનસાથી",
+    relation_child: "બાળક",
+    relation_parent: "માતા-પિતા",
+    relation_other: "અન્ય",
+    visitor_name: "મુલાકાતીનું નામ",
+    visitor_phone: "મુલાકાતીનો ફોન",
+    visitor_purpose: "મુલાકાતનો હેતુ",
+    visitor_validity: "પાસની માન્યતા",
+    visitor_generate: "એક્સેસ પાસ જનરેટ કરો",
+    visitor_auth: "અધિકૃત પ્રવેશ",
+    visitor_share: "પાસ શેર કરો",
+    visitor_download: "ડાઉનલોડ કરો",
+    wing_committee: "વિંગ સમિતિના સભ્યો",
+    floor_map: "ફ્લોર ઓક્યુપન્સી મેપ",
+    president: "પ્રમુખ",
+    vp: "ઉપપ્રમુખ",
+    treasurer: "ખજાનચી",
+    secretary: "મંત્રી",
+    fund_starts: "શરૂઆત",
+    fund_collected: "એકત્રિત",
+    fund_target: "લક્ષ્યાંક",
+    fund_contribute: "ફાળો આપો",
+    fund_how: "ફાળો કેવી રીતે આપવો?",
+    meetings: "મીટિંગ્સ",
+    meetings_title: "સોસાયટી મીટિંગ્સ",
+    meetings_desc: "કોમ્યુનિટી મીટિંગ્સનું આયોજન",
+    meeting_confirm: "હાજરીની પુષ્ટિ કરો",
+    meeting_archive: "આર્કાઇવ સેન્ટર",
+    audit_title: "એક્ટિવિટી ઓડિટ",
+    audit_desc: "વહીવટી કાર્યવાહીની દેખરેખ",
+    audit_search: "ઓડિટ શોધો...",
+    exp_title: "સોસાયટી તિજોરી",
+    exp_desc: "ખર્ચ: સફાઈ, સુરક્ષા અને સુવિધાઓ",
+    exp_log_new: "નવો ખર્ચ ઉમેરો",
+    exp_category: "શ્રેણીઓ",
+    total_exp: "કુલ ખર્ચ",
+    active_records: "સક્રિય રેકોર્ડ્સ",
+    awaiting_appr: "મંજૂરીની રાહ જોવાઈ રહી છે",
+    logout: "સાઇન આઉટ",
+    office_hours: "ઓફિસ સમય",
+    helpline: "હેલ્પલાઇન",
+    infrastructure: "ઈન્ફ્રાસ્ટ્રક્ચર",
+    system_health: "સિસ્ટમ હેલ્થ",
+    revenue: "આવક",
+    broadcasts: "સોસાયટી પ્રસારણ",
+    launchpad: "લોન્ચપેડ",
+    sos: "એસઓએસ",
+    bills: "બિલ",
+    profile: "પ્રોફાઇલ",
+    facilities: "સુવિધાઓ",
+    helpdesk: "હેલ્પડેસ્ક",
+    book_now: "બુક કરો",
+    raise_complaint: "ફરિયાદ કરો",
+    complaint_title: "ફરિયાદનું શીર્ષક",
+    complaint_desc: "સમસ્યા સમજાવો",
+    status_resolved: "ઉકેલાઈ ગયું",
+    status_in_progress: "ચાલુ છે"
+  },
+  hi: {
+    greeting_morning: "સુપ્રભાત",
+    greeting_afternoon: "શુભ બપોર",
+    greeting_evening: "શુભ સાંજ",
+    greeting_night: "શુભ રાત્રિ",
+    dashboard: "કમાન્ડ સેન્ટર",
+    maintenance: "મેન્ટેનન્સ લેબ",
+    emergency: "ઇમરજન્સી ડેસ્ક",
+    visitors: "વિઝિટર એક્સેસ",
+    assets: "રહેણાંક સંપત્તિ",
+    treasury: "તિજોરી વિશ્લેષણ",
+    audit: "ઓડિટ ટ્રેઇલ",
+    funds: "કોમ્યુનિટી ફંડ્સ",
+    notices: "બ્રોડકાસ્ટ્સ",
+    location: "એટલાસ અને બિલ્ડરો",
+    leadership: "નેતૃત્વ",
+    residents: "રહેવાસીઓ",
+    status_active: "સક્રિય",
+    quick_pay: "ઝડપી ચુકવણી",
+    day_shift: "ડે શિફ્ટ",
+    night_shift: "નાઇટ શિફ્ટ",
+    saurashtra: "सौराष्ट्र",
+    residency_portal: "रेजीडेंसी पोर्टल",
+    welcome: "સ્વાગત છે",
+    back: "પાછા",
+    emergency_contacts: "आपातकालीन संपर्क",
+    residential_infra: "आवासीय बुनियादी ढांचा",
+    finance_hub: "वित्त केंद्र",
+    society_bulletin: "सोसायटी बुलेटिन",
+    special_funds: "विशेष निधि और कार्यक्रम",
+    meet_committee: "हमारी समिति से मिलें",
+    site_plan: "साइट प्लान",
+    total_units: "कुल इकाइयाँ",
+    search_wing: "વિંગ શોધો (A-1 થી A-24)...",
+    view_wing_mgmt: "विंग प्रबंधन देखें",
+    pay_now: "ચુકવણી કરો",
+    receipt: "રસીદ",
+    export: "નિકાસ",
+    status_paid: "ચૂકવેલ",
+    status_pending: "બાકી",
+    status_overdue: "બાકી સમય વીતી ગયો",
+    unit: "ઇકાઈ",
+    amount: "રકમ",
+    actions: "કાર્રવાई",
+    profession_engineer: "सॉफ्टवेयर इंजीनियर",
+    profession_business: "कपड़ा व्यवसाय",
+    profession_merchant: "हीरा व्यापारी",
+    profession_teacher: "शिक्षक",
+    profession_doctor: "डॉक्टर",
+    profession_ca: "चार्टर्ड Accountant",
+    profession_govt: "सरकारी अधिकारी",
+    profession_retired: "सेवानिवृत्त",
+    profession_homemaker: "गृहिणी",
+    relation_hof: "परिवार के मुखिया",
+    relation_spouse: "जीवनसाथी",
+    relation_child: "बच्चा",
+    relation_parent: "माता-पिता",
+    relation_other: "अन्य",
+    visitor_name: "आगंतुक का नाम",
+    visitor_phone: "आगंतुक का फ़ोन",
+    visitor_purpose: "यात्रा का उद्देश्य",
+    visitor_validity: "पास की वैधता",
+    visitor_generate: "एक्सेस पास जेनरेट करें",
+    visitor_auth: "अधिकृत प्रवेश",
+    visitor_share: "पास साझा करें",
+    visitor_download: "डाउनलोड करें",
+    wing_committee: "वિંગ સમિતિના સભ્યો",
+    floor_map: "फ्लोर ऑक्यूपेंसी मैप",
+    president: "अध्यक्ष",
+    vp: "उपाध्यक्ष",
+    treasurer: "कोषाध्यक्ष",
+    secretary: "सचिव",
+    fund_starts: "શરૂઆત",
+    fund_collected: "એકત્રિત",
+    fund_target: "લક્ષ્યાંક",
+    fund_contribute: "ફાળો આપો",
+    fund_how: "ફાળો કેવી રીતે આપવો?",
+    meetings: "बैठकें",
+    meetings_title: "सोसायटी बैठकें",
+    meetings_desc: "सामुदायिक बैठकों का आयोजन",
+    meeting_confirm: "उपस्थिति की पुष्टि करें",
+    meeting_archive: "पुरालेख केंद्र",
+    audit_title: "गतिविधि ऑडिट",
+    audit_desc: "પ્રશાસનિક કાર્યવાહીની દેખરેખ",
+    audit_search: "ઓડિટ શોધો...",
+    exp_title: "સોસાયટી તિજોરી",
+    exp_desc: "ખર્ચ: સફાઈ, સુરક્ષા અને સુવિધાઓ",
+    exp_log_new: "નવો ખર્ચ ઉમેરો",
+    exp_category: "શ્રેણીઓ",
+    total_exp: "कुल व्यय",
+    active_records: "સક્રિય રેકોર્ડ્સ",
+    awaiting_appr: "મંજૂરીની રાહ જોવાઈ રહી છે",
+    logout: "સાઇન આઉટ",
+    office_hours: "કાર્યાલय સમય",
+    helpline: "હેલ્પલાઇન",
+    infrastructure: "ઈન્ફ્રાસ્ટ્રક્ચર",
+    system_health: "સિસ્ટમ હેલ્થ",
+    revenue: "રાજસ્વ",
+    broadcasts: "સોસાયટી પ્રસારણ",
+    launchpad: "લોન્ચપેડ",
+    sos: "એસઓએસ",
+    bills: "બિલ",
+    profile: "પ્રોફાઇલ",
+    facilities: "સુવિધાઓ",
+    helpdesk: "હેલ્પડેસ્ક",
+    book_now: "બુક કરો",
+    raise_complaint: "शिकायत दर्ज करें",
+    complaint_title: "शिकायत का शीर्षक",
+    complaint_desc: "સમસ્યા સમજાવો",
+    status_resolved: "समाधान हो गया",
+    status_in_progress: "પ્રગતિમાં"
+  }
+};
+
+export const BUILDER_INFO: Builder = {
+  name: "Saurashtra Developers Group",
+  founded: "1998",
+  projects: ["Saurashtra Residency", "Vibrant Heights", "Patel Enclave", "Diamond Hub"],
+  vision: "To create sustainable, premium living spaces that empower families in the heart of Gujarat.",
+  logo: "https://api.dicebear.com/7.x/initials/svg?seed=SDG&backgroundColor=2563eb",
+  phone: "+91 261 222 3333",
+  email: "contact@saurashtradevelopers.com"
+};
+
+const professions = ['profession_engineer', 'profession_business', 'profession_merchant', 'profession_teacher', 'profession_doctor', 'profession_ca', 'profession_govt', 'profession_retired'];
+const names = ['Arjun', 'Bhavin', 'Chirag', 'Deepak', 'Esha', 'Falguni', 'Gaurav', 'Hardik', 'Ishita', 'Jignesh', 'Kishan', 'Lalit', 'Mansi', 'Nirav', 'Om', 'Pooja', 'Rahul', 'Sneha', 'Tushar', 'Viral'];
+const surnames = ['Patel', 'Vaghani', 'Goti', 'Savani', 'Lathiya', 'Radadiya', 'Vekariya', 'Gajera', 'Kathiriya'];
+
+const generateRandomName = () => {
+  const fName = names[Math.floor(Math.random() * names.length)];
+  const lName = surnames[Math.floor(Math.random() * surnames.length)];
+  return `${fName} ${lName}`;
+};
+
+const generateWingCommittee = (wingName: string): WingCommittee => {
+  return {
+    president: {
+      id: `pres-${wingName}`,
+      name: generateRandomName(),
+      position: 'president',
+      phone: `+91 ${91000 + Math.floor(Math.random() * 8999)} ${10000 + Math.floor(Math.random() * 89999)}`,
+      email: `pres.${wingName.toLowerCase()}@residency.com`,
+      imageUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=pres-${wingName}`
+    },
+    vicePresident: {
+      id: `vp-${wingName}`,
+      name: generateRandomName(),
+      position: 'vp',
+      phone: `+91 ${92000 + Math.floor(Math.random() * 8999)} ${10000 + Math.floor(Math.random() * 89999)}`,
+      email: `vp.${wingName.toLowerCase()}@residency.com`,
+      imageUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=vp-${wingName}`
+    },
+    treasurer: {
+      id: `tres-${wingName}`,
+      name: generateRandomName(),
+      position: 'treasurer',
+      phone: `+91 ${93000 + Math.floor(Math.random() * 8999)} ${10000 + Math.floor(Math.random() * 89999)}`,
+      email: `tres.${wingName.toLowerCase()}@residency.com`,
+      imageUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=tres-${wingName}`
+    }
+  };
+};
+
+const generateMockFlats = (wingName: string): Flat[] => {
+  const flats: Flat[] = [];
+  for (let floor = 1; floor <= 5; floor++) {
+    for (let unit = 1; unit <= 4; unit++) {
+      const unitNo = `${floor}0${unit}`;
+      const familySurname = surnames[Math.floor(Math.random() * surnames.length)];
+      const hofFirstName = names[Math.floor(Math.random() * names.length)];
+      const hofName = `${hofFirstName} ${familySurname}`;
+      
+      const members: FamilyMember[] = [
+        {
+          id: `m-${wingName}-${unitNo}-1`,
+          name: hofName,
+          relation: 'relation_hof' as any,
+          phone: `+91 ${90000 + Math.floor(Math.random() * 9999)} ${10000 + Math.floor(Math.random() * 89999)}`,
+          dob: '1980-05-12',
+          profession: professions[Math.floor(Math.random() * professions.length)]
+        },
+        {
+          id: `m-${wingName}-${unitNo}-2`,
+          name: `Sapna ${familySurname}`,
+          relation: 'relation_spouse' as any,
+          phone: `+91 ${80000 + Math.floor(Math.random() * 9999)} ${10000 + Math.floor(Math.random() * 89999)}`,
+          dob: '1984-08-22',
+          profession: 'profession_homemaker'
+        }
+      ];
+
+      flats.push({
+        id: `flat-${wingName}-${unitNo}`,
+        unitNumber: unitNo,
+        occupancyType: Math.random() > 0.85 ? OccupancyType.TENANT : OccupancyType.OWNER,
+        members
+      });
+    }
+  }
+  return flats;
+};
+
+export const BUILDINGS: Building[] = Array.from({ length: 24 }, (_, i) => {
+  const name = `A-${i + 1}`;
+  const type = i < 6 ? FlatType.BHK1 : FlatType.BHK2;
+  return {
+    id: `bld-${name}`,
+    name: name,
+    type: type,
+    totalFloors: 5,
+    flatsPerFloor: 4,
+    hasLift: true,
+    parkingSpots: 1,
+    flats: generateMockFlats(name),
+    wingCommittee: generateWingCommittee(name)
+  };
+});
+
+export const UTILITY_SUMMARY = BUILDINGS.map((b, i) => {
+  const liftBill = Math.floor(Math.random() * (4000 - 3000 + 1) + 3000);
+  const commonBill = Math.floor(Math.random() * (4000 - 3000 + 1) + 3000);
+  const isSharedPairStart = i % 2 === 0;
+  const waterBill = isSharedPairStart ? Math.floor(Math.random() * 5000 + 2000) : 0; 
+
+  return {
+    buildingId: b.id,
+    buildingName: b.name,
+    liftBill,
+    commonBill,
+    sharedWaterBill: waterBill,
+    sharedWith: isSharedPairStart && i + 1 < 24 ? `A-${i + 2}` : (i > 0 ? `A-${i}` : '')
+  };
+});
+
+export const EXPENSE_CATEGORIES = [
+  { id: 'GARBAGE', label: 'Garbage Collection', color: '#10b981', icon: 'Trash' },
+  { id: 'BUILDING_CLEANING', label: 'Pochha & Safai', color: '#3b82f6', icon: 'Brush' },
+  { id: 'SECURITY', label: 'Gate Security', color: '#f59e0b', icon: 'ShieldCheck' }
+];
+
+export const COMMITTEE: CommitteeMember[] = [
+  { id: '1', name: 'Rajesh Patel', position: 'president', phone: '+91 98765 43210', email: 'rajesh.p@residency.com', imageUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Rajesh' },
+  { id: '2', name: 'Suresh Vaghani', position: 'secretary', phone: '+91 98765 43211', email: 'suresh.v@residency.com', imageUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Suresh' },
+  { id: '3', name: 'Manoj Goti', position: 'treasurer', phone: '+91 98765 43212', email: 'manoj.g@residency.com', imageUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Manoj' },
+];
+
+export const NOTICES: Notice[] = [
+  { id: '1', title: 'Maintenance Due', content: 'Please pay your ₹700 maintenance before the 5th of every month.', date: '2024-05-20', category: 'Urgent' },
+  { id: '2', title: 'Water Tank Cleaning', content: 'Buildings A-1 to A-6 cleaning scheduled for tomorrow.', date: '2024-05-18', category: 'General' },
+  { id: '3', title: 'New Security Rules', content: 'Entry strictly via Gate 1 for visitors from 10 PM onwards.', date: '2024-05-22', category: 'General' },
+];
+
+export const MAINTENANCE_SAMPLES: MaintenanceRecord[] = [
+  { id: 'm1', flatId: 'A-1-101', month: 'May', year: 2024, amount: 700, status: PaymentStatus.PAID, occupancyType: OccupancyType.OWNER, paidDate: '2024-05-02' },
+  { id: 'm2', flatId: 'A-2-102', month: 'May', year: 2024, amount: 700, status: PaymentStatus.PENDING, occupancyType: OccupancyType.TENANT },
+  { id: 'm3', flatId: 'A-15-201', month: 'May', year: 2024, amount: 700, status: PaymentStatus.OVERDUE, occupancyType: OccupancyType.OWNER },
+];
+
+export const FUNDS: FundRecord[] = [
+  { id: 'f1', purpose: 'Ganesh Chaturthi 2024', date: '2024-08-15', totalCollected: 45000, targetAmount: 50000 },
+  { id: 'f2', purpose: 'Navratri Festival', date: '2024-10-01', totalCollected: 25000, targetAmount: 80000 },
+  { id: 'f3', purpose: 'CCTV Security Upgrade', date: '2024-06-01', totalCollected: 120000, targetAmount: 120000 },
+];
