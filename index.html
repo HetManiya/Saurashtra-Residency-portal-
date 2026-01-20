@@ -5,43 +5,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Saurashtra Residency - World Class Living</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['Plus Jakarta Sans', 'sans-serif'],
-          },
-          colors: {
-            brand: {
-              50: '#f0f4ff',
-              100: '#d9e2ff',
-              200: '#bacaff',
-              300: '#8ca6ff',
-              400: '#5975ff',
-              500: '#334cff',
-              600: '#2563eb',
-              700: '#1d4ed8',
-              800: '#1e40af',
-              900: '#1e3a8a',
-            }
-          },
-          animation: {
-            'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-            'float': 'float 6s ease-in-out infinite',
-          },
-          keyframes: {
-            float: {
-              '0%, 100%': { transform: 'translateY(0)' },
-              '50%': { transform: 'translateY(-10px)' },
-            }
-          }
-        }
-      }
-    }
-  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -107,27 +70,9 @@
       transform: translateY(-4px);
     }
   </style>
-<script type="importmap">
-{
-  "imports": {
-    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
-    "react-router-dom": "https://esm.sh/react-router-dom@^7.12.0",
-    "react/": "https://esm.sh/react@^19.2.3/",
-    "react": "https://esm.sh/react@^19.2.3",
-    "recharts": "https://esm.sh/recharts@^3.6.0",
-    "lucide-react": "https://esm.sh/lucide-react@^0.562.0",
-    "@google/genai": "https://esm.sh/@google/genai@^1.35.0",
-    "mongoose": "https://esm.sh/mongoose@^9.1.2",
-    "cors": "https://esm.sh/cors@^2.8.5",
-    "bcryptjs": "https://esm.sh/bcryptjs@^3.0.3",
-    "express": "https://esm.sh/express@^5.2.1",
-    "dotenv": "https://esm.sh/dotenv@^17.2.3",
-    "jsonwebtoken": "https://esm.sh/jsonwebtoken@^9.0.3"
-  }
-}
-</script>
 </head>
 <body class="bg-[#f8fafc] text-slate-900 dark:bg-[#020617] dark:text-slate-100 selection:bg-brand-100 selection:text-brand-900">
   <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
 </body>
 </html>
