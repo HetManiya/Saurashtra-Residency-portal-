@@ -4,7 +4,7 @@ import {
   Download, Plus, Clock, X, CreditCard, Zap, Droplets, Smartphone, 
   ArrowRight, Share2, BellRing, Settings2, Mail, MessageSquare, 
   Loader2, CheckCircle, Home, Key, MessageCircle, Lock, Unlock, AlertCircle, FileText,
-  History, Calendar
+  History, Calendar, Users
 } from 'lucide-react';
 import { MAINTENANCE_SAMPLES, SOCIETY_INFO, UTILITY_SUMMARY } from '../constants';
 import { MaintenanceRecord, PaymentStatus, OccupancyType } from '../types';
@@ -13,7 +13,8 @@ import { useLanguage } from '../components/LanguageContext';
 
 const Maintenance: React.FC = () => {
   const { t } = useLanguage();
-  const [filter, setFilter] = useState<'ALL' | PaymentStatus>('ALL');
+  const [statusFilter, setStatusFilter] = useState<'ALL' | PaymentStatus>('ALL');
+  const [occupancyFilter, setOccupancyFilter] = useState<'ALL' | OccupancyType>('ALL');
   const [activeTab, setActiveTab] = useState<'current' | 'history'>('current');
   const [selectedRecord, setSelectedRecord] = useState<MaintenanceRecord | null>(null);
   const [user, setUser] = useState<any>(null);
@@ -112,9 +113,15 @@ const Maintenance: React.FC = () => {
   };
 
   const isAdmin = user?.role === 'ADMIN' || user?.role === 'COMMITTEE';
+  
   const displayedRecords = activeTab === 'current' 
-    ? records.filter(r => filter === 'ALL' || r.status === filter)
-    : historyRecords;
+    ? records.filter(r => 
+        (statusFilter === 'ALL' || r.status === statusFilter) && 
+        (occupancyFilter === 'ALL' || r.occupancyType === occupancyFilter)
+      )
+    : historyRecords.filter(r => 
+        (occupancyFilter === 'ALL' || r.occupancyType === occupancyFilter)
+      );
 
   return (
     <div className="space-y-10 animate-fade-up">
@@ -149,37 +156,59 @@ const Maintenance: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-        <div className="lg:col-span-3 space-y-8">
+        <div className="lg:col-span-4 space-y-8">
           <div className="bg-white dark:bg-slate-900 rounded-[3rem] border border-slate-100 dark:border-slate-800 premium-shadow overflow-hidden">
-            <div className="p-8 border-b border-slate-50 dark:border-slate-800/50 flex flex-col sm:flex-row justify-between items-center gap-6">
-              <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-2xl">
+            <div className="p-8 border-b border-slate-50 dark:border-slate-800/50 flex flex-col md:flex-row justify-between items-center gap-6">
+              <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-2xl w-full md:w-auto overflow-x-auto shrink-0">
                 <button 
                   onClick={() => setActiveTab('current')} 
-                  className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'current' ? 'bg-white dark:bg-slate-700 text-brand-600 dark:text-brand-400 shadow-xl' : 'text-slate-400 hover:text-slate-600'}`}
+                  className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${activeTab === 'current' ? 'bg-white dark:bg-slate-700 text-brand-600 dark:text-brand-400 shadow-xl' : 'text-slate-400 hover:text-slate-600'}`}
                 >
                   <Calendar size={14} /> Current Ledger
                 </button>
                 <button 
                   onClick={() => setActiveTab('history')} 
-                  className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'history' ? 'bg-white dark:bg-slate-700 text-brand-600 dark:text-brand-400 shadow-xl' : 'text-slate-400 hover:text-slate-600'}`}
+                  className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${activeTab === 'history' ? 'bg-white dark:bg-slate-700 text-brand-600 dark:text-brand-400 shadow-xl' : 'text-slate-400 hover:text-slate-600'}`}
                 >
                   <History size={14} /> Payment History
                 </button>
               </div>
 
-              {activeTab === 'current' && (
-                <div className="flex bg-slate-50 dark:bg-slate-800/50 p-1 rounded-2xl border border-slate-100 dark:border-slate-800">
-                  {['ALL', PaymentStatus.PAID, PaymentStatus.PENDING].map((s) => (
+              <div className="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto">
+                {/* Occupancy Filter */}
+                <div className="flex bg-slate-50 dark:bg-slate-800/50 p-1 rounded-2xl border border-slate-100 dark:border-slate-800 w-full sm:w-auto">
+                  <div className="px-3 py-2 text-[9px] font-black uppercase text-slate-400 border-r border-slate-100 dark:border-slate-700 hidden sm:block">Type</div>
+                  {[
+                    { id: 'ALL', label: 'All' },
+                    { id: OccupancyType.OWNER, label: 'Owner' },
+                    { id: OccupancyType.TENANT, label: 'Tenant' }
+                  ].map((o) => (
                     <button 
-                      key={s} 
-                      onClick={() => setFilter(s as any)} 
-                      className={`px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${filter === s ? 'bg-white dark:bg-slate-900 text-brand-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                      key={o.id} 
+                      onClick={() => setOccupancyFilter(o.id as any)} 
+                      className={`flex-1 sm:flex-none px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${occupancyFilter === o.id ? 'bg-white dark:bg-slate-900 text-indigo-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
                     >
-                      {s}
+                      {o.label}
                     </button>
                   ))}
                 </div>
-              )}
+
+                {/* Status Filter */}
+                {activeTab === 'current' && (
+                  <div className="flex bg-slate-50 dark:bg-slate-800/50 p-1 rounded-2xl border border-slate-100 dark:border-slate-800 w-full sm:w-auto">
+                    <div className="px-3 py-2 text-[9px] font-black uppercase text-slate-400 border-r border-slate-100 dark:border-slate-700 hidden sm:block">Status</div>
+                    {['ALL', PaymentStatus.PAID, PaymentStatus.PENDING, PaymentStatus.OVERDUE].map((s) => (
+                      <button 
+                        key={s} 
+                        onClick={() => setStatusFilter(s as any)} 
+                        className={`flex-1 sm:flex-none px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${statusFilter === s ? 'bg-white dark:bg-slate-900 text-brand-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                      >
+                        {s}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="overflow-x-auto">
@@ -187,6 +216,7 @@ const Maintenance: React.FC = () => {
                 <thead>
                   <tr className="bg-slate-50/50 dark:bg-slate-800/30">
                     <th className="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('unit')}</th>
+                    <th className="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Type</th>
                     {activeTab === 'history' && <th className="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Period</th>}
                     <th className="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('amount')}</th>
                     <th className="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</th>
@@ -200,6 +230,14 @@ const Maintenance: React.FC = () => {
                         <div className="flex items-center gap-4">
                           <div className="w-10 h-10 rounded-xl bg-brand-50 dark:bg-brand-900/10 text-brand-600 flex items-center justify-center font-black text-sm">{record.flatId.split('-')[1]}</div>
                           <span className="font-black text-slate-800 dark:text-slate-200 tracking-tight">{record.flatId}</span>
+                        </div>
+                      </td>
+                      <td className="px-10 py-8">
+                        <div className="flex items-center gap-2">
+                           {record.occupancyType === OccupancyType.OWNER ? <Key size={12} className="text-emerald-500" /> : <Users size={12} className="text-blue-500" />}
+                           <span className={`text-[10px] font-black uppercase tracking-widest ${record.occupancyType === OccupancyType.OWNER ? 'text-emerald-600' : 'text-blue-600'}`}>
+                             {record.occupancyType}
+                           </span>
                         </div>
                       </td>
                       {activeTab === 'history' && (
@@ -252,6 +290,12 @@ const Maintenance: React.FC = () => {
                   ))}
                 </tbody>
               </table>
+              {displayedRecords.length === 0 && (
+                <div className="p-20 text-center">
+                   <AlertCircle className="w-12 h-12 text-slate-200 mx-auto mb-4" />
+                   <p className="text-slate-400 font-bold text-sm">No maintenance records found for the selected filters.</p>
+                </div>
+              )}
             </div>
           </div>
         </div>
