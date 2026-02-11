@@ -1,3 +1,4 @@
+
 import { GoogleGenAI, LiveServerMessage, Modality } from "@google/genai";
 import * as CONSTANTS from '../constants';
 import { MaintenanceRecord, PaymentStatus, Meeting, OccupancyType } from '../types';
@@ -25,9 +26,7 @@ const addAuditLog = (action: string, entity: string, details: string) => {
   localStorage.setItem('sr_audit_logs', JSON.stringify(logs.slice(0, 1000)));
 };
 
-// Fix: Adding exported audioUtils with manual base64 implementation following guidelines
 export const audioUtils = {
-  // Manual base64 encoding/decoding as requested
   encode: (bytes: Uint8Array) => {
     let binary = '';
     const len = bytes.byteLength;
@@ -82,7 +81,6 @@ export const api = {
       window.dispatchEvent(new Event('storage'));
       return data;
     } catch (error) {
-      // BACKUP LOGIC FOR DEMO/OFFLINE
       const fallbackUsers = [
         { 
           email: 'admin@residency.com', 
@@ -109,13 +107,19 @@ export const api = {
   },
 
   register: async (userData: any) => {
-    // For demo, we just return success
     addAuditLog('Register', 'User', `Registration attempt: ${userData.email}`);
     return { success: true };
   },
 
   getBuildings: async () => JSON.parse(localStorage.getItem('sr_buildings') || JSON.stringify(CONSTANTS.BUILDINGS)),
-  getNotices: async () => CONSTANTS.NOTICES,
+  
+  getNotices: async () => {
+    const local = localStorage.getItem('sr_notices');
+    if (local) return JSON.parse(local);
+    localStorage.setItem('sr_notices', JSON.stringify(CONSTANTS.NOTICES));
+    return CONSTANTS.NOTICES;
+  },
+
   getAuditLogs: () => JSON.parse(localStorage.getItem('sr_audit_logs') || '[]'),
   getExpenses: (f: any) => [],
   getLocalityInfo: async (q: string) => ({ text: "Saurashtra Residency is a luxury community...", sources: [] }),
@@ -123,11 +127,9 @@ export const api = {
   calculateMaintenanceWithPenalty: (amt: number) => ({ total: amt, penalty: 0, isOverdue: false }),
   
   getMaintenanceRecords: async (id: string) => {
-    // Basic mock implementation getting from storage or constants
     const allRecords: MaintenanceRecord[] = JSON.parse(localStorage.getItem('sr_maintenance') || JSON.stringify(CONSTANTS.MAINTENANCE_SAMPLES));
     const records = allRecords.filter(r => r.flatId === id);
     
-    // Fallback for demo visualization if no specific records exist for this generated flat
     if (records.length === 0) {
       return [
         { id: `hist-${id}-1`, flatId: id, month: 'April', year: 2024, amount: 700, status: PaymentStatus.PAID, occupancyType: OccupancyType.OWNER, paidDate: '2024-04-05' },
@@ -146,25 +148,35 @@ export const api = {
     return { success: true };
   },
 
-  // Fix: Adding missing postNotice method for Bulletin board
   postNotice: async (data: any) => {
     try {
-      const res = await fetch(`${API_BASE}/society/notices`, {
+      // Local demo persistence
+      const notices = await api.getNotices();
+      const newNotice = {
+        id: `notice-${Date.now()}`,
+        ...data,
+        date: new Date().toISOString()
+      };
+      notices.unshift(newNotice);
+      localStorage.setItem('sr_notices', JSON.stringify(notices));
+
+      // Network attempt
+      fetch(`${API_BASE}/society/notices`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('sr_token')}`
         },
         body: JSON.stringify(data)
-      });
-      return res.json();
+      }).catch(() => {});
+
+      addAuditLog('Post Notice', 'Notice', `Posted: ${data.title}`);
+      return { success: true, notice: newNotice };
     } catch (e) {
-      addAuditLog('Post Notice', 'Notice', `Failed to post: ${data.title}`);
       return { success: false };
     }
   },
 
-  // Fix: Adding missing exportToCSV for financial reports
   exportToCSV: (data: any[], filename: string) => {
     if (!data || !data.length) return;
     const csvContent = "data:text/csv;charset=utf-8," 
@@ -180,24 +192,18 @@ export const api = {
     addAuditLog('Export', 'CSV', `Exported ${filename}`);
   },
 
-  // Fix: Adding missing generateReceipt for payments
   generateReceipt: (record: any) => {
     console.log("Generating receipt for", record);
-    // In a real app, this would generate a PDF or print. 
-    // For demo, we alert and log.
     alert(`Receipt generated for unit ${record.flatId}`);
     addAuditLog('Receipt', 'Maintenance', `Generated for ${record.flatId}`);
   },
 
-  // Fix: Adding missing lockMaintenanceMonth for audit finalization
   lockMaintenanceMonth: async (m: string, y: number) => {
     addAuditLog('Lock Cycle', 'Maintenance', `Locked ${m} ${y}`);
     return { success: true };
   },
 
-  // Fix: Adding missing connectLiveAssistant for Voice AI following @google/genai guidelines
   connectLiveAssistant: async (callbacks: any) => {
-    // Creating a new GoogleGenAI instance right before connecting
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     return ai.live.connect({
       model: 'gemini-2.5-flash-native-audio-preview-12-2025',
@@ -212,11 +218,9 @@ export const api = {
     });
   },
 
-  // NEW: Meeting Scheduler Methods
   getMeetings: async (): Promise<Meeting[]> => {
     const local = localStorage.getItem('sr_meetings');
     if (local) return JSON.parse(local);
-    // Initial Seed Data
     const seed: Meeting[] = [{
       id: 'm-1',
       title: 'Annual General Meeting (AGM) 2024',
@@ -240,11 +244,9 @@ export const api = {
       rsvps: []
     };
     meetings.push(newMeeting);
-    // Sort by date descending
     meetings.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
     localStorage.setItem('sr_meetings', JSON.stringify(meetings));
     
-    // Simulate Notification
     api.broadcastNotification('WHATSAPP', 'ALL_RESIDENTS', `New Meeting Scheduled: ${data.title}`);
     addAuditLog('Schedule', 'Meeting', `Created meeting: ${data.title}`);
     return newMeeting;

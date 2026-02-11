@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useState, useEffect, useMemo } from 'react';
 import { Search, Building2, ChevronRight, Zap, Droplets, MapPin, LayoutGrid, Home, Loader2, Users, X, User, Phone, Calendar, Briefcase, Info, Edit3, Save, CheckCircle2, Trash2, PlusCircle, Star, ShieldCheck, Wallet, CreditCard, ArrowRight, MessageSquare, AlertCircle, History, Receipt } from 'lucide-react';
 import { api } from '../services/api';
 import { SOCIETY_INFO } from '../constants';
@@ -64,6 +65,21 @@ const Buildings: React.FC = () => {
     const matchesSearch = name.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesSearch;
   });
+
+  // Group flats by floor for the visual map
+  const flatsByFloor = useMemo(() => {
+    if (!selectedBuilding || !selectedBuilding.flats) return {};
+    return selectedBuilding.flats.reduce((acc: Record<number, Flat[]>, flat) => {
+      const floor = Math.floor(parseInt(flat.unitNumber) / 100);
+      if (!acc[floor]) acc[floor] = [];
+      acc[floor].push(flat);
+      return acc;
+    }, {});
+  }, [selectedBuilding]);
+
+  const sortedFloors = useMemo(() => {
+    return Object.keys(flatsByFloor).map(Number).sort((a, b) => b - a);
+  }, [flatsByFloor]);
 
   if (loading) {
     return (
@@ -205,28 +221,87 @@ const Buildings: React.FC = () => {
                 </div>
               </section>
 
-              <section className="space-y-6">
-                <div className="flex items-center gap-3 mb-6">
-                  <LayoutGrid className="text-brand-600" size={24} />
-                  <h4 className="text-xl font-black text-slate-900 dark:text-white tracking-tight uppercase tracking-widest text-xs">{t('floor_map')}</h4>
+              <section className="space-y-10">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-3">
+                    <LayoutGrid className="text-brand-600" size={24} />
+                    <h4 className="text-xl font-black text-slate-900 dark:text-white tracking-tight uppercase tracking-widest text-xs">{t('floor_map')}</h4>
+                  </div>
+                  <div className="flex items-center gap-6">
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded bg-emerald-500 shadow-sm"></div>
+                      <span className="text-[9px] font-black uppercase text-slate-400 tracking-widest">Owner</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded bg-blue-500 shadow-sm"></div>
+                      <span className="text-[9px] font-black uppercase text-slate-400 tracking-widest">Tenant</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded bg-slate-200 dark:bg-slate-700 shadow-sm"></div>
+                      <span className="text-[9px] font-black uppercase text-slate-400 tracking-widest">Vacant</span>
+                    </div>
+                  </div>
                 </div>
-                <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-6">
-                  {selectedBuilding.flats?.map((flat) => (
-                    <button 
-                      key={flat.id}
-                      onClick={() => setSelectedFlat(flat)}
-                      className="flex flex-col items-center justify-center p-6 bg-white dark:bg-slate-800 rounded-[2.5rem] border-2 border-transparent hover:border-brand-600 hover:shadow-xl transition-all group relative overflow-hidden"
-                    >
-                      <div className="w-12 h-12 bg-slate-50 dark:bg-slate-900 rounded-2xl flex items-center justify-center text-slate-400 group-hover:text-brand-600 shadow-inner mb-3">
-                        <Home size={24} />
+
+                <div className="bg-white dark:bg-slate-800/40 p-12 rounded-[3.5rem] border border-slate-100 dark:border-slate-800/60 shadow-inner">
+                  <div className="flex flex-col gap-6 max-w-4xl mx-auto">
+                    {sortedFloors.map((floor) => (
+                      <div key={floor} className="flex items-center gap-8 group">
+                        <div className="w-20 text-right">
+                          <p className="text-[11px] font-black uppercase tracking-widest text-slate-300 dark:text-slate-600 group-hover:text-brand-600 transition-colors">Floor {floor}</p>
+                        </div>
+                        <div className="flex-1 grid grid-cols-4 gap-6">
+                          {flatsByFloor[floor].map((flat) => {
+                            const isVacant = !flat.members || flat.members.length === 0;
+                            return (
+                              <button 
+                                key={flat.id}
+                                onClick={() => setSelectedFlat(flat)}
+                                className={`
+                                  relative aspect-[16/10] rounded-2xl border-2 transition-all duration-300 overflow-hidden group/flat flex flex-col items-center justify-center
+                                  ${isVacant 
+                                    ? 'bg-slate-50 dark:bg-slate-900/50 border-slate-100 dark:border-slate-800 grayscale opacity-60' 
+                                    : flat.occupancyType === OccupancyType.OWNER
+                                      ? 'bg-emerald-50/50 dark:bg-emerald-900/10 border-emerald-100 dark:border-emerald-900/40 hover:bg-emerald-100'
+                                      : 'bg-blue-50/50 dark:bg-blue-900/10 border-blue-100 dark:border-blue-900/40 hover:bg-blue-100'
+                                  }
+                                  hover:scale-105 hover:shadow-xl hover:-translate-y-1 active:scale-95
+                                `}
+                              >
+                                <div className={`
+                                  absolute top-0 inset-x-0 h-1 transition-all duration-300
+                                  ${isVacant ? 'bg-slate-200' : flat.occupancyType === OccupancyType.OWNER ? 'bg-emerald-500' : 'bg-blue-500'}
+                                `} />
+                                
+                                <span className={`text-xl font-black tracking-tighter transition-colors ${
+                                  isVacant ? 'text-slate-300' : 'text-slate-900 dark:text-white group-hover/flat:text-brand-600'
+                                }`}>
+                                  {flat.unitNumber}
+                                </span>
+                                
+                                {!isVacant && (
+                                  <div className="mt-1 flex items-center gap-1">
+                                    <Users size={10} className="text-slate-400" />
+                                    <span className="text-[8px] font-black uppercase text-slate-400">{flat.members.length}</span>
+                                  </div>
+                                )}
+                              </button>
+                            );
+                          })}
+                        </div>
                       </div>
-                      <span className="font-black text-lg text-slate-900 dark:text-white mb-1">{flat.unitNumber}</span>
-                      <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-full ${flat.occupancyType === OccupancyType.OWNER ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/10' : 'bg-blue-50 text-blue-600 dark:bg-blue-900/10'}`}>
-                        {flat.occupancyType}
-                      </span>
-                      <div className="mt-2 text-[8px] font-bold text-slate-400">{flat.members.length} {t('residents')}</div>
-                    </button>
-                  ))}
+                    ))}
+                    
+                    {/* Building Base / Entry */}
+                    <div className="mt-6 flex items-center gap-8">
+                      <div className="w-20" />
+                      <div className="flex-1 h-3 bg-slate-100 dark:bg-slate-800 rounded-full relative">
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-6 py-1 rounded-full text-[8px] font-black uppercase tracking-widest shadow-xl">
+                          Lobby Entrance
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </section>
             </div>
