@@ -62,7 +62,8 @@ export interface AmenityBooking {
   purpose: string;
   attendees: number;
   isPublic: boolean;
-  status: 'Confirmed' | 'Pending';
+  // Fixed: Added 'Rejected' to status to allow for full lifecycle management of bookings
+  status: 'Confirmed' | 'Pending' | 'Rejected';
 }
 
 export interface Builder {

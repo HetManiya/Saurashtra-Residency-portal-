@@ -4,7 +4,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { 
   UserPlus, Mail, Lock, User, Shield, Home, ArrowRight, 
   Loader2, CheckCircle, ChevronLeft, MapPin, Users,
-  Star, Briefcase, Key, ChevronDown
+  Star, Briefcase, Key, ChevronDown, Clock
 } from 'lucide-react';
 import { api } from '../services/api';
 import { BUILDINGS } from '../constants';
@@ -45,12 +45,12 @@ const Register: React.FC = () => {
       
       await api.register(backendData);
       
-      // Navigate to login with a "Success" state
+      // Navigate to login with a "Pending Approval" state
       navigate('/login', { 
         state: { 
           registered: true, 
           email: formData.email,
-          message: "Registration successful! Use your details to Sign In."
+          message: "Request submitted! Your Wing President will verify and approve your account shortly. You will be able to log in once approved."
         } 
       });
     } catch (err: any) {
@@ -103,7 +103,11 @@ const Register: React.FC = () => {
 
           <div className="text-center mb-12">
             <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter">Join Our Community</h1>
-            <p className="text-slate-500 text-sm mt-3 font-medium">Create your official Saurashtra Residency profile</p>
+            <p className="text-slate-500 text-sm mt-3 font-medium">Step 1: Application for Membership</p>
+          </div>
+
+          <div className="mb-8 p-5 bg-amber-50 dark:bg-amber-900/10 border border-amber-100 dark:border-amber-800/50 text-amber-700 dark:text-amber-400 rounded-3xl text-[10px] font-black uppercase tracking-widest flex items-center gap-3">
+             <Clock size={18} /> Approval from Wing President is Mandatory
           </div>
 
           {error && (
@@ -263,7 +267,7 @@ const Register: React.FC = () => {
                   className="w-full py-5 bg-brand-600 text-white rounded-[2.5rem] font-black uppercase tracking-widest text-xs flex items-center justify-center gap-3 group shadow-2xl shadow-brand-500/30 active:scale-[0.98] transition-all"
                 >
                   {loading ? <Loader2 className="animate-spin" size={20} /> : (
-                    <>Complete Registration & Sign In <CheckCircle size={18} /></>
+                    <>Submit Verification Request <CheckCircle size={18} /></>
                   )}
                 </button>
               </div>

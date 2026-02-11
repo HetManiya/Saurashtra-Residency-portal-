@@ -6,7 +6,7 @@ import {
   LogOut, ShieldCheck, ChevronRight, Compass, PieChart, Moon, 
   Sun, LayoutGrid, CalendarDays, History, Siren, Search, 
   BellRing, Settings, Command, UserPlus, QrCode, Clock,
-  Globe, Sofa, LifeBuoy, Zap, ShieldAlert, Waves
+  Globe, Sofa, LifeBuoy, Zap, ShieldAlert, Waves, UserCheck
 } from 'lucide-react';
 import VoiceAssistant from './VoiceAssistant';
 import { useLanguage } from './LanguageContext';
@@ -31,11 +31,19 @@ const SidebarContent: React.FC<{
       ]
     },
     {
-      title: 'Management',
+      title: 'Security & Access',
       adminOnly: true,
       items: [
-         { name: t('treasury'), path: '/expenses', icon: PieChart },
+         { name: 'Approvals', path: '/approvals', icon: UserCheck },
          { name: t('audit'), path: '/audit-logs', icon: History },
+      ]
+    },
+    {
+      title: 'Management',
+      // Accessible by Admin and Committee
+      committeeAccessible: true,
+      items: [
+         { name: t('treasury'), path: '/expenses', icon: PieChart },
       ]
     },
     {
@@ -74,7 +82,7 @@ const SidebarContent: React.FC<{
         <div className="overflow-hidden">
           <h1 className="font-extrabold text-lg lg:text-xl tracking-tight dark:text-white mb-0 truncate">{t('saurashtra')}</h1>
           <p className="text-[10px] font-black uppercase text-brand-600 tracking-widest mb-0 truncate">
-            {isAdmin ? 'Admin Portal' : 'Resident Portal'}
+            {isAdmin ? 'Admin Console' : 'Resident Portal'}
           </p>
         </div>
         <button onClick={() => setIsSidebarOpen(false)} className="lg:hidden ml-auto text-slate-400 p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition-all">
@@ -84,7 +92,11 @@ const SidebarContent: React.FC<{
 
       <nav className="flex-1 px-4 overflow-y-auto space-y-6 pb-6 custom-scrollbar">
         {navGroups.map((group, idx) => {
-          if (group.adminOnly && !isAdmin) return null;
+          const isCommittee = user?.role === 'COMMITTEE';
+          const canSee = group.adminOnly ? isAdmin : (group.committeeAccessible ? (isAdmin || isCommittee) : true);
+          
+          if (!canSee) return null;
+
           return (
             <div key={idx}>
               <p className="px-4 text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">
@@ -159,8 +171,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       const parsedUser = JSON.parse(storedUser);
       setUser(parsedUser);
       
-      const adminOnlyPaths = ['/audit-logs', '/expenses'];
-      const isAdminRole = parsedUser.role === 'ADMIN' || parsedUser.role === 'COMMITTEE';
+      const adminOnlyPaths = ['/audit-logs', '/approvals'];
+      const isAdminRole = parsedUser.role === 'ADMIN';
       if (!isAdminRole && adminOnlyPaths.includes(location.pathname)) {
         navigate('/', { replace: true });
       }
@@ -184,7 +196,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     navigate('/login', { replace: true });
   }, [navigate]);
 
-  const isAdmin = user?.role === 'ADMIN' || user?.role === 'COMMITTEE';
+  const isAdmin = user?.role === 'ADMIN';
 
   return (
     <div className="flex h-screen bg-[#f8fafc] dark:bg-[#020617] overflow-hidden font-sans">

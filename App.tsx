@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/Layout';
@@ -18,6 +19,7 @@ import Emergency from './pages/Emergency';
 import VisitorPass from './pages/VisitorPass';
 import Facilities from './pages/Facilities';
 import Helpdesk from './pages/Helpdesk';
+import RegistrationApprovals from './pages/RegistrationApprovals';
 
 const App: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('sr_token'));
@@ -48,8 +50,11 @@ const App: React.FC = () => {
                 <Route path="/" element={<Dashboard />} />
                 <Route path="/emergency" element={<Emergency />} />
                 
-                {/* Admin & Committee Only */}
+                {/* Admin Only */}
                 <Route path="/audit-logs" element={<ProtectedRoute allowedRoles={['ADMIN']}><AuditLogs /></ProtectedRoute>} />
+                <Route path="/approvals" element={<ProtectedRoute allowedRoles={['ADMIN']}><RegistrationApprovals /></ProtectedRoute>} />
+                
+                {/* Admin & Committee */}
                 <Route path="/expenses" element={<ProtectedRoute allowedRoles={['ADMIN', 'COMMITTEE']}><Expenses /></ProtectedRoute>} />
                 
                 {/* General Protected Routes */}

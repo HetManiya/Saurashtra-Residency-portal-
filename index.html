@@ -16,26 +16,35 @@
           },
           colors: {
             brand: {
-              50: '#f0f4ff',
-              100: '#d9e2ff',
-              200: '#bacaff',
-              300: '#8ca6ff',
-              400: '#5975ff',
-              500: '#334cff',
-              600: '#2563eb',
-              700: '#1d4ed8',
-              800: '#1e40af',
-              900: '#1e3a8a',
+              50: '#ecfdf5',
+              100: '#d1fae5',
+              200: '#a7f3d0',
+              300: '#6ee7b7',
+              400: '#34d399',
+              500: '#10b981',
+              600: '#059669', // Sophisticated Emerald
+              700: '#047857',
+              800: '#065f46',
+              900: '#064e3b',
+            },
+            accent: {
+              gold: '#f59e0b',
+              champagne: '#fef3c7',
             }
           },
           animation: {
             'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
             'float': 'float 6s ease-in-out infinite',
+            'glow': 'glow 3s ease-in-out infinite',
           },
           keyframes: {
             float: {
               '0%, 100%': { transform: 'translateY(0)' },
               '50%': { transform: 'translateY(-10px)' },
+            },
+            glow: {
+              '0%, 100%': { 'box-shadow': '0 0 15px rgba(16, 185, 129, 0.2)' },
+              '50%': { 'box-shadow': '0 0 30px rgba(16, 185, 129, 0.5)' },
             }
           }
         }
@@ -47,7 +56,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --brand-blue: #2563eb;
+      --brand-emerald: #059669;
     }
     body { 
       font-family: 'Plus Jakarta Sans', sans-serif; 
@@ -60,51 +69,64 @@
     html { scroll-behavior: smooth; }
 
     /* Custom Scrollbar */
-    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scrollbar::-webkit-scrollbar { width: 5px; height: 5px; }
     .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
     .custom-scrollbar::-webkit-scrollbar-thumb { 
-      background: #cbd5e1; 
+      background: #10b98144; 
       border-radius: 10px;
     }
-    .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; }
+    .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #10b98122; }
 
     /* Modern UI Glass */
     .glass {
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      background: rgba(255, 255, 255, 0.75);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      background: rgba(255, 255, 255, 0.7);
     }
     .dark .glass {
-      background: rgba(15, 23, 42, 0.8);
+      background: rgba(2, 6, 23, 0.7);
     }
 
     .glass-border {
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.1);
     }
     .dark .glass-border {
-      border: 1px solid rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(16, 185, 129, 0.05);
     }
 
     /* Premium Transitions */
     .page-transition {
-      animation: fadeIn 0.4s ease-out;
+      animation: fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1);
     }
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
+      from { opacity: 0; transform: translateY(12px); }
       to { opacity: 1; transform: translateY(0); }
     }
 
     /* Active Nav Glow */
     .nav-active-glow {
-      box-shadow: 0 0 20px rgba(37, 99, 235, 0.4);
+      box-shadow: 0 0 25px rgba(16, 185, 129, 0.3);
     }
 
     /* Bento Grid Effects */
     .bento-card {
-      transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+      transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+      border: 1px solid transparent;
     }
     .bento-card:hover {
-      transform: translateY(-4px);
+      transform: translateY(-6px);
+      border-color: rgba(16, 185, 129, 0.15);
+      box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.05);
+    }
+    .dark .bento-card:hover {
+      box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.4);
+    }
+
+    .premium-card {
+      background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%);
+    }
+    .dark .premium-card {
+      background: linear-gradient(135deg, #0f172a 0%, #020617 100%);
     }
   </style>
 <script type="importmap">
@@ -127,7 +149,7 @@
 }
 </script>
 </head>
-<body class="bg-[#f8fafc] text-slate-900 dark:bg-[#020617] dark:text-slate-100 selection:bg-brand-100 selection:text-brand-900">
+<body class="bg-[#fcfdfe] text-slate-900 dark:bg-[#020617] dark:text-slate-100 selection:bg-brand-100 selection:text-brand-900">
   <div id="root"></div>
 </body>
 </html>
