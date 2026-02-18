@@ -285,7 +285,7 @@ export const TRANSLATIONS: Record<Language, any> = {
     funds: "કોમ્યુનિટી ફંડ્સ",
     notices: "બ્રોડકાસ્ટ્સ",
     location: "એટલાસ અને બિલ્ડરો",
-    leadership: "નેતૃત્વ",
+    leadership: "નેવતૃત્વ",
     residents: "રહેવાસીઓ",
     status_active: "સક્રિય",
     quick_pay: "ઝડપી ચુકવણી",
@@ -319,7 +319,7 @@ export const TRANSLATIONS: Record<Language, any> = {
     profession_merchant: "हीरा व्यापारी",
     profession_teacher: "शिक्षक",
     profession_doctor: "डॉक्टर",
-    profession_ca: "चार्टर्ड Accountant",
+    profession_ca: "चાર્ટર્ડ Accountant",
     profession_govt: "सरकारी अधिकारी",
     profession_retired: "सेवानिवृत्त",
     profession_homemaker: "गृहिणी",
@@ -405,7 +405,7 @@ export const BUILDINGS: Building[] = Array.from({ length: 24 }, (_, i) => {
     flatsPerFloor: 4,
     hasLift: true,
     parkingSpots: 1,
-    flats: [], // START EMPTY
+    flats: [], 
     wingCommittee: {
       president: { id: '', name: 'Unassigned', position: 'President', phone: '', email: '', imageUrl: '' },
       vicePresident: { id: '', name: 'Unassigned', position: 'VP', phone: '', email: '', imageUrl: '' },
