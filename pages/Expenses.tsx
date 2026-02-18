@@ -15,6 +15,7 @@ const Expenses: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
   const [filterType, setFilterType] = useState('ALL');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [user, setUser] = useState<any>(null);
   
   // Form State
@@ -22,11 +23,9 @@ const Expenses: React.FC = () => {
     type: 'GARBAGE',
     payeeName: '',
     amount: '',
-    status: 'Pending',
+    status: 'Paid',
     details: {
       buildingName: '',
-      gateNumber: 'Gate 1',
-      shift: 'Day',
       remarks: ''
     }
   });
@@ -45,15 +44,33 @@ const Expenses: React.FC = () => {
     setLoading(false);
   };
 
+  const handleAddExpense = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    try {
+      await api.addExpense({
+        ...formData,
+        amount: parseFloat(formData.amount as string)
+      });
+      setShowAddModal(false);
+      setFormData({ type: 'GARBAGE', payeeName: '', amount: '', status: 'Paid', details: { buildingName: '', remarks: '' } });
+      await loadExpenses();
+    } catch (err) {
+      alert("Failed to log expense");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const handleExport = () => {
     const exportData = expenses.map(e => ({
-      ID: e._id,
+      ID: e.id || e._id,
       Type: e.type,
       Payee: e.payeeName,
       Amount: e.amount,
       Status: e.status,
       Date: new Date(e.date || Date.now()).toLocaleDateString(),
-      Details: e.details?.buildingName || e.details?.gateNumber || 'Society Wide'
+      Details: e.details?.buildingName || 'Society Wide'
     }));
     api.exportToCSV(exportData, 'Saurashtra_Treasury_Report');
   };
@@ -115,7 +132,7 @@ const Expenses: React.FC = () => {
                 onClick={() => setFilterType('ALL')}
                 className={`w-full text-left px-6 py-4 rounded-2xl text-xs font-black uppercase tracking-widest transition-all ${filterType === 'ALL' ? 'bg-brand-50 text-brand-600 dark:bg-brand-900/20' : 'text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'}`}
               >
-                {t('residents')}
+                All Categories
               </button>
               {EXPENSE_CATEGORIES.map(cat => (
                 <button 
@@ -150,12 +167,13 @@ const Expenses: React.FC = () => {
                   </thead>
                   <tbody className="divide-y divide-slate-50 dark:divide-slate-800/50">
                     {expenses.map((exp) => (
-                      <tr key={exp._id || Math.random()} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-all group">
+                      <tr key={exp.id || exp._id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-all group">
                         <td className="px-10 py-8">
                           <p className="font-black text-slate-900 dark:text-white text-lg tracking-tight mb-1">{exp.payeeName}</p>
+                          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{exp.type}</p>
                         </td>
                         <td className="px-10 py-8 text-xs font-bold text-slate-500 uppercase">
-                          Wing {exp.details?.buildingName || 'All'}
+                          {exp.details?.buildingName ? `Wing ${exp.details.buildingName}` : 'Society Wide'}
                         </td>
                         <td className="px-10 py-8">
                           <span className="font-black text-slate-900 dark:text-white text-xl">₹{exp.amount.toLocaleString()}</span>
@@ -169,6 +187,11 @@ const Expenses: React.FC = () => {
                         </td>
                       </tr>
                     ))}
+                    {!loading && expenses.length === 0 && (
+                      <tr>
+                        <td colSpan={4} className="py-20 text-center text-slate-400 font-bold uppercase text-[10px] tracking-widest">No payout records found</td>
+                      </tr>
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -176,6 +199,69 @@ const Expenses: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Add Expense Modal */}
+      {showAddModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
+          <div className="absolute inset-0 bg-slate-900/80 backdrop-blur-xl animate-in fade-in" onClick={() => setShowAddModal(false)} />
+          <div className="relative w-full max-w-xl bg-white dark:bg-slate-900 rounded-[3.5rem] p-10 shadow-3xl border border-slate-100 dark:border-slate-800">
+            <div className="flex justify-between items-center mb-10">
+               <h3 className="text-3xl font-black tracking-tighter text-slate-900 dark:text-white">Log Payout</h3>
+               <button onClick={() => setShowAddModal(false)} className="p-4 text-slate-300 hover:text-slate-900 hover:bg-slate-100 rounded-full transition-all"><X size={24} /></button>
+            </div>
+            
+            <form className="space-y-6" onSubmit={handleAddExpense}>
+               <div className="space-y-2">
+                 <label className="text-[10px] font-black uppercase text-slate-400 ml-3 tracking-widest">Expense Category</label>
+                 <select 
+                  className="w-full px-8 py-5 bg-slate-50 dark:bg-slate-800 rounded-[2rem] outline-none text-sm font-bold border-2 border-transparent focus:border-brand-600/20 transition-all dark:text-white"
+                  value={formData.type} onChange={e => setFormData({...formData, type: e.target.value})}
+                 >
+                   {EXPENSE_CATEGORIES.map(cat => <option key={cat.id} value={cat.id}>{cat.label}</option>)}
+                 </select>
+               </div>
+
+               <div className="space-y-2">
+                 <label className="text-[10px] font-black uppercase text-slate-400 ml-3 tracking-widest">Payee / Vendor Name</label>
+                 <input 
+                  type="text" required placeholder="e.g. Surat Safai Agency"
+                  className="w-full px-8 py-5 bg-slate-50 dark:bg-slate-800 rounded-[2rem] outline-none text-sm font-bold border-2 border-transparent focus:border-brand-600/20 transition-all dark:text-white"
+                  value={formData.payeeName} onChange={e => setFormData({...formData, payeeName: e.target.value})}
+                 />
+               </div>
+
+               <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase text-slate-400 ml-3 tracking-widest">Amount (₹)</label>
+                    <input 
+                      type="number" required placeholder="0.00"
+                      className="w-full px-8 py-5 bg-slate-50 dark:bg-slate-800 rounded-[2rem] outline-none text-sm font-bold border-2 border-transparent focus:border-brand-600/20 transition-all dark:text-white"
+                      value={formData.amount} onChange={e => setFormData({...formData, amount: e.target.value})}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase text-slate-400 ml-3 tracking-widest">Wing Allocation</label>
+                    <select 
+                      className="w-full px-8 py-5 bg-slate-50 dark:bg-slate-800 rounded-[2rem] outline-none text-sm font-bold border-2 border-transparent focus:border-brand-600/20 transition-all dark:text-white"
+                      value={formData.details.buildingName} onChange={e => setFormData({...formData, details: {...formData.details, buildingName: e.target.value}})}
+                    >
+                      <option value="">Society Wide</option>
+                      {Array.from({length: 24}, (_, i) => `A-${i+1}`).map(w => <option key={w} value={w}>Wing {w}</option>)}
+                    </select>
+                  </div>
+               </div>
+
+               <button 
+                disabled={isSubmitting}
+                className="w-full py-5 bg-brand-600 text-white rounded-[2rem] font-black uppercase tracking-widest text-xs flex items-center justify-center gap-3 shadow-2xl shadow-brand-500/30 transition-all active:scale-95"
+               >
+                  {isSubmitting ? <Loader2 className="animate-spin" /> : <ShieldCheck size={18} />}
+                  Confirm & Log Payout
+               </button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

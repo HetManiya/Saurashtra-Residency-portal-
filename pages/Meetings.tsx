@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { 
   CalendarDays, MapPin, Clock, Plus, Users, ChevronRight, Info, CheckCircle, X, BellRing, Calendar, Loader2
@@ -14,7 +15,6 @@ const Meetings: React.FC = () => {
   const [user, setUser] = useState<any>(null);
   const [submitting, setSubmitting] = useState(false);
   
-  // Form State
   const [formData, setFormData] = useState({
     title: '',
     date: '',
@@ -63,7 +63,7 @@ const Meetings: React.FC = () => {
   const handleRSVP = async (meetingId: string, currentStatus: boolean) => {
     if (!user) return;
     try {
-      const updatedMeeting = await api.rsvpMeeting(meetingId, user.id || user.email, !currentStatus);
+      const updatedMeeting = await api.rsvpMeeting(meetingId, user.id, !currentStatus);
       setMeetings(prev => prev.map(m => m.id === meetingId ? updatedMeeting : m));
     } catch (e) {
       console.error(e);
@@ -71,37 +71,37 @@ const Meetings: React.FC = () => {
   };
 
   const isAdmin = user?.role === 'ADMIN' || user?.role === 'COMMITTEE';
-  const userId = user?.id || user?.email;
+  const userId = user?.id;
 
   const isPast = (dateStr: string) => {
     return new Date(dateStr) < new Date(new Date().setHours(0,0,0,0));
   };
 
+  const upcomingMeetings = meetings.filter(m => !isPast(m.date));
+  const pastMeetings = meetings.filter(m => isPast(m.date));
+
   if (loading) {
     return (
       <div className="h-[60vh] flex flex-col items-center justify-center">
         <Loader2 className="animate-spin text-brand-600 mb-4" size={40} />
-        <p className="font-black uppercase tracking-widest text-xs text-slate-400">Syncing Schedule...</p>
+        <p className="font-black uppercase tracking-widest text-xs text-slate-400">Loading Assemblies...</p>
       </div>
     );
   }
-
-  const upcomingMeetings = meetings.filter(m => !isPast(m.date));
-  const pastMeetings = meetings.filter(m => isPast(m.date));
 
   return (
     <div className="space-y-10 animate-fade-up pb-20">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-8 border-b border-slate-200 dark:border-slate-800">
         <div>
           <h1 className="text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">{t('meetings_title')}</h1>
-          <p className="text-slate-500 dark:text-slate-400 mt-2 font-medium">{t('meetings_desc')}</p>
+          <p className="text-slate-500 dark:text-slate-400 mt-2 font-medium">Coordinate community gatherings and festive planning</p>
         </div>
         {isAdmin && (
           <button 
             onClick={() => setShowModal(true)}
-            className="px-6 py-4 bg-brand-600 text-white rounded-3xl font-black text-xs uppercase tracking-widest flex items-center gap-2 hover:bg-brand-700 transition-all shadow-xl shadow-brand-500/20 active:scale-95"
+            className="px-6 py-4 bg-brand-600 text-white rounded-3xl font-black text-xs uppercase tracking-widest flex items-center gap-2 hover:bg-brand-700 transition-all shadow-xl active:scale-95"
           >
-            <Plus size={18} /> Schedule
+            <Plus size={18} /> New Schedule
           </button>
         )}
       </div>
@@ -111,14 +111,14 @@ const Meetings: React.FC = () => {
           {upcomingMeetings.length === 0 ? (
             <div className="bg-white dark:bg-slate-900 p-12 rounded-[3rem] border border-slate-100 dark:border-slate-800 text-center">
               <CalendarDays className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-              <h3 className="text-xl font-black text-slate-900 dark:text-white mb-2">No Upcoming Meetings</h3>
-              <p className="text-slate-500 text-sm">Check back later or view the archive.</p>
+              <h3 className="text-xl font-black text-slate-900 dark:text-white mb-2">Clear Calendar</h3>
+              <p className="text-slate-500 text-sm">No society assemblies are currently scheduled.</p>
             </div>
           ) : (
             upcomingMeetings.map((meeting) => {
-              const isAttending = meeting.rsvps.includes(userId);
+              const isAttending = meeting.rsvps?.includes(userId);
               return (
-                <div key={meeting.id} className="bg-white dark:bg-slate-900 p-8 rounded-[3rem] border border-slate-100 dark:border-slate-800 premium-shadow group hover:border-brand-600 transition-all">
+                <div key={meeting.id} className="bg-white dark:bg-slate-900 p-8 rounded-[3rem] border border-slate-100 dark:border-slate-800 premium-shadow group hover:border-brand-600/30 transition-all">
                   <div className="flex flex-col md:flex-row gap-8">
                     <div className="flex-1">
                       <div className="flex flex-wrap gap-3 mb-4">
@@ -147,28 +147,24 @@ const Meetings: React.FC = () => {
                     
                     <div className="md:w-48 pt-4 md:pt-0 border-t md:border-t-0 md:border-l border-slate-100 dark:border-slate-800 md:pl-8 flex flex-col justify-center">
                        <p className="text-[10px] font-black uppercase text-slate-400 mb-2 text-center md:text-left">
-                         {isAdmin ? 'Total RSVP' : 'Your Status'}
+                         {isAdmin ? 'Total RVSPs' : 'Your Attendance'}
                        </p>
                        
                        {isAdmin ? (
                          <div className="text-center md:text-left">
-                           <p className="text-3xl font-black text-brand-600 mb-1">{meeting.rsvps.length}</p>
-                           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Residents Confirmed</p>
+                           <p className="text-3xl font-black text-brand-600 mb-1">{meeting.rsvps?.length || 0}</p>
+                           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Confimations</p>
                          </div>
                        ) : (
                          <button 
                           onClick={() => handleRSVP(meeting.id, isAttending)}
                           className={`w-full py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 transition-all ${
                             isAttending 
-                              ? 'bg-emerald-50 text-emerald-600 border border-emerald-100 dark:bg-emerald-900/20 dark:border-emerald-800' 
+                              ? 'bg-emerald-50 text-emerald-600 border border-emerald-100 dark:bg-emerald-900/20' 
                               : 'bg-slate-900 text-white dark:bg-slate-700 hover:bg-brand-600'
                           }`}
                          >
-                          {isAttending ? (
-                            <>Attending <CheckCircle size={14} /></>
-                          ) : (
-                            <>Confirm <ChevronRight size={14} /></>
-                          )}
+                          {isAttending ? <>Attending <CheckCircle size={14} /></> : <>Confirm RSVP</>}
                         </button>
                        )}
                     </div>
@@ -182,47 +178,41 @@ const Meetings: React.FC = () => {
         <div className="space-y-8">
           <div className="bg-white dark:bg-slate-900 p-8 rounded-[3rem] border border-slate-100 dark:border-slate-800 premium-shadow">
             <h4 className="font-black text-slate-900 dark:text-white mb-6 flex items-center gap-2">
-              <Info size={18} className="text-brand-600" /> {t('meeting_archive')}
+              <Info size={18} className="text-brand-600" /> Archive Center
             </h4>
             <div className="space-y-4">
               {pastMeetings.length > 0 ? (
                 pastMeetings.slice(0, 5).map(m => (
-                  <div key={m.id} className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl flex justify-between items-center group cursor-default">
+                  <div key={m.id} className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl flex justify-between items-center">
                     <div>
                       <p className="text-xs font-bold text-slate-700 dark:text-slate-300 line-clamp-1">{m.title}</p>
                       <p className="text-[10px] text-slate-400 font-bold">{new Date(m.date).toLocaleDateString()}</p>
                     </div>
-                    <span className="text-[10px] font-black bg-white dark:bg-slate-900 px-2 py-1 rounded-lg text-slate-400 shadow-sm">{m.rsvps.length} Attended</span>
+                    <span className="text-[10px] font-black bg-white dark:bg-slate-900 px-2 py-1 rounded-lg text-slate-400 shadow-sm">{m.rsvps?.length || 0} RSVPs</span>
                   </div>
                 ))
               ) : (
-                <p className="text-sm text-slate-400 italic p-4">No archived meetings.</p>
+                <p className="text-[10px] text-slate-400 uppercase tracking-widest text-center py-6 font-bold">No historical data</p>
               )}
             </div>
           </div>
         </div>
       </div>
 
-      {/* Schedule Meeting Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-6">
-          <div className="absolute inset-0 bg-slate-900/80 backdrop-blur-xl animate-in fade-in duration-300" onClick={() => setShowModal(false)} />
-          <div className="relative w-full max-w-xl bg-white dark:bg-slate-900 rounded-[3.5rem] p-10 shadow-2xl overflow-hidden animate-in zoom-in-95 border border-slate-100 dark:border-slate-800 max-h-[90vh] overflow-y-auto">
+          <div className="absolute inset-0 bg-slate-900/80 backdrop-blur-xl animate-in fade-in" onClick={() => setShowModal(false)} />
+          <div className="relative w-full max-w-xl bg-white dark:bg-slate-900 rounded-[3.5rem] p-10 shadow-2xl border border-slate-100 dark:border-slate-800">
             <div className="flex justify-between items-center mb-8">
-               <div>
-                 <h3 className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter">New Assembly</h3>
-                 <p className="text-[10px] font-black uppercase text-brand-600 tracking-widest">Schedule a community gathering</p>
-               </div>
-               <button onClick={() => setShowModal(false)} className="p-3 text-slate-300 hover:text-slate-900 dark:hover:text-white transition-all">
-                  <X size={28} />
-               </button>
+               <h3 className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter">New Assembly</h3>
+               <button onClick={() => setShowModal(false)} className="p-3 text-slate-300 hover:text-slate-900 dark:hover:text-white transition-all"><X size={28} /></button>
             </div>
             
             <form onSubmit={handleSchedule} className="space-y-6">
                <div className="space-y-2">
                  <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Meeting Title</label>
                  <input 
-                  type="text" required placeholder="e.g. Diwali Celebration Planning" 
+                  type="text" required placeholder="e.g. Navratri Event Planning" 
                   className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-800 rounded-2xl outline-none font-bold text-sm dark:text-white border-2 border-transparent focus:border-brand-600/20"
                   value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})}
                  />
@@ -249,50 +239,28 @@ const Meetings: React.FC = () => {
 
                <div className="space-y-2">
                  <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Location</label>
-                 <div className="relative">
-                   <MapPin className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                   <input 
-                    type="text" required placeholder="e.g. Club House / Garden" 
-                    className="w-full pl-12 pr-6 py-4 bg-slate-50 dark:bg-slate-800 rounded-2xl outline-none font-bold text-sm dark:text-white border-2 border-transparent focus:border-brand-600/20"
-                    value={formData.location} onChange={e => setFormData({...formData, location: e.target.value})}
-                   />
-                 </div>
+                 <input 
+                  type="text" required placeholder="Club House / Main Garden" 
+                  className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-800 rounded-2xl outline-none font-bold text-sm dark:text-white border-2 border-transparent focus:border-brand-600/20"
+                  value={formData.location} onChange={e => setFormData({...formData, location: e.target.value})}
+                 />
                </div>
 
                <div className="space-y-2">
-                 <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Agenda / Description</label>
+                 <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Agenda Description</label>
                  <textarea 
-                  required rows={3} placeholder="Brief details about the meeting..."
+                  required rows={3} placeholder="Briefly describe the purpose..."
                   className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-800 rounded-2xl outline-none font-bold text-sm dark:text-white border-2 border-transparent focus:border-brand-600/20 resize-none"
                   value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})}
                  />
                </div>
 
-               <div className="space-y-2">
-                 <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Priority Category</label>
-                 <div className="flex gap-3">
-                    {(['General', 'Urgent', 'Celebration'] as const).map(cat => (
-                      <button 
-                        key={cat} type="button"
-                        onClick={() => setFormData({...formData, category: cat})}
-                        className={`flex-1 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest border-2 transition-all ${
-                          formData.category === cat 
-                            ? 'border-brand-600 bg-brand-50 text-brand-600 dark:bg-brand-900/10' 
-                            : 'border-slate-100 dark:border-slate-800 text-slate-400'
-                        }`}
-                      >
-                        {cat}
-                      </button>
-                    ))}
-                 </div>
-               </div>
-
                <button 
                 type="submit" disabled={submitting}
-                className="w-full py-5 bg-brand-600 text-white rounded-[2.5rem] font-black uppercase tracking-widest text-xs flex items-center justify-center gap-3 shadow-xl shadow-brand-500/20 active:scale-95 transition-all mt-4"
+                className="w-full py-5 bg-brand-600 text-white rounded-[2.5rem] font-black uppercase tracking-widest text-xs flex items-center justify-center gap-3 shadow-xl active:scale-95 transition-all mt-4"
                >
                  {submitting ? <Loader2 className="animate-spin" size={18} /> : <Calendar size={18} />}
-                 {submitting ? 'Scheduling...' : 'Broadcast Meeting'}
+                 {submitting ? 'Scheduling...' : 'Broadcast to Residents'}
                </button>
             </form>
           </div>

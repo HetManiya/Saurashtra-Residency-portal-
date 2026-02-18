@@ -4,7 +4,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { 
   UserPlus, Mail, Lock, User, Shield, Home, ArrowRight, 
   Loader2, CheckCircle, ChevronLeft, MapPin, Users,
-  Star, Briefcase, Key, ChevronDown, Clock
+  Star, Briefcase, Key, ChevronDown, Clock, AlertTriangle
 } from 'lucide-react';
 import { api } from '../services/api';
 import { BUILDINGS } from '../constants';
@@ -40,17 +40,16 @@ const Register: React.FC = () => {
       const backendData = {
         ...formData,
         flatId: `${formData.wing}-${formData.flatNo}`,
-        role: formData.position === 'Resident' ? 'RESIDENT' : 'ADMIN'
+        role: formData.role // Using role directly from selection
       };
       
       await api.register(backendData);
       
-      // Navigate to login with a "Pending Approval" state
       navigate('/login', { 
         state: { 
           registered: true, 
           email: formData.email,
-          message: "Request submitted! Your Wing President will verify and approve your account shortly. You will be able to log in once approved."
+          message: "Registration requested! Your Wing President will verify and approve your account shortly. You will be able to log in once approved."
         } 
       });
     } catch (err: any) {
@@ -79,14 +78,12 @@ const Register: React.FC = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#FDFEFF] dark:bg-[#020617] p-6 transition-colors duration-300 relative overflow-hidden">
-      {/* Background Decor */}
       <div className="absolute top-0 left-0 w-[600px] h-[600px] bg-brand-600/5 rounded-full blur-[120px] -ml-48 -mt-48" />
       <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-indigo-600/5 rounded-full blur-[120px] -mr-48 -mb-48" />
 
       <div className="max-w-xl w-full relative z-10 animate-fade-up">
         <div className="bg-white dark:bg-slate-900 rounded-[3.5rem] shadow-2xl p-10 md:p-14 border border-slate-100 dark:border-slate-800 relative overflow-hidden premium-shadow">
           
-          {/* Progress Header */}
           <div className="flex items-center justify-between mb-12">
             <button 
               onClick={() => step > 1 ? setStep(step - 1) : navigate('/login')}
@@ -102,28 +99,23 @@ const Register: React.FC = () => {
           </div>
 
           <div className="text-center mb-12">
-            <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter">Join Our Community</h1>
-            <p className="text-slate-500 text-sm mt-3 font-medium">Step 1: Application for Membership</p>
-          </div>
-
-          <div className="mb-8 p-5 bg-amber-50 dark:bg-amber-900/10 border border-amber-100 dark:border-amber-800/50 text-amber-700 dark:text-amber-400 rounded-3xl text-[10px] font-black uppercase tracking-widest flex items-center gap-3">
-             <Clock size={18} /> Approval from Wing President is Mandatory
+            <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter">Saurashtra Membership</h1>
+            <p className="text-slate-500 text-sm mt-3 font-medium">Digital access registration for residents</p>
           </div>
 
           {error && (
-            <div className="mb-8 p-5 bg-rose-50 border border-rose-100 text-rose-600 rounded-3xl text-sm font-bold flex items-center gap-3 animate-in shake">
+            <div className="mb-8 p-5 bg-rose-50 border border-rose-100 text-rose-600 rounded-3xl text-sm font-bold flex items-center gap-3">
               <AlertTriangle size={20} className="text-rose-400" /> {error}
             </div>
           )}
 
           <form onSubmit={handleRegister} className="space-y-6">
-            {/* STEP 1: ACCOUNT DETAILS */}
             {step === 1 && (
               <div className="space-y-5 animate-in fade-in slide-in-from-right-4 duration-500">
                 <div className="space-y-2">
                   <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Full Name</label>
-                  <div className="relative group">
-                    <User className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-brand-600 transition-colors" size={20} />
+                  <div className="relative">
+                    <User className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
                     <input 
                       type="text" required placeholder="Full Name"
                       className="w-full pl-14 pr-6 py-5 bg-slate-50 dark:bg-slate-800/50 rounded-[2rem] outline-none text-sm font-bold border-2 border-transparent focus:border-brand-600/20 transition-all dark:text-white"
@@ -133,8 +125,8 @@ const Register: React.FC = () => {
                 </div>
                 <div className="space-y-2">
                   <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Email Address</label>
-                  <div className="relative group">
-                    <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-brand-600 transition-colors" size={20} />
+                  <div className="relative">
+                    <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
                     <input 
                       type="email" required placeholder="Email Address"
                       className="w-full pl-14 pr-6 py-5 bg-slate-50 dark:bg-slate-800/50 rounded-[2rem] outline-none text-sm font-bold border-2 border-transparent focus:border-brand-600/20 transition-all dark:text-white"
@@ -144,8 +136,8 @@ const Register: React.FC = () => {
                 </div>
                 <div className="space-y-2">
                   <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Password</label>
-                  <div className="relative group">
-                    <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-brand-600 transition-colors" size={20} />
+                  <div className="relative">
+                    <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
                     <input 
                       type="password" required placeholder="••••••••"
                       className="w-full pl-14 pr-6 py-5 bg-slate-50 dark:bg-slate-800/50 rounded-[2rem] outline-none text-sm font-bold border-2 border-transparent focus:border-brand-600/20 transition-all dark:text-white"
@@ -162,7 +154,6 @@ const Register: React.FC = () => {
               </div>
             )}
 
-            {/* STEP 2: ROLE SELECTION */}
             {step === 2 && (
               <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
                 <div className="grid grid-cols-1 gap-5">
@@ -204,7 +195,6 @@ const Register: React.FC = () => {
               </div>
             )}
 
-            {/* STEP 3: PROPERTY MAPPING */}
             {step === 3 && (
               <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
                 <div className="p-8 bg-brand-50 dark:bg-brand-900/10 rounded-[2.5rem] border border-brand-100 dark:border-brand-800 flex items-center gap-5">
@@ -212,7 +202,7 @@ const Register: React.FC = () => {
                       {formData.position === 'Resident' ? <Home size={28} /> : <Shield size={28} />}
                    </div>
                    <div>
-                      <p className="text-[10px] font-black uppercase tracking-widest text-brand-600 mb-1">Assigned Identity</p>
+                      <p className="text-[10px] font-black uppercase tracking-widest text-brand-600 mb-1">Identity Profile</p>
                       <p className="text-lg font-black text-slate-900 dark:text-white leading-none">{formData.position}</p>
                    </div>
                 </div>
@@ -220,29 +210,21 @@ const Register: React.FC = () => {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Building Wing</label>
-                    <div className="relative">
-                      <MapPin className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
-                      <select 
-                        className="w-full pl-14 pr-10 py-5 bg-slate-50 dark:bg-slate-800 rounded-[2rem] outline-none text-sm font-bold appearance-none dark:text-white border-2 border-transparent focus:border-brand-600/20 transition-all"
-                        value={formData.wing} onChange={e => setFormData({...formData, wing: e.target.value})}
-                      >
-                        {wings.map(w => <option key={w} value={w}>Wing {w}</option>)}
-                      </select>
-                      <ChevronDown className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={18} />
-                    </div>
+                    <select 
+                      className="w-full px-8 py-5 bg-slate-50 dark:bg-slate-800 rounded-[2rem] outline-none text-sm font-bold dark:text-white border-2 border-transparent focus:border-brand-600/20 transition-all"
+                      value={formData.wing} onChange={e => setFormData({...formData, wing: e.target.value})}
+                    >
+                      {wings.map(w => <option key={w} value={w}>Wing {w}</option>)}
+                    </select>
                   </div>
                   <div className="space-y-2">
                     <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Flat Number</label>
-                    <div className="relative">
-                      <Home className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
-                      <select 
-                        className="w-full pl-14 pr-10 py-5 bg-slate-50 dark:bg-slate-800 rounded-[2rem] outline-none text-sm font-bold appearance-none dark:text-white border-2 border-transparent focus:border-brand-600/20 transition-all"
-                        value={formData.flatNo} onChange={e => setFormData({...formData, flatNo: e.target.value})}
-                      >
-                        {flats.map(f => <option key={f} value={f}>Flat {f}</option>)}
-                      </select>
-                      <ChevronDown className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={18} />
-                    </div>
+                    <select 
+                      className="w-full px-8 py-5 bg-slate-50 dark:bg-slate-800 rounded-[2rem] outline-none text-sm font-bold dark:text-white border-2 border-transparent focus:border-brand-600/20 transition-all"
+                      value={formData.flatNo} onChange={e => setFormData({...formData, flatNo: e.target.value})}
+                    >
+                      {flats.map(f => <option key={f} value={f}>Flat {f}</option>)}
+                    </select>
                   </div>
                 </div>
 
@@ -255,7 +237,6 @@ const Register: React.FC = () => {
                         onClick={() => setFormData({...formData, occupancyType: type})}
                         className={`py-5 rounded-[2rem] font-black text-[10px] uppercase tracking-widest border-2 transition-all flex items-center justify-center gap-3 ${formData.occupancyType === type ? 'border-brand-600 bg-brand-50 text-brand-600 dark:bg-brand-900/20' : 'border-slate-100 dark:border-slate-800 text-slate-400'}`}
                       >
-                        {type === 'Owner' ? <Key size={16} /> : <Users size={16} />}
                         {type}
                       </button>
                     ))}
@@ -267,29 +248,16 @@ const Register: React.FC = () => {
                   className="w-full py-5 bg-brand-600 text-white rounded-[2.5rem] font-black uppercase tracking-widest text-xs flex items-center justify-center gap-3 group shadow-2xl shadow-brand-500/30 active:scale-[0.98] transition-all"
                 >
                   {loading ? <Loader2 className="animate-spin" size={20} /> : (
-                    <>Submit Verification Request <CheckCircle size={18} /></>
+                    <>Submit Registration <CheckCircle size={18} /></>
                   )}
                 </button>
               </div>
             )}
           </form>
-
-          <div className="mt-12 text-center">
-            <p className="text-xs text-slate-400 font-bold tracking-tight">
-              Already have an account? {' '}
-              <Link to="/login" className="text-brand-600 font-black hover:underline">Sign In Instead</Link>
-            </p>
-          </div>
         </div>
       </div>
     </div>
   );
 };
-
-const AlertTriangle = ({ size, className }: { size: number, className: string }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" /><path d="M12 9v4" /><path d="M12 17h.01" />
-  </svg>
-);
 
 export default Register;

@@ -5,19 +5,22 @@ import {
   Droplets, TreePine, DoorOpen, Home, ArrowUpRight,
   Activity, BrainCircuit, BarChart3, TrendingUp, AlertCircle,
   BellRing, Command, Settings, Smartphone, CreditCard, Clock, Sun, Moon,
-  ShieldAlert, Receipt, QrCode, LifeBuoy, Siren, UserPlus, Sparkles
+  ShieldAlert, Receipt, QrCode, LifeBuoy, Siren, UserPlus, Sparkles, Loader2
 } from 'lucide-react';
-import { SOCIETY_INFO, BUILDINGS, NOTICES, UTILITY_SUMMARY, MAINTENANCE_SAMPLES } from '../constants';
+import { SOCIETY_INFO, BUILDINGS, UTILITY_SUMMARY } from '../constants';
 import { AreaChart, Area, ResponsiveContainer } from 'recharts';
 import { api } from '../services/api';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../components/LanguageContext';
+import { Notice } from '../types';
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const { t } = useLanguage();
   const [prediction, setPrediction] = useState<string | null>(null);
   const [loadingAi, setLoadingAi] = useState(false);
+  const [notices, setNotices] = useState<Notice[]>([]);
+  const [loadingNotices, setLoadingNotices] = useState(true);
   const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
@@ -30,7 +33,16 @@ const Dashboard: React.FC = () => {
       setPrediction(pred);
       setLoadingAi(false);
     };
+
+    const fetchNotices = async () => {
+      setLoadingNotices(true);
+      const data = await api.getNotices();
+      setNotices(data);
+      setLoadingNotices(false);
+    };
+
     fetchPrediction();
+    fetchNotices();
   }, []);
 
   const isAdmin = user?.role === 'ADMIN' || user?.role === 'COMMITTEE';
@@ -221,16 +233,24 @@ const Dashboard: React.FC = () => {
               <button onClick={() => navigate('/notices')} className="text-[10px] font-black uppercase text-brand-600 tracking-widest hover:underline">Full Feed</button>
            </div>
            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {NOTICES.slice(0, 4).map((notice, i) => (
-                <div key={i} className="p-6 bg-slate-50 dark:bg-slate-800 rounded-3xl border border-transparent dark:border-slate-700 transition-all hover:border-brand-500/30 cursor-pointer group/item">
-                  <div className="flex justify-between items-center mb-4">
-                    <span className="px-3 py-1 bg-white dark:bg-slate-950 rounded-full text-[8px] font-black uppercase tracking-widest text-brand-600">{notice.category}</span>
-                    <div className="w-2 h-2 rounded-full bg-brand-600 opacity-0 group-hover/item:opacity-100 transition-opacity" />
+              {loadingNotices ? (
+                <div className="col-span-2 py-12 flex justify-center"><Loader2 className="animate-spin text-brand-600" /></div>
+              ) : notices.length === 0 ? (
+                <div className="col-span-2 py-12 text-center text-slate-400 font-bold uppercase tracking-widest text-[10px]">No new updates</div>
+              ) : (
+                notices.slice(0, 4).map((notice, i) => (
+                  <div key={notice.id || i} className="p-6 bg-slate-50 dark:bg-slate-800 rounded-3xl border border-transparent dark:border-slate-700 transition-all hover:border-brand-500/30 cursor-pointer group/item">
+                    <div className="flex justify-between items-center mb-4">
+                      <span className={`px-3 py-1 bg-white dark:bg-slate-950 rounded-full text-[8px] font-black uppercase tracking-widest ${notice.category === 'Urgent' ? 'text-rose-600' : 'text-brand-600'}`}>
+                        {notice.category}
+                      </span>
+                      <div className="w-2 h-2 rounded-full bg-brand-600 opacity-0 group-hover/item:opacity-100 transition-opacity" />
+                    </div>
+                    <h4 className="font-black text-slate-900 dark:text-white mb-2 line-clamp-1">{notice.title}</h4>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">{notice.content}</p>
                   </div>
-                  <h4 className="font-black text-slate-900 dark:text-white mb-2 line-clamp-1">{notice.title}</h4>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">{notice.content}</p>
-                </div>
-              ))}
+                ))
+              )}
            </div>
         </div>
       </div>
