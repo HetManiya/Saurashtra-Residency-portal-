@@ -91,7 +91,7 @@ const Login: React.FC = () => {
 
             <button 
               disabled={loading || !!success}
-              className="w-full py-4.5 bg-brand-600 text-white rounded-[2rem] font-black uppercase tracking-widest text-[10px] shadow-2xl shadow-brand-500/20 hover:bg-brand-700 transition-all active:scale-[0.98] mt-4 disabled:opacity-70"
+              className="w-full py-5 bg-brand-600 text-white rounded-[2rem] font-black uppercase tracking-widest text-xs shadow-2xl shadow-brand-500/20 hover:bg-brand-700 transition-all active:scale-[0.98] mt-6 disabled:opacity-70"
             >
               {loading || !!success ? <Loader2 className="animate-spin mx-auto" size={20} /> : 'Login'}
             </button>
