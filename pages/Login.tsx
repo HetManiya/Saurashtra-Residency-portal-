@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
-import { Lock, Mail, Loader2, Shield, CheckCircle, AlertTriangle, UserPlus, Info, ShieldCheck, Home } from 'lucide-react';
+import { Lock, Mail, Loader2, Shield, CheckCircle, AlertTriangle, UserPlus, Info, ShieldCheck, Home, ArrowRight, User, ShieldAlert } from 'lucide-react';
 import { api } from '../services/api';
 
 const Login: React.FC = () => {
@@ -20,27 +20,37 @@ const Login: React.FC = () => {
     }
   }, [location.state]);
 
-  const handleAuth = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleAuth = async (e?: React.FormEvent, customCreds?: {e: string, p: string}) => {
+    if (e) e.preventDefault();
     setLoading(true);
     setError('');
     setSuccess('');
     
+    const targetEmail = customCreds ? customCreds.e : email;
+    const targetPass = customCreds ? customCreds.p : password;
+
     try {
-      const response = await api.login({ email, password });
+      const response = await api.login({ email: targetEmail, password: targetPass });
       if (response && (response.token || response.user)) {
         setSuccess('Login successfully! Redirecting to dashboard...');
         window.dispatchEvent(new Event('storage'));
         
-        // Brief delay to show the success notification
         setTimeout(() => {
           navigate('/', { replace: true });
         }, 1000);
       }
     } catch (err: any) {
-      setError(err.message || "Invalid credentials");
+      setError(err.message || "Invalid credentials. Please use the Quick Demo access below.");
     } finally {
       if (!success) setLoading(false);
+    }
+  };
+
+  const quickDemoLogin = (role: 'admin' | 'resident') => {
+    if (role === 'admin') {
+      handleAuth(undefined, { e: 'admin@residency.com', p: 'admin123' });
+    } else {
+      handleAuth(undefined, { e: 'resident@residency.com', p: 'resident123' });
     }
   };
 
@@ -60,7 +70,7 @@ const Login: React.FC = () => {
           </div>
 
           {success && <div className="mb-6 p-4 rounded-2xl bg-emerald-50 text-emerald-600 text-xs font-bold flex gap-3 animate-in zoom-in-95"><CheckCircle size={18} /> {success}</div>}
-          {error && <div className="mb-6 p-4 rounded-2xl bg-rose-50 text-rose-600 text-xs font-bold flex gap-3"><AlertTriangle size={18} /> {error}</div>}
+          {error && <div className="mb-6 p-4 rounded-2xl bg-rose-50 text-rose-600 text-[10px] font-black uppercase tracking-widest flex gap-3 leading-relaxed"><AlertTriangle size={18} className="shrink-0" /> {error}</div>}
 
           <form onSubmit={handleAuth} className="space-y-5">
             <div className="space-y-1.5">
@@ -71,7 +81,7 @@ const Login: React.FC = () => {
                   type="email" required placeholder="name@residency.com"
                   className="w-full pl-14 pr-6 py-4 bg-slate-50 dark:bg-slate-800 rounded-[1.5rem] outline-none text-sm font-bold border-2 border-transparent focus:border-brand-600/20 transition-all dark:text-white"
                   value={email} onChange={e => setEmail(e.target.value)}
-                  disabled={!!success}
+                  disabled={!!success || loading}
                 />
               </div>
             </div>
@@ -84,7 +94,7 @@ const Login: React.FC = () => {
                   type="password" required placeholder="••••••••"
                   className="w-full pl-14 pr-6 py-4 bg-slate-50 dark:bg-slate-800 rounded-[1.5rem] outline-none text-sm font-bold border-2 border-transparent focus:border-brand-600/20 transition-all dark:text-white"
                   value={password} onChange={e => setPassword(e.target.value)}
-                  disabled={!!success}
+                  disabled={!!success || loading}
                 />
               </div>
             </div>
@@ -93,13 +103,41 @@ const Login: React.FC = () => {
               disabled={loading || !!success}
               className="w-full py-5 bg-brand-600 text-white rounded-[2rem] font-black uppercase tracking-widest text-xs shadow-2xl shadow-brand-500/20 hover:bg-brand-700 transition-all active:scale-[0.98] mt-6 disabled:opacity-70"
             >
-              {loading || !!success ? <Loader2 className="animate-spin mx-auto" size={20} /> : 'Login'}
+              {loading && !success ? <Loader2 className="animate-spin mx-auto" size={20} /> : 'Login'}
             </button>
           </form>
 
-          <div className="mt-10 pt-8 border-t dark:border-slate-800 text-center">
+          {/* Demo Access Panel */}
+          <div className="mt-10 p-6 bg-slate-50 dark:bg-slate-800/40 rounded-[2.5rem] border border-slate-100 dark:border-slate-800">
+             <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 text-center mb-4 flex items-center justify-center gap-2">
+               <ShieldCheck size={12} className="text-brand-600" /> Demo Suite Access
+             </p>
+             <div className="flex flex-col gap-3">
+                <div className="flex gap-3">
+                  <button 
+                    onClick={() => quickDemoLogin('admin')}
+                    disabled={loading}
+                    className="flex-1 py-3 bg-amber-500 text-white rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-amber-600 transition-all shadow-md flex items-center justify-center gap-2"
+                  >
+                    <ShieldAlert size={12} /> System Admin
+                  </button>
+                  <button 
+                    onClick={() => quickDemoLogin('resident')}
+                    disabled={loading}
+                    className="flex-1 py-3 bg-white dark:bg-slate-900 rounded-xl text-[9px] font-black uppercase tracking-widest text-slate-600 hover:text-brand-600 hover:border-brand-600/30 border border-transparent transition-all shadow-sm flex items-center justify-center gap-2"
+                  >
+                    <User size={12} /> Live Resident
+                  </button>
+                </div>
+                <p className="text-[8px] text-slate-400 font-bold text-center italic">
+                  Note: Admin access is restricted to verified committee credentials in production.
+                </p>
+             </div>
+          </div>
+
+          <div className="mt-8 text-center">
             <Link to="/register" className="text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-brand-600 transition-colors">
-              New to Saurashtra Residency? <span className="text-brand-600">New Registration</span>
+              New to residency? <span className="text-brand-600">Register Property</span>
             </Link>
           </div>
         </div>

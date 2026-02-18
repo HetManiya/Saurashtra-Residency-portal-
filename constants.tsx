@@ -43,47 +43,7 @@ export const SOCIETY_INFO = {
   ],
 };
 
-export const FACILITY_BOOKINGS: AmenityBooking[] = [
-  {
-    id: 'B1',
-    facilityId: 1,
-    userName: 'Kishan Patel',
-    unitNumber: 'A-1-204',
-    date: '2024-05-25',
-    startTime: '10:00 AM',
-    endTime: '02:00 PM',
-    purpose: "Aaryan's 5th Birthday Party",
-    attendees: 85,
-    isPublic: false,
-    status: 'Confirmed'
-  },
-  {
-    id: 'B2',
-    facilityId: 2,
-    userName: 'Bhavin Vaghani',
-    unitNumber: 'A-15-502',
-    date: '2024-05-26',
-    startTime: '06:00 PM',
-    endTime: '11:00 PM',
-    purpose: 'Sangeet Ceremony',
-    attendees: 350,
-    isPublic: true,
-    status: 'Confirmed'
-  },
-  {
-    id: 'B3',
-    facilityId: 3,
-    userName: 'Nirav Gajera',
-    unitNumber: 'A-8-101',
-    date: '2024-05-24',
-    startTime: '08:00 PM',
-    endTime: '11:00 PM',
-    purpose: 'IPL Final Night Screening',
-    attendees: 20,
-    isPublic: true,
-    status: 'Confirmed'
-  }
-];
+export const FACILITY_BOOKINGS: AmenityBooking[] = [];
 
 export const TRANSLATIONS: Record<Language, any> = {
   en: {
@@ -343,7 +303,7 @@ export const TRANSLATIONS: Record<Language, any> = {
     meet_committee: "हमारी समिति से मिलें",
     site_plan: "साइट प्लान",
     total_units: "कुल इकाइयाँ",
-    search_wing: "વિંગ શોધો (A-1 થી A-24)...",
+    search_wing: "Search wing (A-1 થી A-24)...",
     view_wing_mgmt: "विंग प्रबंधन देखें",
     pay_now: "ચુકવણી કરો",
     receipt: "રસીદ",
@@ -376,7 +336,7 @@ export const TRANSLATIONS: Record<Language, any> = {
     visitor_auth: "अधिकृत प्रवेश",
     visitor_share: "पास साझा करें",
     visitor_download: "डाउनलोड करें",
-    wing_committee: "वિંગ સમિતિના સભ્યો",
+    wing_committee: "વિંગ સમિતિના સભ્યો",
     floor_map: "फ्लोर ऑक्यूपेंसी मैप",
     president: "अध्यक्ष",
     vp: "उपाध्यक्ष",
@@ -434,84 +394,6 @@ export const BUILDER_INFO: Builder = {
   email: "contact@saurashtradevelopers.com"
 };
 
-const professions = ['profession_engineer', 'profession_business', 'profession_merchant', 'profession_teacher', 'profession_doctor', 'profession_ca', 'profession_govt', 'profession_retired'];
-const names = ['Arjun', 'Bhavin', 'Chirag', 'Deepak', 'Esha', 'Falguni', 'Gaurav', 'Hardik', 'Ishita', 'Jignesh', 'Kishan', 'Lalit', 'Mansi', 'Nirav', 'Om', 'Pooja', 'Rahul', 'Sneha', 'Tushar', 'Viral'];
-const surnames = ['Patel', 'Vaghani', 'Goti', 'Savani', 'Lathiya', 'Radadiya', 'Vekariya', 'Gajera', 'Kathiriya'];
-
-const generateRandomName = () => {
-  const fName = names[Math.floor(Math.random() * names.length)];
-  const lName = surnames[Math.floor(Math.random() * surnames.length)];
-  return `${fName} ${lName}`;
-};
-
-const generateWingCommittee = (wingName: string): WingCommittee => {
-  return {
-    president: {
-      id: `pres-${wingName}`,
-      name: generateRandomName(),
-      position: 'president',
-      phone: `+91 ${91000 + Math.floor(Math.random() * 8999)} ${10000 + Math.floor(Math.random() * 89999)}`,
-      email: `pres.${wingName.toLowerCase()}@residency.com`,
-      imageUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=pres-${wingName}`
-    },
-    vicePresident: {
-      id: `vp-${wingName}`,
-      name: generateRandomName(),
-      position: 'vp',
-      phone: `+91 ${92000 + Math.floor(Math.random() * 8999)} ${10000 + Math.floor(Math.random() * 89999)}`,
-      email: `vp.${wingName.toLowerCase()}@residency.com`,
-      imageUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=vp-${wingName}`
-    },
-    treasurer: {
-      id: `tres-${wingName}`,
-      name: generateRandomName(),
-      position: 'treasurer',
-      phone: `+91 ${93000 + Math.floor(Math.random() * 8999)} ${10000 + Math.floor(Math.random() * 89999)}`,
-      email: `tres.${wingName.toLowerCase()}@residency.com`,
-      imageUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=tres-${wingName}`
-    }
-  };
-};
-
-const generateMockFlats = (wingName: string): Flat[] => {
-  const flats: Flat[] = [];
-  for (let floor = 1; floor <= 5; floor++) {
-    for (let unit = 1; unit <= 4; unit++) {
-      const unitNo = `${floor}0${unit}`;
-      const familySurname = surnames[Math.floor(Math.random() * surnames.length)];
-      const hofFirstName = names[Math.floor(Math.random() * names.length)];
-      const hofName = `${hofFirstName} ${familySurname}`;
-      
-      const members: FamilyMember[] = [
-        {
-          id: `m-${wingName}-${unitNo}-1`,
-          name: hofName,
-          relation: 'relation_hof' as any,
-          phone: `+91 ${90000 + Math.floor(Math.random() * 9999)} ${10000 + Math.floor(Math.random() * 89999)}`,
-          dob: '1980-05-12',
-          profession: professions[Math.floor(Math.random() * professions.length)]
-        },
-        {
-          id: `m-${wingName}-${unitNo}-2`,
-          name: `Sapna ${familySurname}`,
-          relation: 'relation_spouse' as any,
-          phone: `+91 ${80000 + Math.floor(Math.random() * 9999)} ${10000 + Math.floor(Math.random() * 89999)}`,
-          dob: '1984-08-22',
-          profession: 'profession_homemaker'
-        }
-      ];
-
-      flats.push({
-        id: `flat-${wingName}-${unitNo}`,
-        unitNumber: unitNo,
-        occupancyType: Math.random() > 0.85 ? OccupancyType.TENANT : OccupancyType.OWNER,
-        members
-      });
-    }
-  }
-  return flats;
-};
-
 export const BUILDINGS: Building[] = Array.from({ length: 24 }, (_, i) => {
   const name = `A-${i + 1}`;
   const type = i < 6 ? FlatType.BHK1 : FlatType.BHK2;
@@ -523,24 +405,23 @@ export const BUILDINGS: Building[] = Array.from({ length: 24 }, (_, i) => {
     flatsPerFloor: 4,
     hasLift: true,
     parkingSpots: 1,
-    flats: generateMockFlats(name),
-    wingCommittee: generateWingCommittee(name)
+    flats: [], // START EMPTY
+    wingCommittee: {
+      president: { id: '', name: 'Unassigned', position: 'President', phone: '', email: '', imageUrl: '' },
+      vicePresident: { id: '', name: 'Unassigned', position: 'VP', phone: '', email: '', imageUrl: '' },
+      treasurer: { id: '', name: 'Unassigned', position: 'Treasurer', phone: '', email: '', imageUrl: '' }
+    }
   };
 });
 
 export const UTILITY_SUMMARY = BUILDINGS.map((b, i) => {
-  const liftBill = Math.floor(Math.random() * (4000 - 3000 + 1) + 3000);
-  const commonBill = Math.floor(Math.random() * (4000 - 3000 + 1) + 3000);
-  const isSharedPairStart = i % 2 === 0;
-  const waterBill = isSharedPairStart ? Math.floor(Math.random() * 5000 + 2000) : 0; 
-
   return {
     buildingId: b.id,
     buildingName: b.name,
-    liftBill,
-    commonBill,
-    sharedWaterBill: waterBill,
-    sharedWith: isSharedPairStart && i + 1 < 24 ? `A-${i + 2}` : (i > 0 ? `A-${i}` : '')
+    liftBill: 0,
+    commonBill: 0,
+    sharedWaterBill: 0,
+    sharedWith: i % 2 === 0 && i + 1 < 24 ? `A-${i + 2}` : (i > 0 ? `A-${i}` : '')
   };
 });
 
@@ -556,20 +437,6 @@ export const COMMITTEE: CommitteeMember[] = [
   { id: '3', name: 'Manoj Goti', position: 'treasurer', phone: '+91 98765 43212', email: 'manoj.g@residency.com', imageUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Manoj' },
 ];
 
-export const NOTICES: Notice[] = [
-  { id: '1', title: 'Maintenance Due', content: 'Please pay your ₹700 maintenance before the 5th of every month.', date: '2024-05-20', category: 'Urgent' },
-  { id: '2', title: 'Water Tank Cleaning', content: 'Buildings A-1 to A-6 cleaning scheduled for tomorrow.', date: '2024-05-18', category: 'General' },
-  { id: '3', title: 'New Security Rules', content: 'Entry strictly via Gate 1 for visitors from 10 PM onwards.', date: '2024-05-22', category: 'General' },
-];
-
-export const MAINTENANCE_SAMPLES: MaintenanceRecord[] = [
-  { id: 'm1', flatId: 'A-1-101', month: 'May', year: 2024, amount: 700, status: PaymentStatus.PAID, occupancyType: OccupancyType.OWNER, paidDate: '2024-05-02' },
-  { id: 'm2', flatId: 'A-2-102', month: 'May', year: 2024, amount: 700, status: PaymentStatus.PENDING, occupancyType: OccupancyType.TENANT },
-  { id: 'm3', flatId: 'A-15-201', month: 'May', year: 2024, amount: 700, status: PaymentStatus.OVERDUE, occupancyType: OccupancyType.OWNER },
-];
-
-export const FUNDS: FundRecord[] = [
-  { id: 'f1', purpose: 'Ganesh Chaturthi 2024', date: '2024-08-15', totalCollected: 45000, targetAmount: 50000 },
-  { id: 'f2', purpose: 'Navratri Festival', date: '2024-10-01', totalCollected: 25000, targetAmount: 80000 },
-  { id: 'f3', purpose: 'CCTV Security Upgrade', date: '2024-06-01', totalCollected: 120000, targetAmount: 120000 },
-];
+export const NOTICES: Notice[] = [];
+export const MAINTENANCE_SAMPLES: MaintenanceRecord[] = [];
+export const FUNDS: FundRecord[] = [];
