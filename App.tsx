@@ -20,6 +20,7 @@ import VisitorPass from './pages/VisitorPass';
 import Facilities from './pages/Facilities';
 import Helpdesk from './pages/Helpdesk';
 import RegistrationApprovals from './pages/RegistrationApprovals';
+import Profile from './pages/Profile';
 
 const App: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('sr_token'));
@@ -49,6 +50,7 @@ const App: React.FC = () => {
                 {/* Everyone can see Dashboard (logic inside handles view) */}
                 <Route path="/" element={<Dashboard />} />
                 <Route path="/emergency" element={<Emergency />} />
+                <Route path="/profile" element={<Profile />} />
                 
                 {/* Admin Only */}
                 <Route path="/audit-logs" element={<ProtectedRoute allowedRoles={['ADMIN']}><AuditLogs /></ProtectedRoute>} />

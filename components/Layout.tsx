@@ -132,20 +132,24 @@ const SidebarContent: React.FC<{
       </nav>
 
       <div className="p-6 border-t border-slate-50 dark:border-slate-800/50 shrink-0">
-        <div className="p-4 rounded-[2rem] bg-slate-50 dark:bg-slate-800/40 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl overflow-hidden bg-white shadow-sm ring-2 ring-slate-100 dark:ring-slate-700 shrink-0">
+        <Link 
+          to="/profile"
+          onClick={() => { if (window.innerWidth < 1024) setIsSidebarOpen(false); }}
+          className="p-4 rounded-[2rem] bg-slate-50 dark:bg-slate-800/40 flex items-center gap-3 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all border border-transparent hover:border-brand-600/20 group"
+        >
+          <div className="w-10 h-10 rounded-xl overflow-hidden bg-white shadow-sm ring-2 ring-slate-100 dark:ring-slate-700 shrink-0 group-hover:scale-110 transition-transform">
             <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.name || 'guest'}`} alt="User" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-xs font-black truncate dark:text-white mb-0">{user?.name || 'Resident'}</p>
+            <p className="text-xs font-black truncate dark:text-white mb-0 group-hover:text-brand-600 transition-colors">{user?.name || 'Resident'}</p>
             <p className={`text-[9px] font-black uppercase mb-0 truncate ${isAdmin ? 'text-amber-500' : 'text-brand-500'}`}>
               {user?.role || 'Guest'}
             </p>
           </div>
-          <button onClick={handleLogout} className="p-2 text-slate-400 hover:text-rose-600 transition-colors shrink-0" title="Logout">
+          <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleLogout(); }} className="p-2 text-slate-400 hover:text-rose-600 transition-colors shrink-0" title="Logout">
             <LogOut size={16} />
           </button>
-        </div>
+        </Link>
       </div>
     </div>
   );

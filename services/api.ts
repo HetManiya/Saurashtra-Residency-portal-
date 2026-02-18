@@ -190,6 +190,13 @@ export const api = {
     return { success: true };
   },
 
+  updatePassword: async (userId: string, data: any) => {
+    // In a real app, this would use Supabase Auth updatePassword
+    // For demo, we just return success
+    await addAuditLog('Password Update', 'User', `Credentials updated for user: ${userId}`);
+    return { success: true };
+  },
+
   getPendingRegistrations: async () => {
     let dbData: any[] = [];
     try {
@@ -294,7 +301,12 @@ export const api = {
   },
 
   getMaintenanceRecords: async (flatId: string): Promise<MaintenanceRecord[]> => {
-    return [];
+    // Demo Mock: Return some historical records for the unit
+    return [
+      { id: '1', flatId, month: 'May', year: 2024, amount: 700, status: PaymentStatus.PENDING, occupancyType: OccupancyType.OWNER },
+      { id: '2', flatId, month: 'April', year: 2024, amount: 700, status: PaymentStatus.PAID, occupancyType: OccupancyType.OWNER, paidDate: '2024-04-05' },
+      { id: '3', flatId, month: 'March', year: 2024, amount: 700, status: PaymentStatus.PAID, occupancyType: OccupancyType.OWNER, paidDate: '2024-03-08' },
+    ];
   },
 
   getAllMaintenanceRecords: async (month?: string, year?: number): Promise<MaintenanceRecord[]> => {
