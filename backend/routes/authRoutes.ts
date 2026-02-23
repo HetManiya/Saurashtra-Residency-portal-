@@ -41,6 +41,13 @@ router.post('/login', async (req, res) => {
     const user = await User.findOne({ email });
     if (!user) return res.status(404).json({ message: 'User not found' });
 
+    if (user.status === 'PENDING') {
+      return res.status(403).json({ message: 'Your account is awaiting approval from the committee.' });
+    }
+    if (user.status === 'REJECTED') {
+      return res.status(403).json({ message: 'Your registration request was rejected. Please contact the office.' });
+    }
+
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(400).json({ message: 'Invalid credentials' });
 

@@ -9,6 +9,7 @@ import {
   Globe, Sofa, LifeBuoy, Zap, ShieldAlert, Waves, UserCheck
 } from 'lucide-react';
 import VoiceAssistant from './VoiceAssistant';
+import ChatAssistant from './ChatAssistant';
 import { useLanguage } from './LanguageContext';
 
 interface LayoutProps { children: React.ReactNode; }
@@ -279,6 +280,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         </main>
       </div>
       <VoiceAssistant />
+      <ChatAssistant />
     </div>
   );
 };

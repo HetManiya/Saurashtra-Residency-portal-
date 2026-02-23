@@ -13,7 +13,13 @@ const userSchema = new mongoose.Schema({
   permissions: [{ type: String }], 
   flatId: { type: String }, // e.g., 'A-1-101'
   occupancyType: { type: String, enum: ['Owner', 'Tenant'] },
-  phone: { type: String },
+  phone: { type: String, required: true },
+  status: { 
+    type: String, 
+    enum: ['PENDING', 'APPROVED', 'REJECTED'], 
+    default: 'PENDING' 
+  },
+  fcmToken: { type: String }, // For Firebase Cloud Messaging (Android)
   lastLogin: { type: Date }
 }, { timestamps: true });
 

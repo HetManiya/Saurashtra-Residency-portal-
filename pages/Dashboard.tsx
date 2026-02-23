@@ -22,6 +22,8 @@ const Dashboard: React.FC = () => {
   const [notices, setNotices] = useState<Notice[]>([]);
   const [loadingNotices, setLoadingNotices] = useState(true);
   const [user, setUser] = useState<any>(null);
+  const [adminSummary, setAdminSummary] = useState<any>(null);
+  const [loadingAdmin, setLoadingAdmin] = useState(false);
 
   useEffect(() => {
     const storedUser = localStorage.getItem('sr_user');
@@ -41,9 +43,38 @@ const Dashboard: React.FC = () => {
       setLoadingNotices(false);
     };
 
+    const fetchAdminData = async () => {
+      if (storedUser) {
+        const u = JSON.parse(storedUser);
+        if (u.role === 'ADMIN' || u.role === 'COMMITTEE') {
+          setLoadingAdmin(true);
+          try {
+            const data = await api.getAdminSummary();
+            setAdminSummary(data);
+          } catch (e) {
+            console.error(e);
+          } finally {
+            setLoadingAdmin(false);
+          }
+        }
+      }
+    };
+
     fetchPrediction();
     fetchNotices();
+    fetchAdminData();
   }, []);
+
+  const handleResolveComplaint = async (id: string) => {
+    try {
+      await api.resolveComplaint(id);
+      // Refresh admin data
+      const data = await api.getAdminSummary();
+      setAdminSummary(data);
+    } catch (e) {
+      alert("Failed to resolve complaint");
+    }
+  };
 
   const isAdmin = user?.role === 'ADMIN' || user?.role === 'COMMITTEE';
 
@@ -66,11 +97,15 @@ const Dashboard: React.FC = () => {
             </div>
             <div className="grid grid-cols-2 gap-4 shrink-0">
                <div className="p-6 bg-white/5 border border-white/10 rounded-3xl text-center backdrop-blur-sm">
-                  <p className="text-3xl font-black mb-1">94%</p>
+                  <p className="text-3xl font-black mb-1">
+                    {loadingAdmin ? '...' : (adminSummary?.summary?.totalCollected ? `₹${(adminSummary.summary.totalCollected / 1000).toFixed(1)}k` : '94%')}
+                  </p>
                   <p className="text-[9px] font-black uppercase tracking-widest text-slate-500">Funds Collected</p>
                </div>
                <div className="p-6 bg-white/5 border border-white/10 rounded-3xl text-center backdrop-blur-sm">
-                  <p className="text-3xl font-black mb-1">02</p>
+                  <p className="text-3xl font-black mb-1">
+                    {loadingAdmin ? '...' : (adminSummary?.summary?.openComplaints ?? '02')}
+                  </p>
                   <p className="text-[9px] font-black uppercase tracking-widest text-slate-500">Open Tickets</p>
                </div>
             </div>
@@ -142,22 +177,44 @@ const Dashboard: React.FC = () => {
 
         <div className="bg-white dark:bg-slate-900 p-10 rounded-[3rem] border border-slate-100 dark:border-slate-800 bento-card">
            <h5 className="font-black text-xl mb-10 d-flex align-items-center gap-3">
-              <ShieldCheck size={24} className="text-brand-500" /> Infrastructure
+              <AlertCircle size={24} className="text-brand-500" /> Recent Complaints
            </h5>
            <div className="space-y-4">
-              {[
-                { label: 'Wing A-12 Lift', status: 'In Service', icon: Zap, color: 'text-amber-500', bg: 'bg-amber-50' },
-                { label: 'Water Reserve', status: 'Optimal', icon: Droplets, color: 'text-brand-500', bg: 'bg-brand-50' },
-                { label: 'CCTV Grid', status: 'Secure', icon: ShieldCheck, color: 'text-emerald-500', bg: 'bg-emerald-50' }
-              ].map((item, i) => (
-                <div key={i} className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-transparent dark:border-slate-700 hover:border-brand-500/20 transition-all">
-                   <div className="flex items-center gap-4">
-                      <div className={`p-2.5 rounded-xl ${item.bg} dark:bg-slate-900`}><item.icon size={18} className={item.color} /></div>
-                      <span className="text-xs font-extrabold dark:text-white">{item.label}</span>
-                   </div>
-                   <span className="text-[9px] font-black uppercase text-slate-400">{item.status}</span>
-                </div>
-              ))}
+              {loadingAdmin ? (
+                <div className="py-10 flex justify-center"><Loader2 className="animate-spin text-brand-600" /></div>
+              ) : adminSummary?.recentComplaints?.length > 0 ? (
+                adminSummary.recentComplaints.map((complaint: any) => (
+                  <div key={complaint.id} className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-transparent dark:border-slate-700 hover:border-brand-500/20 transition-all">
+                     <div className="flex items-center gap-4">
+                        <div className="p-2.5 rounded-xl bg-rose-50 dark:bg-slate-900"><AlertCircle size={18} className="text-rose-500" /></div>
+                        <div className="flex flex-col">
+                          <span className="text-xs font-extrabold dark:text-white">{complaint.subject}</span>
+                          <span className="text-[9px] text-slate-400 font-bold">{complaint.residentName} ({complaint.flatId})</span>
+                        </div>
+                     </div>
+                     <button 
+                       onClick={() => handleResolveComplaint(complaint.id)}
+                       className="px-3 py-1.5 bg-emerald-600 text-white rounded-lg text-[8px] font-black uppercase tracking-widest hover:bg-emerald-700 transition-all"
+                     >
+                       Resolve
+                     </button>
+                  </div>
+                ))
+              ) : (
+                [
+                  { label: 'Wing A-12 Lift', status: 'In Service', icon: Zap, color: 'text-amber-500', bg: 'bg-amber-50' },
+                  { label: 'Water Reserve', status: 'Optimal', icon: Droplets, color: 'text-brand-500', bg: 'bg-brand-50' },
+                  { label: 'CCTV Grid', status: 'Secure', icon: ShieldCheck, color: 'text-emerald-500', bg: 'bg-emerald-50' }
+                ].map((item, i) => (
+                  <div key={i} className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-transparent dark:border-slate-700 hover:border-brand-500/20 transition-all">
+                     <div className="flex items-center gap-4">
+                        <div className={`p-2.5 rounded-xl ${item.bg} dark:bg-slate-900`}><item.icon size={18} className={item.color} /></div>
+                        <span className="text-xs font-extrabold dark:text-white">{item.label}</span>
+                     </div>
+                     <span className="text-[9px] font-black uppercase text-slate-400">{item.status}</span>
+                  </div>
+                ))
+              )}
            </div>
            <button onClick={() => navigate('/audit-logs')} className="w-full mt-8 py-4 bg-brand-600 hover:bg-brand-700 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-brand-500/20 transition-all">
               Comprehensive Audit

@@ -50,5 +50,6 @@ export const authorize = (allowedRoles: string[] = [], requiredPermissions: stri
   };
 };
 
-// Fix: Adding the missing authorizeAdmin middleware as a wrapper for ADMIN role authorization
+// Fix: Adding the missing adminOnly middleware as a wrapper for ADMIN role authorization
+export const adminOnly = authorize(['ADMIN']);
 export const authorizeAdmin = authorize(['ADMIN']);

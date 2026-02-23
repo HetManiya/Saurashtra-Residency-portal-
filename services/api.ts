@@ -377,6 +377,39 @@ export const api = {
 
   isMonthLocked: (m: string, y: number) => false,
 
+  createPaymentOrder: async (maintenanceId: string) => {
+    const token = localStorage.getItem('sr_token');
+    const response = await fetch('/api/v1/payments/create-order', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ maintenanceId })
+    });
+    if (!response.ok) throw new Error('Failed to create payment order');
+    return response.json();
+  },
+
+  getAdminSummary: async () => {
+    const token = localStorage.getItem('sr_token');
+    const response = await fetch('/api/v1/admin/summary', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (!response.ok) throw new Error('Failed to fetch admin summary');
+    return response.json();
+  },
+
+  resolveComplaint: async (complaintId: string) => {
+    const token = localStorage.getItem('sr_token');
+    const response = await fetch(`/api/v1/admin/complaints/${complaintId}/resolve`, {
+      method: 'PATCH',
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (!response.ok) throw new Error('Failed to resolve complaint');
+    return response.json();
+  },
+
   connectLiveAssistant: async (callbacks: any) => {
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     return ai.live.connect({

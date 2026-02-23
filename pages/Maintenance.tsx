@@ -10,6 +10,99 @@ import { SOCIETY_INFO, UTILITY_SUMMARY, BUILDINGS } from '../constants';
 import { MaintenanceRecord, PaymentStatus, OccupancyType } from '../types';
 import { api } from '../services/api';
 import { useLanguage } from '../components/LanguageContext';
+import { loadStripe } from '@stripe/stripe-js';
+import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
+
+const CheckoutForm: React.FC<{ 
+  clientSecret: string; 
+  onSuccess: () => void; 
+  onCancel: () => void;
+  amount: number;
+}> = ({ clientSecret, onSuccess, onCancel, amount }) => {
+  const stripe = useStripe();
+  const elements = useElements();
+  const [error, setError] = useState<string | null>(null);
+  const [processing, setProcessing] = useState(false);
+
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!stripe || !elements) return;
+
+    setProcessing(true);
+    
+    const result = await stripe.confirmPayment({
+      elements,
+      confirmParams: {
+        return_url: `${window.location.origin}/#/maintenance?payment_success=true`,
+      },
+      redirect: 'if_required',
+    });
+
+    if (result.error) {
+      setError(result.error.message || 'Payment failed');
+      setProcessing(false);
+    } else {
+      if (result.paymentIntent?.status === 'succeeded') {
+        onSuccess();
+      }
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="mb-6">
+        <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-4">Select Payment Method</p>
+        <div className="flex items-center gap-4 mb-4 overflow-x-auto pb-2 custom-scrollbar">
+          <div className="flex flex-col items-center gap-1 min-w-[60px]">
+            <div className="w-10 h-10 bg-slate-50 dark:bg-slate-800 rounded-xl flex items-center justify-center border border-slate-200 dark:border-slate-700">
+              <img src="https://www.vectorlogo.zone/logos/google_pay/google_pay-icon.svg" className="w-6 h-6" alt="GPay" />
+            </div>
+            <span className="text-[8px] font-black uppercase text-slate-400">GPay</span>
+          </div>
+          <div className="flex flex-col items-center gap-1 min-w-[60px]">
+            <div className="w-10 h-10 bg-slate-50 dark:bg-slate-800 rounded-xl flex items-center justify-center border border-slate-200 dark:border-slate-700">
+              <img src="https://www.vectorlogo.zone/logos/paytm/paytm-icon.svg" className="w-6 h-6" alt="Paytm" />
+            </div>
+            <span className="text-[8px] font-black uppercase text-slate-400">Paytm</span>
+          </div>
+          <div className="flex flex-col items-center gap-1 min-w-[60px]">
+            <div className="w-10 h-10 bg-slate-50 dark:bg-slate-800 rounded-xl flex items-center justify-center border border-slate-200 dark:border-slate-700">
+              <img src="https://www.vectorlogo.zone/logos/npci_upi/npci_upi-icon.svg" className="w-6 h-6" alt="UPI" />
+            </div>
+            <span className="text-[8px] font-black uppercase text-slate-400">UPI</span>
+          </div>
+          <div className="flex flex-col items-center gap-1 min-w-[60px]">
+            <div className="w-10 h-10 bg-slate-50 dark:bg-slate-800 rounded-xl flex items-center justify-center border border-slate-200 dark:border-slate-700">
+              <CreditCard size={20} className="text-slate-400" />
+            </div>
+            <span className="text-[8px] font-black uppercase text-slate-400">Cards</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700">
+        <PaymentElement />
+      </div>
+      {error && <div className="text-rose-600 text-xs font-bold">{error}</div>}
+      <div className="flex gap-3">
+        <button 
+          type="button" 
+          onClick={onCancel}
+          className="flex-1 py-4 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-2xl font-black uppercase tracking-widest text-[10px]"
+        >
+          Cancel
+        </button>
+        <button 
+          type="submit" 
+          disabled={!stripe || processing}
+          className="flex-1 py-4 bg-brand-600 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-lg shadow-brand-500/20 disabled:opacity-50"
+        >
+          {processing ? 'Processing...' : `Pay ₹${amount}`}
+        </button>
+      </div>
+    </form>
+  );
+};
 
 const Maintenance: React.FC = () => {
   const { t } = useLanguage();
@@ -25,6 +118,9 @@ const Maintenance: React.FC = () => {
   const [isLocked, setIsLocked] = useState(false);
   const [currentMonth] = useState('May');
   const [currentYear] = useState(2024);
+  
+  const [paymentOrder, setPaymentOrder] = useState<any>(null);
+  const [stripePromise, setStripePromise] = useState<any>(null);
 
   const isAdmin = user?.role === 'ADMIN' || user?.role === 'COMMITTEE';
 
@@ -54,6 +150,14 @@ const Maintenance: React.FC = () => {
     const parsedUser = storedUser ? JSON.parse(storedUser) : null;
     setUser(parsedUser);
     if (parsedUser) loadAllData(parsedUser);
+
+    // Handle return from payment redirect
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('payment_success') === 'true') {
+      alert("Payment Successful! Receipt generated.");
+      // Clear the param
+      window.history.replaceState({}, document.title, window.location.pathname + window.location.hash);
+    }
   }, [loadAllData]);
 
   const handleExport = () => {
@@ -70,19 +174,30 @@ const Maintenance: React.FC = () => {
     api.exportToCSV(exportData, `Maintenance_${activeTab === 'current' ? 'Ledger' : 'History'}_${new Date().toISOString().split('T')[0]}`);
   };
 
-  const handlePayUPI = async (record: MaintenanceRecord) => {
+  const handlePayStripe = async (record: MaintenanceRecord) => {
     if (isLocked || record.status === PaymentStatus.PAID) return;
     
     setIsProcessingPayment(true);
     try {
-      await api.updateMaintenanceStatus(record.id, PaymentStatus.PAID, new Date().toISOString());
-      if (user) await loadAllData(user);
-      api.generateReceipt({ ...record, status: PaymentStatus.PAID });
-      api.broadcastNotification('WHATSAPP', record.flatId, `Payment Success! Receipt for Flat ${record.flatId} (${record.month}) has been generated.`);
+      const order = await api.createPaymentOrder(record.id);
+      setStripePromise(loadStripe(order.publishableKey));
+      setPaymentOrder({ ...order, recordId: record.id });
     } catch (e) {
-      alert("Payment update failed.");
+      alert("Payment initialization failed. Please check your connection.");
     } finally {
       setIsProcessingPayment(false);
+    }
+  };
+
+  const handlePaymentSuccess = async () => {
+    if (!paymentOrder) return;
+    try {
+      await api.updateMaintenanceStatus(paymentOrder.recordId, PaymentStatus.PAID, new Date().toISOString());
+      if (user) await loadAllData(user);
+      setPaymentOrder(null);
+      alert("Payment Successful! Receipt generated.");
+    } catch (e) {
+      console.error(e);
     }
   };
 
@@ -313,7 +428,7 @@ const Maintenance: React.FC = () => {
                               <div className="flex items-center gap-2">
                                 {(activeTab === 'current' || record.status === PaymentStatus.OVERDUE) && !isLocked && (
                                   <button 
-                                    onClick={() => handlePayUPI(record)}
+                                    onClick={() => handlePayStripe(record)}
                                     disabled={isProcessingPayment}
                                     className="flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-brand-700 transition-all shadow-lg"
                                   >
@@ -365,6 +480,47 @@ const Maintenance: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {paymentOrder && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setPaymentOrder(null)} />
+          <div className="relative bg-white dark:bg-slate-900 w-full max-w-md rounded-[2.5rem] p-8 shadow-2xl border border-slate-100 dark:border-slate-800 animate-in zoom-in-95 duration-200">
+            <div className="flex justify-between items-start mb-6">
+              <div>
+                <h3 className="text-2xl font-black tracking-tight dark:text-white">Checkout</h3>
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Secure Society Payments</p>
+              </div>
+              <button onClick={() => setPaymentOrder(null)} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
+                <X size={20} className="text-slate-400" />
+              </button>
+            </div>
+
+            <div className="p-4 bg-brand-50 dark:bg-brand-900/10 rounded-2xl border border-brand-100 dark:border-brand-900/20 mb-8">
+              <div className="flex justify-between items-center">
+                <span className="text-xs font-bold text-slate-500 dark:text-slate-400">Total Amount</span>
+                <span className="text-xl font-black text-brand-600">₹{paymentOrder.amount}</span>
+              </div>
+            </div>
+            
+            {stripePromise && (
+              <Elements stripe={stripePromise} options={{ clientSecret: paymentOrder.clientSecret }}>
+                <CheckoutForm 
+                  clientSecret={paymentOrder.clientSecret} 
+                  amount={paymentOrder.amount}
+                  onSuccess={handlePaymentSuccess}
+                  onCancel={() => setPaymentOrder(null)}
+                />
+              </Elements>
+            )}
+
+            <div className="mt-8 pt-6 border-t border-slate-100 dark:border-slate-800 flex items-center justify-center gap-4 opacity-50 grayscale">
+              <img src="https://www.vectorlogo.zone/logos/visa/visa-icon.svg" className="h-4" alt="Visa" />
+              <img src="https://www.vectorlogo.zone/logos/mastercard/mastercard-icon.svg" className="h-4" alt="Mastercard" />
+              <img src="https://www.vectorlogo.zone/logos/npci_upi/npci_upi-icon.svg" className="h-4" alt="UPI" />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
