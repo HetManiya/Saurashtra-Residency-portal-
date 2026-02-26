@@ -18,6 +18,7 @@ const Buildings: React.FC = () => {
   const [user, setUser] = useState<any>(null);
   const [showAuditModal, setShowAuditModal] = useState(false);
   const [auditSearch, setAuditSearch] = useState('');
+  const [totalMaintenance, setTotalMaintenance] = useState(2500);
   
   useEffect(() => {
     const stored = localStorage.getItem('sr_user');
@@ -25,8 +26,16 @@ const Buildings: React.FC = () => {
     loadBuildingsAndOccupancy();
   }, []);
 
-  const loadBuildingsAndOccupancy = async () => {
-    setLoading(true);
+  useEffect(() => {
+    const fetchMaintenance = async () => {
+      const { total } = await api.calculateMaintenanceWithPenalty(SOCIETY_INFO.maintenanceAmount);
+      setTotalMaintenance(total);
+    };
+    fetchMaintenance();
+  }, []);
+
+  const loadBuildingsAndOccupancy = async (retries = 0) => {
+    if (retries === 0) setLoading(true);
     try {
       const [bData, oData] = await Promise.all([
         api.getBuildings(),
@@ -34,9 +43,13 @@ const Buildings: React.FC = () => {
       ]);
       setBuildings(bData);
       setRegisteredUnits(oData);
-    } catch (e) {
-      console.error(e);
-    } finally {
+      setLoading(false);
+    } catch (e: any) {
+      if (e.message === 'SERVER_STARTING' && retries < 5) {
+        setTimeout(() => loadBuildingsAndOccupancy(retries + 1), 2000);
+        return;
+      }
+      console.error('Buildings Load Error:', e);
       setLoading(false);
     }
   };
@@ -143,8 +156,6 @@ const Buildings: React.FC = () => {
       </div>
     );
   }
-
-  const { total } = api.calculateMaintenanceWithPenalty(SOCIETY_INFO.maintenanceAmount);
 
   return (
     <div className="space-y-10 animate-fade-up">
@@ -419,7 +430,7 @@ const Buildings: React.FC = () => {
                     <div className="pt-6 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
                       <div>
                         <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-1">Standard Maintenance</p>
-                        <p className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter">₹{total}</p>
+                        <p className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter">₹{totalMaintenance}</p>
                       </div>
                       <button 
                         onClick={() => {}} 

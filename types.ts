@@ -131,6 +131,7 @@ export interface Meeting {
   location: string;
   description: string;
   category: 'General' | 'Urgent' | 'Celebration';
-  rsvps: string[]; // Array of user IDs/Flat IDs
+  type?: string;
+  rsvps: any[]; // Array of RSVP objects { userId, status }
   createdBy: string;
 }

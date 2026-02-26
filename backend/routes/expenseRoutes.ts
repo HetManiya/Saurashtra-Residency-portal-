@@ -1,7 +1,7 @@
 
 import express from 'express';
 import Expense from '../models/Expense';
-import { protect, authorizeAdmin } from '../middleware/authMiddleware';
+import { protect, authorize } from '../middleware/authMiddleware';
 
 const router = express.Router();
 
@@ -27,8 +27,8 @@ router.get('/', protect, async (req, res) => {
   }
 });
 
-// Create, Update, Delete - ADMIN ONLY
-router.post('/', protect, authorizeAdmin, async (req, res) => {
+// Create, Update, Delete - ADMIN/COMMITTEE
+router.post('/', protect, authorize(['ADMIN', 'COMMITTEE']), async (req, res) => {
   try {
     const expense = new Expense(req.body);
     await expense.save();
@@ -38,7 +38,7 @@ router.post('/', protect, authorizeAdmin, async (req, res) => {
   }
 });
 
-router.patch('/:id', protect, authorizeAdmin, async (req, res) => {
+router.patch('/:id', protect, authorize(['ADMIN', 'COMMITTEE']), async (req, res) => {
   try {
     const expense = await Expense.findByIdAndUpdate(req.params.id, req.body, { new: true });
     res.json(expense);
@@ -47,7 +47,7 @@ router.patch('/:id', protect, authorizeAdmin, async (req, res) => {
   }
 });
 
-router.delete('/:id', protect, authorizeAdmin, async (req, res) => {
+router.delete('/:id', protect, authorize(['ADMIN', 'COMMITTEE']), async (req, res) => {
   try {
     await Expense.findByIdAndDelete(req.params.id);
     res.json({ message: 'Record deleted' });

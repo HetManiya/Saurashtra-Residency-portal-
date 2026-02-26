@@ -24,36 +24,62 @@ const Dashboard: React.FC = () => {
   const [user, setUser] = useState<any>(null);
   const [adminSummary, setAdminSummary] = useState<any>(null);
   const [loadingAdmin, setLoadingAdmin] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
+    setIsMounted(true);
     const storedUser = localStorage.getItem('sr_user');
     if (storedUser) setUser(JSON.parse(storedUser));
     
-    const fetchPrediction = async () => {
-      setLoadingAi(true);
-      const pred = await api.getExpensePrediction(UTILITY_SUMMARY);
-      setPrediction(pred);
-      setLoadingAi(false);
+    const fetchPrediction = async (retries = 0) => {
+      if (retries === 0) setLoadingAi(true);
+      try {
+        const pred = await api.getExpensePrediction(UTILITY_SUMMARY);
+        setPrediction(pred);
+        setLoadingAi(false);
+      } catch (e: any) {
+        if (e.message === 'SERVER_STARTING' && retries < 5) {
+          setTimeout(() => fetchPrediction(retries + 1), 2000);
+          return;
+        }
+        console.error('AI Prediction Error:', e);
+        setPrediction("Forecast temporarily unavailable.");
+        setLoadingAi(false);
+      }
     };
 
-    const fetchNotices = async () => {
-      setLoadingNotices(true);
-      const data = await api.getNotices();
-      setNotices(data);
-      setLoadingNotices(false);
+    const fetchNotices = async (retries = 0) => {
+      if (retries === 0) setLoadingNotices(true);
+      try {
+        const data = await api.getNotices();
+        setNotices(data);
+        setLoadingNotices(false);
+      } catch (e: any) {
+        if (e.message === 'SERVER_STARTING' && retries < 5) {
+          setTimeout(() => fetchNotices(retries + 1), 2000);
+          return;
+        }
+        console.error('Notices Fetch Error:', e);
+        setNotices([]);
+        setLoadingNotices(false);
+      }
     };
 
-    const fetchAdminData = async () => {
+    const fetchAdminData = async (retries = 0) => {
       if (storedUser) {
         const u = JSON.parse(storedUser);
         if (u.role === 'ADMIN' || u.role === 'COMMITTEE') {
-          setLoadingAdmin(true);
+          if (retries === 0) setLoadingAdmin(true);
           try {
             const data = await api.getAdminSummary();
             setAdminSummary(data);
-          } catch (e) {
-            console.error(e);
-          } finally {
+            setLoadingAdmin(false);
+          } catch (e: any) {
+            if (e.message === 'SERVER_STARTING' && retries < 5) {
+              setTimeout(() => fetchAdminData(retries + 1), 2000);
+              return;
+            }
+            console.error('Admin Summary Error:', e);
             setLoadingAdmin(false);
           }
         }
@@ -132,18 +158,20 @@ const Dashboard: React.FC = () => {
               </h5>
               <span className="badge rounded-pill bg-emerald-50 text-brand-700 py-2.5 px-4 border border-brand-100 font-black">+12.4%</span>
            </div>
-           <div className="h-44 mb-8">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={[{v:4000},{v:3000},{v:5000},{v:4500},{v:6000}]}>
-                  <defs>
-                    <linearGradient id="colorBrand" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
-                    </linearGradient>
-                  </defs>
-                  <Area type="monotone" dataKey="v" stroke="#059669" fill="url(#colorBrand)" strokeWidth={4} />
-                </AreaChart>
-              </ResponsiveContainer>
+           <div className="w-full mb-8" style={{ width: '100%', height: '300px', minHeight: '300px', position: 'relative' }}>
+              {isMounted && (
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={[{v:4000},{v:3000},{v:5000},{v:4500},{v:6000}]}>
+                    <defs>
+                      <linearGradient id="colorBrand" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                    <Area type="monotone" dataKey="v" stroke="#059669" fill="url(#colorBrand)" strokeWidth={4} />
+                  </AreaChart>
+                </ResponsiveContainer>
+              )}
            </div>
            <div className="flex justify-between items-end pt-8 border-t dark:border-slate-800">
               <div>
@@ -183,8 +211,8 @@ const Dashboard: React.FC = () => {
               {loadingAdmin ? (
                 <div className="py-10 flex justify-center"><Loader2 className="animate-spin text-brand-600" /></div>
               ) : adminSummary?.recentComplaints?.length > 0 ? (
-                adminSummary.recentComplaints.map((complaint: any) => (
-                  <div key={complaint.id} className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-transparent dark:border-slate-700 hover:border-brand-500/20 transition-all">
+                adminSummary.recentComplaints.map((complaint: any, index: number) => (
+                  <div key={complaint.id || index} className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-transparent dark:border-slate-700 hover:border-brand-500/20 transition-all">
                      <div className="flex items-center gap-4">
                         <div className="p-2.5 rounded-xl bg-rose-50 dark:bg-slate-900"><AlertCircle size={18} className="text-rose-500" /></div>
                         <div className="flex flex-col">
@@ -295,8 +323,8 @@ const Dashboard: React.FC = () => {
               ) : notices.length === 0 ? (
                 <div className="col-span-2 py-12 text-center text-slate-400 font-bold uppercase tracking-widest text-[10px]">No new updates</div>
               ) : (
-                notices.slice(0, 4).map((notice, i) => (
-                  <div key={notice.id || i} className="p-6 bg-slate-50 dark:bg-slate-800 rounded-3xl border border-transparent dark:border-slate-700 transition-all hover:border-brand-500/30 cursor-pointer group/item">
+                notices.slice(0, 4).map((notice, index) => (
+                  <div key={notice.id || index} className="p-6 bg-slate-50 dark:bg-slate-800 rounded-3xl border border-transparent dark:border-slate-700 transition-all hover:border-brand-500/30 cursor-pointer group/item">
                     <div className="flex justify-between items-center mb-4">
                       <span className={`px-3 py-1 bg-white dark:bg-slate-950 rounded-full text-[8px] font-black uppercase tracking-widest ${notice.category === 'Urgent' ? 'text-rose-600' : 'text-brand-600'}`}>
                         {notice.category}

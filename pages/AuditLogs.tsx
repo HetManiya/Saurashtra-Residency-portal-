@@ -16,11 +16,20 @@ const AuditLogs: React.FC = () => {
     fetchLogs();
   }, []);
 
-  const fetchLogs = async () => {
-    setLoading(true);
-    const data = await api.getAuditLogs();
-    setLogs(data);
-    setLoading(false);
+  const fetchLogs = async (retries = 0) => {
+    if (retries === 0) setLoading(true);
+    try {
+      const data = await api.getAuditLogs();
+      setLogs(data);
+      setLoading(false);
+    } catch (e: any) {
+      if (e.message === 'SERVER_STARTING' && retries < 5) {
+        setTimeout(() => fetchLogs(retries + 1), 2000);
+        return;
+      }
+      console.error('Audit Logs Load Error:', e);
+      setLoading(false);
+    }
   };
 
   const filteredLogs = logs.filter(log => {

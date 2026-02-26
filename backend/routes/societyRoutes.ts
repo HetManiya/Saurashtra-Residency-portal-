@@ -4,32 +4,36 @@ import Maintenance from '../models/Maintenance';
 import Building from '../models/Building';
 import Fund from '../models/Fund';
 import Notice from '../models/Notice';
-import { protect, authorizeAdmin } from '../middleware/authMiddleware';
+import { protect, authorize } from '../middleware/authMiddleware';
 
 const router = express.Router();
 
 // Get all buildings
 router.get('/buildings', protect, async (req, res) => {
   try {
+    console.log('🏢 Fetching Buildings...');
     const buildings = await Building.find().sort({ name: 1 });
     res.json(buildings);
-  } catch (error) {
-    res.status(500).json({ message: 'Error fetching buildings' });
+  } catch (error: any) {
+    console.error('🏢 Fetch Buildings Error:', error.message);
+    res.status(500).json({ message: 'Error fetching buildings', error: error.message });
   }
 });
 
 // Get all notices
 router.get('/notices', protect, async (req, res) => {
   try {
+    console.log('📢 Fetching Notices...');
     const notices = await Notice.find().sort({ date: -1 });
     res.json(notices);
-  } catch (error) {
-    res.status(500).json({ message: 'Error fetching notices' });
+  } catch (error: any) {
+    console.error('📢 Fetch Notices Error:', error.message);
+    res.status(500).json({ message: 'Error fetching notices', error: error.message });
   }
 });
 
-// Post a notice (Admin Only)
-router.post('/notices', protect, authorizeAdmin, async (req: any, res) => {
+// Post a notice (Admin/Committee)
+router.post('/notices', protect, authorize(['ADMIN', 'COMMITTEE']), async (req: any, res) => {
   try {
     const notice = new Notice({
       ...req.body,
@@ -65,8 +69,8 @@ router.get('/maintenance', protect, async (req: any, res) => {
   }
 });
 
-// GENERATE MONTHLY MAINTENANCE (Admin Only)
-router.post('/maintenance/generate', protect, authorizeAdmin, async (req, res) => {
+// GENERATE MONTHLY MAINTENANCE (Admin/Committee)
+router.post('/maintenance/generate', protect, authorize(['ADMIN', 'COMMITTEE']), async (req, res) => {
   try {
     const { month, year, amount } = req.body;
     
@@ -102,8 +106,8 @@ router.post('/maintenance/generate', protect, authorizeAdmin, async (req, res) =
   }
 });
 
-// Update maintenance status (Admin Only)
-router.patch('/maintenance/:id', protect, authorizeAdmin, async (req, res) => {
+// Update maintenance status (Admin/Committee)
+router.patch('/maintenance/:id', protect, authorize(['ADMIN', 'COMMITTEE']), async (req, res) => {
   try {
     const { status, paidDate } = req.body;
     const record = await Maintenance.findByIdAndUpdate(

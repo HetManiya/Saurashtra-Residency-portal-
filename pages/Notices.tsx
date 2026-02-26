@@ -23,14 +23,18 @@ const Notices: React.FC = () => {
     loadNotices();
   }, []);
 
-  const loadNotices = async () => {
-    setLoading(true);
+  const loadNotices = async (retries = 0) => {
+    if (retries === 0) setLoading(true);
     try {
       const data = await api.getNotices();
       setNotices(data);
-    } catch (e) {
-      console.error(e);
-    } finally {
+      setLoading(false);
+    } catch (e: any) {
+      if (e.message === 'SERVER_STARTING' && retries < 5) {
+        setTimeout(() => loadNotices(retries + 1), 2000);
+        return;
+      }
+      console.error('Notices Load Error:', e);
       setLoading(false);
     }
   };

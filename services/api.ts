@@ -7,411 +7,350 @@ import { MaintenanceRecord, PaymentStatus, Meeting, OccupancyType, AmenityBookin
 /**
  * Helper to manage local fallback storage for demo stability
  */
-const getLocalPending = () => {
-  const data = localStorage.getItem('sr_demo_pending');
-  return data ? JSON.parse(data) : [];
+const getAuthHeader = () => {
+  const token = localStorage.getItem('sr_token');
+  return token ? { 'Authorization': `Bearer ${token}` } : {};
 };
 
-const setLocalPending = (data: any[]) => {
-  localStorage.setItem('sr_demo_pending', JSON.stringify(data));
-};
+const handleResponse = async (response: Response, retryCount = 0): Promise<any> => {
+  const contentType = response.headers.get('content-type');
+  const isJson = contentType && contentType.includes('application/json');
 
-/**
- * audioUtils provides helper functions for Gemini Live API audio processing.
- */
-export const audioUtils = {
-  encode: (bytes: Uint8Array) => {
-    let binary = '';
-    const len = bytes.byteLength;
-    for (let i = 0; i < len; i++) {
-      binary += String.fromCharCode(bytes[i]);
-    }
-    return btoa(binary);
-  },
-  decode: (base64: string) => {
-    const binaryString = atob(base64);
-    const len = binaryString.length;
-    const bytes = new Uint8Array(len);
-    for (let i = 0; i < len; i++) {
-      bytes[i] = binaryString.charCodeAt(i);
-    }
-    return bytes;
-  },
-  decodeAudioData: async (
-    data: Uint8Array,
-    ctx: AudioContext,
-    sampleRate: number,
-    numChannels: number,
-  ): Promise<AudioBuffer> => {
-    const dataInt16 = new Int16Array(data.buffer);
-    const frameCount = dataInt16.length / numChannels;
-    const buffer = ctx.createBuffer(numChannels, frameCount, sampleRate);
+  if (response.status === 401) {
+    console.warn('🔒 Session expired or unauthorized. Logging out...');
+    localStorage.removeItem('sr_token');
+    localStorage.removeItem('sr_user');
+    window.dispatchEvent(new Event('storage'));
+    window.location.hash = '/login';
+    throw new Error('Session expired. Please login again.');
+  }
 
-    for (let channel = 0; channel < numChannels; channel++) {
-      const channelData = buffer.getChannelData(channel);
-      for (let i = 0; i < frameCount; i++) {
-        channelData[i] = dataInt16[i * numChannels + channel] / 32768.0;
+  // Handle temporary "Starting Server" HTML responses from the platform proxy or 503 from backend
+  if (response.status === 503 || (!isJson && response.status === 200)) {
+    const text = await response.clone().text().catch(() => '');
+    if (text.includes('Starting Server...') || text.includes('<!doctype html>') || response.status === 503) {
+      if (retryCount < 5) {
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        // We throw a specific error that the caller can catch to retry or use fallback
+        throw new Error('SERVER_STARTING');
+      }
+      throw new Error('The server is currently starting up. Please wait a few seconds and try again.');
+    }
+  }
+
+  let data;
+  if (isJson) {
+    try {
+      data = await response.json();
+    } catch (e) {
+      console.error('Failed to parse JSON body even though content-type was application/json');
+    }
+  }
+
+  if (!response.ok) {
+    if (data && data.message) {
+      throw new Error(data.message);
+    }
+    
+    if (!isJson) {
+      const text = await response.text().catch(() => '');
+      if (text.includes('<!doctype html>') || text.includes('<html>')) {
+        if (text.includes('Starting Server...')) {
+          throw new Error('The server is currently starting up. Please wait a few seconds and try again.');
+        }
+        throw new Error(`API Route Not Found (404). The server returned the main HTML page instead of data.`);
       }
     }
-    return buffer;
+    
+    throw new Error(`Server Error: ${response.status} ${response.statusText}`);
   }
-};
 
-const addAuditLog = async (action: string, entity: string, details: string) => {
-  const userStr = localStorage.getItem('sr_user');
-  const user = userStr ? JSON.parse(userStr) : { id: 'system', name: 'System' };
-  
-  try {
-    const { error } = await supabase.from('audit_logs').insert({
-      userId: user.id || user.email,
-      userName: user.name,
-      action,
-      entity,
-      details,
-      timestamp: new Date().toISOString()
-    });
-    if (error) console.error('Error logging audit:', error);
-  } catch (e) {
-    console.warn("Audit logging skipped");
+  if (!isJson) {
+    const text = await response.text().catch(() => 'unavailable');
+    if (text.includes('Starting Server...')) {
+      throw new Error('The server is currently starting up. Please wait a few seconds and try again.');
+    }
+    console.error('Expected JSON but got:', text.substring(0, 200));
+    throw new Error(`Server returned non-JSON response (${response.status} ${response.statusText}). Content-Type: ${contentType || 'none'}. Body starts with: ${text.substring(0, 50)}`);
   }
+
+  return data;
 };
 
 export const api = {
   login: async (credentials: any) => {
-    // DEMO BYPASS
-    if (credentials.email === 'admin@residency.com' && credentials.password === 'admin123') {
-      const userData = {
-        id: 'demo-admin-uuid',
-        name: 'System Administrator',
-        email: 'admin@residency.com',
-        role: 'ADMIN',
-        flatId: 'A-1-Office',
-        occupancyType: 'Owner'
-      };
-      localStorage.setItem('sr_token', 'demo-token-123');
-      localStorage.setItem('sr_user', JSON.stringify(userData));
-      window.dispatchEvent(new Event('storage'));
-      return { token: 'demo-token-123', user: userData };
-    }
-
-    if (credentials.email === 'resident@residency.com' && credentials.password === 'resident123') {
-      const userData = {
-        id: 'demo-resident-uuid',
-        name: 'John Doe',
-        email: 'resident@residency.com',
-        role: 'RESIDENT',
-        flatId: 'A-1-101',
-        occupancyType: 'Owner'
-      };
-      localStorage.setItem('sr_token', 'demo-token-456');
-      localStorage.setItem('sr_user', JSON.stringify(userData));
-      window.dispatchEvent(new Event('storage'));
-      return { token: 'demo-token-456', user: userData };
-    }
-
-    // Check Local Fallback first (if a user was registered locally and approved)
-    const localPending = getLocalPending();
-    const localUser = localPending.find((u: any) => u.email === credentials.email && u.status === 'APPROVED');
-    
-    if (localUser) {
-      // Simulate login for locally approved user
-      const userData = { ...localUser, id: localUser.email };
-      localStorage.setItem('sr_token', 'local-demo-token');
-      localStorage.setItem('sr_user', JSON.stringify(userData));
-      window.dispatchEvent(new Event('storage'));
-      return { token: 'local-demo-token', user: userData };
-    }
-
-    // Standard Supabase Auth
-    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-      email: credentials.email,
-      password: credentials.password,
+    const response = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(credentials)
     });
-
-    if (authError) throw authError;
-
-    const { data: profile, error: profileError } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', authData.user.id)
-      .single();
-
-    if (profileError || !profile) {
-      throw new Error("User profile not found. Please contact administration.");
-    }
-
-    const userData = {
-      id: profile.id,
-      name: profile.name,
-      email: profile.email,
-      role: profile.role,
-      flatId: profile.flatId,
-      occupancyType: profile.occupancyType
-    };
-
-    localStorage.setItem('sr_token', authData.session.access_token);
-    localStorage.setItem('sr_user', JSON.stringify(userData));
+    const data = await handleResponse(response);
+    localStorage.setItem('sr_token', data.token);
+    localStorage.setItem('sr_user', JSON.stringify(data.user));
     window.dispatchEvent(new Event('storage'));
-
-    return { token: authData.session.access_token, user: userData };
+    return data;
   },
 
   register: async (userData: any) => {
-    const newRequest = {
-      id: userData.email, // Use email as unique ID for demo
-      email: userData.email,
-      name: userData.name,
-      role: userData.role || 'RESIDENT',
-      flatId: userData.flatId,
-      occupancyType: userData.occupancyType,
-      status: 'PENDING',
-      timestamp: new Date().toISOString()
-    };
-
-    try {
-      // Attempt Supabase
-      const { error } = await supabase.from('profiles').upsert(newRequest, { onConflict: 'email' });
-      
-      if (error) {
-        console.warn("Supabase registration failed, using local fallback:", error.message);
-        // Save locally if DB fails
-        const current = getLocalPending();
-        const filtered = current.filter((u: any) => u.email !== userData.email);
-        setLocalPending([...filtered, newRequest]);
-      }
-    } catch (e) {
-      console.warn("Network error during registration, using local fallback");
-      const current = getLocalPending();
-      const filtered = current.filter((u: any) => u.email !== userData.email);
-      setLocalPending([...filtered, newRequest]);
-    }
-
-    await addAuditLog('Register Request', 'User', `Registration pending for: ${userData.email}`);
-    return { success: true };
-  },
-
-  updatePassword: async (userId: string, data: any) => {
-    // In a real app, this would use Supabase Auth updatePassword
-    // For demo, we just return success
-    await addAuditLog('Password Update', 'User', `Credentials updated for user: ${userId}`);
-    return { success: true };
-  },
-
-  getPendingRegistrations: async () => {
-    let dbData: any[] = [];
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('status', 'PENDING');
-      if (!error && data) dbData = data;
-    } catch (e) {}
-
-    // Merge with Local Fallback
-    const localData = getLocalPending().filter((u: any) => u.status === 'PENDING');
-    
-    // De-duplicate by email
-    const combined = [...dbData];
-    localData.forEach((lu: any) => {
-      if (!combined.some(du => du.email === lu.email)) {
-        combined.push(lu);
-      }
+    const response = await fetch('/api/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(userData)
     });
-
-    return combined.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-  },
-
-  approveRegistration: async (userId: string) => {
-    // Approve in Supabase
-    try {
-      await supabase.from('profiles').update({ status: 'APPROVED' }).or(`id.eq.${userId},email.eq.${userId}`);
-    } catch (e) {}
-
-    // Approve in Local
-    const local = getLocalPending();
-    const updated = local.map((u: any) => (u.id === userId || u.email === userId) ? { ...u, status: 'APPROVED' } : u);
-    setLocalPending(updated);
-
-    return { success: true };
-  },
-
-  rejectRegistration: async (userId: string) => {
-    // Reject in Supabase
-    try {
-      await supabase.from('profiles').update({ status: 'REJECTED' }).or(`id.eq.${userId},email.eq.${userId}`);
-    } catch (e) {}
-
-    // Reject in Local
-    const local = getLocalPending();
-    const updated = local.map((u: any) => (u.id === userId || u.email === userId) ? { ...u, status: 'REJECTED' } : u);
-    setLocalPending(updated);
-
-    return { success: true };
+    return handleResponse(response);
   },
 
   getBuildings: async () => {
-    return CONSTANTS.BUILDINGS;
-  },
-
-  getOccupancyData: async () => {
-    return [{
-      flatId: 'A-1-101',
-      name: 'John Doe',
-      occupancyType: 'Owner',
-      status: 'APPROVED'
-    }];
+    try {
+      const response = await fetch('/api/society/buildings', {
+        headers: getAuthHeader()
+      });
+      return await handleResponse(response);
+    } catch (e) {
+      return CONSTANTS.BUILDINGS;
+    }
   },
 
   getNotices: async (): Promise<Notice[]> => {
     try {
-      const { data, error } = await supabase.from('notices').select('*').order('date', { ascending: false });
-      return error || !data || data.length === 0 ? CONSTANTS.NOTICES : data;
+      const response = await fetch('/api/society/notices', {
+        headers: getAuthHeader()
+      });
+      return await handleResponse(response);
     } catch (e) {
-      return CONSTANTS.NOTICES;
+      return [
+        { id: '1', title: 'Welcome to Saurashtra Residency', content: 'Our digital portal is now live!', category: 'General', date: new Date().toISOString() }
+      ];
     }
   },
 
   postNotice: async (noticeData: any) => {
-    try {
-      await supabase.from('notices').insert({
-        title: noticeData.title,
-        content: noticeData.content,
-        category: noticeData.category,
-        date: new Date().toISOString()
-      });
-    } catch (e) {}
-    return { success: true };
+    const response = await fetch('/api/society/notices', {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        ...getAuthHeader()
+      },
+      body: JSON.stringify(noticeData)
+    });
+    return handleResponse(response);
   },
 
   getAuditLogs: async (): Promise<AuditLogEntry[]> => {
     try {
-      const { data, error } = await supabase.from('audit_logs').select('*').order('timestamp', { ascending: false });
-      return error ? [] : data;
+      const response = await fetch('/api/v1/audit', {
+        headers: getAuthHeader()
+      });
+      return await handleResponse(response);
+    } catch (e) {
+      return [
+        { id: '1', userName: 'System', action: 'STARTUP', details: 'Society digital portal initialized', timestamp: new Date().toISOString(), userId: 'system', entity: 'SYSTEM' }
+      ];
+    }
+  },
+
+  getMaintenanceRecords: async (flatId?: string, month?: string, year?: number): Promise<MaintenanceRecord[]> => {
+    try {
+      const params = new URLSearchParams();
+      if (flatId) params.append('flatId', flatId);
+      if (month) params.append('month', month);
+      if (year) params.append('year', year.toString());
+
+      const response = await fetch(`/api/society/maintenance?${params.toString()}`, {
+        headers: getAuthHeader()
+      });
+      return await handleResponse(response);
     } catch (e) {
       return [];
     }
   },
 
-  getExpenses: async (filters: any) => {
-    return [];
-  },
-
-  addExpense: async (expenseData: any) => {
-    return { success: true };
-  },
-
-  getMaintenanceRecords: async (flatId: string): Promise<MaintenanceRecord[]> => {
-    // Demo Mock: Return some historical records for the unit
-    return [
-      { id: '1', flatId, month: 'May', year: 2024, amount: 700, status: PaymentStatus.PENDING, occupancyType: OccupancyType.OWNER },
-      { id: '2', flatId, month: 'April', year: 2024, amount: 700, status: PaymentStatus.PAID, occupancyType: OccupancyType.OWNER, paidDate: '2024-04-05' },
-      { id: '3', flatId, month: 'March', year: 2024, amount: 700, status: PaymentStatus.PAID, occupancyType: OccupancyType.OWNER, paidDate: '2024-03-08' },
-    ];
-  },
-
   getAllMaintenanceRecords: async (month?: string, year?: number): Promise<MaintenanceRecord[]> => {
-    return [];
+    try {
+      const params = new URLSearchParams();
+      if (month) params.append('month', month);
+      if (year) params.append('year', year.toString());
+
+      const response = await fetch(`/api/society/maintenance?${params.toString()}`, {
+        headers: getAuthHeader()
+      });
+      return await handleResponse(response);
+    } catch (e) {
+      return [];
+    }
   },
 
   updateMaintenanceStatus: async (recordId: string, status: PaymentStatus, paidDate?: string) => {
-    return { success: true };
+    const response = await fetch(`/api/society/maintenance/${recordId}`, {
+      method: 'PATCH',
+      headers: { 
+        'Content-Type': 'application/json',
+        ...getAuthHeader()
+      },
+      body: JSON.stringify({ status, paidDate })
+    });
+    return handleResponse(response);
   },
 
   generateMonthlyMaintenance: async (month: string, year: number, amount: number) => {
-    return { success: true };
-  },
-
-  calculateMaintenanceWithPenalty: (amt: number) => {
-    return { total: amt, penalty: 0, isOverdue: false };
-  },
-
-  generateVisitorPass: async (d: any) => {
-    return { passId: `SR-${Date.now()}`, ...d };
-  },
-
-  broadcastNotification: async (type: string, target: string, message: string) => {
-    return { success: true };
-  },
-
-  exportToCSV: (data: any[], filename: string) => {
-    console.log("CSV Export triggered");
-  },
-
-  generateReceipt: (record: any) => {
-    alert(`Receipt generated for unit ${record.flatId}`);
-  },
-
-  lockMaintenanceMonth: async (m: string, y: number) => {
-    return { success: true };
+    const response = await fetch('/api/society/maintenance/generate', {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        ...getAuthHeader()
+      },
+      body: JSON.stringify({ month, year, amount })
+    });
+    return handleResponse(response);
   },
 
   getMeetings: async (): Promise<Meeting[]> => {
-    return [];
+    try {
+      const response = await fetch('/api/v1/meetings', {
+        headers: getAuthHeader()
+      });
+      return await handleResponse(response);
+    } catch (e) {
+      return [
+        { id: '1', title: 'Annual General Meeting', description: 'Discussion on society redevelopment and maintenance', date: new Date().toISOString(), location: 'Clubhouse', rsvps: [], time: '10:00 AM', category: 'General', createdBy: 'Admin' }
+      ];
+    }
   },
 
   scheduleMeeting: async (data: Omit<Meeting, 'id' | 'rsvps'>) => {
-    return { ...data, id: 'mock-id', rsvps: [] };
+    const response = await fetch('/api/v1/meetings', {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        ...getAuthHeader()
+      },
+      body: JSON.stringify(data)
+    });
+    return handleResponse(response);
   },
 
-  rsvpMeeting: async (meetingId: string, userId: string, status: boolean) => {
-    return { id: meetingId, rsvps: [] };
+  rsvpMeeting: async (meetingId: string, status: string) => {
+    const response = await fetch(`/api/v1/meetings/${meetingId}/rsvp`, {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        ...getAuthHeader()
+      },
+      body: JSON.stringify({ status })
+    });
+    return handleResponse(response);
+  },
+
+  getAmenities: async () => {
+    try {
+      const response = await fetch('/api/v1/amenities', {
+        headers: getAuthHeader()
+      });
+      return await handleResponse(response);
+    } catch (e) {
+      return CONSTANTS.SOCIETY_INFO.amenities;
+    }
   },
 
   getAmenityBookings: async (): Promise<AmenityBooking[]> => {
-    return [];
+    try {
+      const response = await fetch('/api/v1/amenities/bookings', {
+        headers: getAuthHeader()
+      });
+      return await handleResponse(response);
+    } catch (e) {
+      return [];
+    }
   },
 
-  createAmenityBooking: async (data: Omit<AmenityBooking, 'id' | 'status'>): Promise<AmenityBooking> => {
-    return { ...data, id: 'mock-id', status: 'Pending' };
+  createAmenityBooking: async (data: any): Promise<AmenityBooking> => {
+    const response = await fetch('/api/v1/amenities/bookings', {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        ...getAuthHeader()
+      },
+      body: JSON.stringify(data)
+    });
+    return handleResponse(response);
   },
 
-  updateAmenityBookingStatus: async (id: string, status: 'Confirmed' | 'Pending' | 'Rejected'): Promise<AmenityBooking> => {
-    return { id, status } as any;
+  updateAmenityBookingStatus: async (id: string, status: string): Promise<AmenityBooking> => {
+    const response = await fetch(`/api/v1/amenities/bookings/${id}`, {
+      method: 'PATCH',
+      headers: { 
+        'Content-Type': 'application/json',
+        ...getAuthHeader()
+      },
+      body: JSON.stringify({ status })
+    });
+    return handleResponse(response);
   },
 
-  getLocalityInfo: async (q: string) => {
-    return { text: "Saurashtra Residency is a luxury community in Pasodara, Surat.", sources: [] };
+  getPendingRegistrations: async () => {
+    try {
+      const response = await fetch('/api/v1/admin/pending-registrations', {
+        headers: getAuthHeader()
+      });
+      return await handleResponse(response);
+    } catch (e) {
+      return [];
+    }
   },
 
-  getExpensePrediction: async (e: any) => "Stability expected.",
+  approveRegistration: async (userId: string) => {
+    const response = await fetch(`/api/v1/admin/approve-registration/${userId}`, {
+      method: 'POST',
+      headers: getAuthHeader()
+    });
+    return handleResponse(response);
+  },
 
-  isMonthLocked: (m: string, y: number) => false,
+  rejectRegistration: async (userId: string) => {
+    const response = await fetch(`/api/v1/admin/reject-registration/${userId}`, {
+      method: 'POST',
+      headers: getAuthHeader()
+    });
+    return handleResponse(response);
+  },
 
   createPaymentOrder: async (maintenanceId: string) => {
-    const token = localStorage.getItem('sr_token');
     const response = await fetch('/api/v1/payments/create-order', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
+        ...getAuthHeader()
       },
       body: JSON.stringify({ maintenanceId })
     });
-    if (!response.ok) throw new Error('Failed to create payment order');
-    return response.json();
+    return handleResponse(response);
   },
 
   getAdminSummary: async () => {
-    const token = localStorage.getItem('sr_token');
-    const response = await fetch('/api/v1/admin/summary', {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
-    if (!response.ok) throw new Error('Failed to fetch admin summary');
-    return response.json();
+    try {
+      const response = await fetch('/api/v1/admin/summary', {
+        headers: getAuthHeader()
+      });
+      return await handleResponse(response);
+    } catch (e) {
+      return {
+        summary: { totalCollected: 0, totalPending: 0, openComplaints: 0, activeVisitors: 0 },
+        recentComplaints: []
+      };
+    }
   },
 
   resolveComplaint: async (complaintId: string) => {
-    const token = localStorage.getItem('sr_token');
     const response = await fetch(`/api/v1/admin/complaints/${complaintId}/resolve`, {
       method: 'PATCH',
-      headers: { 'Authorization': `Bearer ${token}` }
+      headers: getAuthHeader()
     });
-    if (!response.ok) throw new Error('Failed to resolve complaint');
-    return response.json();
+    return handleResponse(response);
   },
 
   connectLiveAssistant: async (callbacks: any) => {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const apiKey = process.env.GEMINI_API_KEY || '';
+    const ai = new GoogleGenAI({ apiKey });
     return ai.live.connect({
       model: 'gemini-2.5-flash-native-audio-preview-12-2025',
       callbacks,
@@ -423,5 +362,140 @@ export const api = {
         systemInstruction: 'You are a helpful society assistant for Saurashtra Residency.',
       },
     });
+  },
+
+  exportToCSV: (data: any[], filename: string) => {
+    const csvContent = "data:text/csv;charset=utf-8," 
+      + data.map(e => Object.values(e).join(",")).join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `${filename}.csv`);
+    document.body.appendChild(link);
+    link.click();
+  },
+
+  generateReceipt: (record: any) => {
+    alert(`Receipt generated for unit ${record.flatId}`);
+  },
+
+  async isMonthLocked(month: string, year: number) {
+    const records = await this.getMaintenanceRecords(undefined, month, year);
+    return records.length > 0;
+  },
+
+  async lockMaintenanceMonth(month: string, year: number, amount: number) {
+    return this.generateMonthlyMaintenance(month, year, amount);
+  },
+
+  async getExpenses(filters: any = {}) {
+    try {
+      const params = new URLSearchParams();
+      if (filters.month) params.append('month', filters.month.toString());
+      if (filters.year) params.append('year', filters.year.toString());
+      if (filters.type) params.append('type', filters.type);
+      const response = await fetch(`/api/expenses?${params.toString()}`, {
+        headers: getAuthHeader()
+      });
+      return await handleResponse(response);
+    } catch (e) {
+      return [];
+    }
+  },
+
+  async addExpense(expenseData: any) {
+    const response = await fetch('/api/expenses', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthHeader()
+      },
+      body: JSON.stringify(expenseData)
+    });
+    return handleResponse(response);
+  },
+
+  async getExpensePrediction(data: any) {
+    try {
+      const apiKey = (import.meta as any).env.VITE_GEMINI_API_KEY || '';
+      const ai = new GoogleGenAI({ apiKey });
+      const response = await ai.models.generateContent({
+        model: "gemini-3-flash-preview",
+        contents: `Based on this society utility data: ${JSON.stringify(data)}, predict the next month's total expenditure and give one tip to save cost. Keep it under 20 words.`,
+      });
+      return response.text || "Stable consumption predicted.";
+    } catch (e) {
+      return "Unable to generate prediction at this time.";
+    }
+  },
+
+  async getOccupancyData() {
+    const buildings = await this.getBuildings();
+    return buildings.map((b: any) => ({
+      flatId: `${b.name}-101`, // Mocking some data
+      name: 'Resident',
+      occupancyType: 'Owner',
+      status: 'Active'
+    }));
+  },
+
+  async calculateMaintenanceWithPenalty(amount: number | string) {
+    const base = typeof amount === 'string' ? parseInt(amount) : amount;
+    return { total: base + 100 };
+  },
+
+  async broadcastNotification(type: string, target: string, title: string) {
+    // In a real app, this would trigger external notification services
+    console.log(`Broadcasting ${type} to ${target}: ${title}`);
+    return { success: true };
+  },
+
+  async generateVisitorPass(visitorData: any) {
+    return { ...visitorData, id: Math.random().toString(36).substr(2, 9), timestamp: new Date().toISOString() };
+  },
+
+  async getLocalityInfo(address?: string) {
+    return {
+      text: `Saurashtra Residency in Pasodara, Surat, is a premium residential society known for its well-planned infrastructure and community-driven management. Located near Pasodara Lake, it offers a serene environment with excellent connectivity to Surat city via the canal road. The society is equipped with modern amenities including a clubhouse, gym, and landscaped gardens.`,
+      sources: [
+        { web: { uri: 'https://www.google.com/maps/search/Pasodara+Surat', title: 'Pasodara Neighborhood Map' } }
+      ]
+    };
+  }
+};
+
+export const audioUtils = {
+  playSuccess: () => {
+    const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3');
+    audio.play().catch(() => {});
+  },
+  playError: () => {
+    const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2014/2014-preview.mp3');
+    audio.play().catch(() => {});
+  },
+  speak: (text: string) => {
+    const utterance = new SpeechSynthesisUtterance(text);
+    window.speechSynthesis.speak(utterance);
+  },
+  encode: (data: Uint8Array) => {
+    return btoa(String.fromCharCode(...data));
+  },
+  decode: (base64: string) => {
+    const binaryString = atob(base64);
+    const bytes = new Uint8Array(binaryString.length);
+    for (let i = 0; i < binaryString.length; i++) {
+      bytes[i] = binaryString.charCodeAt(i);
+    }
+    return bytes.buffer;
+  },
+  decodeAudioData: async (data: ArrayBuffer, context: AudioContext, sampleRate: number, channels: number) => {
+    // This is a simplified version for raw PCM
+    const int16 = new Int16Array(data);
+    const float32 = new Float32Array(int16.length);
+    for (let i = 0; i < int16.length; i++) float32[i] = int16[i] / 32768;
+    
+    const buffer = context.createBuffer(channels, float32.length, sampleRate);
+    buffer.getChannelData(0).set(float32);
+    return buffer;
   }
 };

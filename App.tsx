@@ -47,16 +47,13 @@ const App: React.FC = () => {
           <ProtectedRoute>
             <Layout>
               <Routes>
-                {/* Everyone can see Dashboard (logic inside handles view) */}
                 <Route path="/" element={<Dashboard />} />
                 <Route path="/emergency" element={<Emergency />} />
                 <Route path="/profile" element={<Profile />} />
                 
-                {/* Admin Only */}
-                <Route path="/audit-logs" element={<ProtectedRoute allowedRoles={['ADMIN']}><AuditLogs /></ProtectedRoute>} />
-                <Route path="/approvals" element={<ProtectedRoute allowedRoles={['ADMIN']}><RegistrationApprovals /></ProtectedRoute>} />
-                
                 {/* Admin & Committee */}
+                <Route path="/audit-logs" element={<ProtectedRoute allowedRoles={['ADMIN', 'COMMITTEE']}><AuditLogs /></ProtectedRoute>} />
+                <Route path="/approvals" element={<ProtectedRoute allowedRoles={['ADMIN', 'COMMITTEE']}><RegistrationApprovals /></ProtectedRoute>} />
                 <Route path="/expenses" element={<ProtectedRoute allowedRoles={['ADMIN', 'COMMITTEE']}><Expenses /></ProtectedRoute>} />
                 
                 {/* General Protected Routes */}

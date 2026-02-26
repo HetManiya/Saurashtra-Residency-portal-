@@ -22,7 +22,8 @@ export const protect = (req: any, res: Response, next: NextFunction) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret_key') as any;
     req.user = decoded; // { id, role, permissions }
     next();
-  } catch (error) {
+  } catch (error: any) {
+    console.error('🔒 Auth Middleware Error:', error.message);
     res.status(401).json({ message: 'Token is invalid' });
   }
 };
@@ -44,6 +45,7 @@ export const authorize = (allowedRoles: string[] = [], requiredPermissions: stri
       return next();
     }
 
+    console.error(`🚫 Access Denied: User role ${userRole} lacks required roles [${allowedRoles}] or permissions [${requiredPermissions}]`);
     res.status(403).json({ 
       message: `Access denied. Requires one of roles: [${allowedRoles}] or permissions: [${requiredPermissions}]` 
     });

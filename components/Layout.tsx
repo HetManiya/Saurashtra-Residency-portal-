@@ -173,17 +173,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     const timer = setInterval(() => setTime(new Date()), 1000);
     const storedUser = localStorage.getItem('sr_user');
     if (storedUser) {
-      const parsedUser = JSON.parse(storedUser);
-      setUser(parsedUser);
-      
-      const adminOnlyPaths = ['/audit-logs', '/approvals'];
-      const isAdminRole = parsedUser.role === 'ADMIN';
-      if (!isAdminRole && adminOnlyPaths.includes(location.pathname)) {
-        navigate('/', { replace: true });
-      }
+      setUser(JSON.parse(storedUser));
     }
     return () => clearInterval(timer);
-  }, [location.pathname, navigate]);
+  }, []);
 
   useEffect(() => {
     if (isDarkMode) {
@@ -201,7 +194,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     navigate('/login', { replace: true });
   }, [navigate]);
 
-  const isAdmin = user?.role === 'ADMIN';
+  const isAdmin = user?.role === 'ADMIN' || user?.role === 'COMMITTEE';
 
   return (
     <div className="flex h-screen bg-[#f8fafc] dark:bg-[#020617] overflow-hidden font-sans">

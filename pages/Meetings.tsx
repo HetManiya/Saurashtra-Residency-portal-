@@ -60,10 +60,11 @@ const Meetings: React.FC = () => {
     }
   };
 
-  const handleRSVP = async (meetingId: string, currentStatus: boolean) => {
+  const handleRSVP = async (meetingId: string, currentStatus: string) => {
     if (!user) return;
     try {
-      const updatedMeeting = await api.rsvpMeeting(meetingId, user.id, !currentStatus);
+      const nextStatus = currentStatus === 'YES' ? 'NO' : 'YES';
+      const updatedMeeting = await api.rsvpMeeting(meetingId, nextStatus);
       setMeetings(prev => prev.map(m => m.id === meetingId ? updatedMeeting : m));
     } catch (e) {
       console.error(e);
@@ -115,8 +116,10 @@ const Meetings: React.FC = () => {
               <p className="text-slate-500 text-sm">No society assemblies are currently scheduled.</p>
             </div>
           ) : (
-            upcomingMeetings.map((meeting) => {
-              const isAttending = meeting.rsvps?.includes(userId);
+            upcomingMeetings.map((meeting: Meeting) => {
+              const userRsvp = meeting.rsvps?.find((r: any) => r.userId === userId);
+              const isAttending = userRsvp?.status === 'YES';
+              
               return (
                 <div key={meeting.id} className="bg-white dark:bg-slate-900 p-8 rounded-[3rem] border border-slate-100 dark:border-slate-800 premium-shadow group hover:border-brand-600/30 transition-all">
                   <div className="flex flex-col md:flex-row gap-8">
@@ -137,7 +140,7 @@ const Meetings: React.FC = () => {
                       
                       <div className="flex flex-wrap items-center gap-6 text-slate-500 text-xs font-bold">
                         <div className="flex items-center gap-2">
-                          <Clock size={16} className="text-brand-500" /> {meeting.time}
+                          <Clock size={16} className="text-brand-500" /> {new Date(meeting.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </div>
                         <div className="flex items-center gap-2">
                           <MapPin size={16} className="text-brand-500" /> {meeting.location}
@@ -152,12 +155,12 @@ const Meetings: React.FC = () => {
                        
                        {isAdmin ? (
                          <div className="text-center md:text-left">
-                           <p className="text-3xl font-black text-brand-600 mb-1">{meeting.rsvps?.length || 0}</p>
+                           <p className="text-3xl font-black text-brand-600 mb-1">{meeting.rsvps?.filter((r: any) => r.status === 'YES').length || 0}</p>
                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Confimations</p>
                          </div>
                        ) : (
                          <button 
-                          onClick={() => handleRSVP(meeting.id, isAttending)}
+                          onClick={() => handleRSVP(meeting.id, userRsvp?.status || 'NO')}
                           className={`w-full py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 transition-all ${
                             isAttending 
                               ? 'bg-emerald-50 text-emerald-600 border border-emerald-100 dark:bg-emerald-900/20' 
@@ -182,13 +185,13 @@ const Meetings: React.FC = () => {
             </h4>
             <div className="space-y-4">
               {pastMeetings.length > 0 ? (
-                pastMeetings.slice(0, 5).map(m => (
+                pastMeetings.slice(0, 5).map((m: Meeting) => (
                   <div key={m.id} className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl flex justify-between items-center">
                     <div>
                       <p className="text-xs font-bold text-slate-700 dark:text-slate-300 line-clamp-1">{m.title}</p>
                       <p className="text-[10px] text-slate-400 font-bold">{new Date(m.date).toLocaleDateString()}</p>
                     </div>
-                    <span className="text-[10px] font-black bg-white dark:bg-slate-900 px-2 py-1 rounded-lg text-slate-400 shadow-sm">{m.rsvps?.length || 0} RSVPs</span>
+                    <span className="text-[10px] font-black bg-white dark:bg-slate-900 px-2 py-1 rounded-lg text-slate-400 shadow-sm">{m.rsvps?.filter((r: any) => r.status === 'YES').length || 0} RSVPs</span>
                   </div>
                 ))
               ) : (

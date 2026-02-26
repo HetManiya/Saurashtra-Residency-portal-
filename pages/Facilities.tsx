@@ -13,7 +13,8 @@ import { api } from '../services/api';
 const Facilities: React.FC = () => {
   const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState<'explore' | 'my-bookings' | 'admin'>('explore');
-  const [allBookings, setAllBookings] = useState<AmenityBooking[]>([]);
+  const [allBookings, setAllBookings] = useState<any[]>([]);
+  const [amenities, setAmenities] = useState<any[]>([]);
   const [selectedAmenity, setSelectedAmenity] = useState<any | null>(null);
   const [showBookingForm, setShowBookingForm] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -21,24 +22,26 @@ const Facilities: React.FC = () => {
 
   const [formData, setFormData] = useState({
     purpose: '',
-    attendees: 10,
     date: '',
     startTime: '10:00 AM',
     endTime: '02:00 PM',
-    isPublic: false
   });
 
   useEffect(() => {
     const storedUser = localStorage.getItem('sr_user');
     if (storedUser) setUser(JSON.parse(storedUser));
-    loadBookings();
+    loadData();
   }, []);
 
-  const loadBookings = async () => {
+  const loadData = async () => {
     setLoading(true);
     try {
-      const data = await api.getAmenityBookings();
-      setAllBookings(data);
+      const [bookingsData, amenitiesData] = await Promise.all([
+        api.getAmenityBookings(),
+        api.getAmenities()
+      ]);
+      setAllBookings(bookingsData);
+      setAmenities(amenitiesData);
     } catch (e) {
       console.error(e);
     } finally {
@@ -50,11 +53,11 @@ const Facilities: React.FC = () => {
 
   const myBookings = useMemo(() => {
     if (!user) return [];
-    return allBookings.filter(b => b.unitNumber === user.flatId);
+    return allBookings.filter(b => b.userId === user.id || b.flatId === user.flatId);
   }, [allBookings, user]);
 
   const pendingBookings = useMemo(() => {
-    return allBookings.filter(b => b.status === 'Pending');
+    return allBookings.filter(b => b.status === 'PENDING');
   }, [allBookings]);
 
   const handleBookingSubmit = async (e: React.FormEvent) => {
@@ -63,53 +66,49 @@ const Facilities: React.FC = () => {
 
     try {
       await api.createAmenityBooking({
-        facilityId: selectedAmenity.id,
-        userName: user.name,
-        unitNumber: user.flatId,
+        amenityId: selectedAmenity._id,
         purpose: formData.purpose,
-        attendees: formData.attendees,
         date: formData.date,
         startTime: formData.startTime,
         endTime: formData.endTime,
-        isPublic: formData.isPublic
       });
-      await loadBookings();
+      await loadData();
       setShowBookingForm(false);
-      setFormData({ purpose: '', attendees: 10, date: '', startTime: '10:00 AM', endTime: '02:00 PM', isPublic: false });
+      setFormData({ purpose: '', date: '', startTime: '10:00 AM', endTime: '02:00 PM' });
       alert("Booking request submitted successfully! Awaiting committee approval.");
     } catch (e) {
       alert("Failed to submit booking.");
     }
   };
 
-  const handleStatusUpdate = async (id: string, status: 'Confirmed' | 'Rejected') => {
+  const handleStatusUpdate = async (id: string, status: 'APPROVED' | 'REJECTED') => {
     try {
       await api.updateAmenityBookingStatus(id, status);
-      await loadBookings();
+      await loadData();
     } catch (e) {
       alert("Failed to update status.");
     }
   };
 
-  const getFacilityIcon = (id: number) => {
-    switch (id) {
-      case 1: return <PartyPopper size={24} />;
-      case 2: return <TreePine size={24} />;
-      case 3: return <Clapperboard size={24} />;
-      default: return <Sofa size={24} />;
-    }
+  const getFacilityIcon = (name: string) => {
+    const n = name.toLowerCase();
+    if (n.includes('club')) return <PartyPopper size={24} />;
+    if (n.includes('pool')) return <TreePine size={24} />;
+    if (n.includes('theatre') || n.includes('cinema')) return <Clapperboard size={24} />;
+    if (n.includes('gym')) return <Building size={24} />;
+    return <Sofa size={24} />;
   };
 
   const getStatusStyle = (status: string) => {
     switch (status) {
-      case 'Confirmed': return 'bg-emerald-50 text-emerald-600 border-emerald-100 dark:bg-emerald-900/20 dark:border-emerald-800';
-      case 'Pending': return 'bg-amber-50 text-amber-600 border-amber-100 dark:bg-amber-900/20 dark:border-amber-800';
-      case 'Rejected': return 'bg-rose-50 text-rose-600 border-rose-100 dark:bg-rose-900/20 dark:border-rose-800';
+      case 'APPROVED': return 'bg-emerald-50 text-emerald-600 border-emerald-100 dark:bg-emerald-900/20 dark:border-emerald-800';
+      case 'PENDING': return 'bg-amber-50 text-amber-600 border-amber-100 dark:bg-amber-900/20 dark:border-amber-800';
+      case 'REJECTED': return 'bg-rose-50 text-rose-600 border-rose-100 dark:bg-rose-900/20 dark:border-rose-800';
       default: return 'bg-slate-50 text-slate-500 border-slate-100';
     }
   };
 
-  if (loading && allBookings.length === 0) {
+  if (loading && amenities.length === 0) {
     return (
       <div className="h-[60vh] flex flex-col items-center justify-center">
         <Loader2 className="animate-spin text-brand-600 mb-4" size={40} />
@@ -151,32 +150,32 @@ const Facilities: React.FC = () => {
 
       {activeTab === 'explore' && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {SOCIETY_INFO.amenities.map((item: any) => (
-            <div key={item.id} className="group bg-white dark:bg-slate-900 rounded-[3rem] border border-slate-100 dark:border-slate-800 overflow-hidden shadow-sm bento-card flex flex-col">
+          {amenities.map((item: any) => (
+            <div key={item._id} className="group bg-white dark:bg-slate-900 rounded-[3rem] border border-slate-100 dark:border-slate-800 overflow-hidden shadow-sm bento-card flex flex-col">
               <div className="h-64 relative overflow-hidden">
-                <img src={item.image} alt={item.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                <img src={item.image || `https://picsum.photos/seed/${item.name}/800/600`} alt={item.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" referrerPolicy="no-referrer" />
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-slate-900/20 to-transparent" />
                 <div className="absolute bottom-6 left-6 flex items-center gap-3">
                   <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center text-white border border-white/20">
-                    {getFacilityIcon(item.id)}
+                    {getFacilityIcon(item.name)}
                   </div>
                   <div>
                     <h3 className="text-xl font-black text-white mb-0">{item.name}</h3>
-                    <span className="text-[10px] font-black uppercase text-brand-400 tracking-widest">{item.location}</span>
+                    <span className="text-[10px] font-black uppercase text-brand-400 tracking-widest">{item.status}</span>
                   </div>
                 </div>
               </div>
               
               <div className="p-10 flex-1 flex flex-col">
-                <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed mb-8">{item.desc}</p>
+                <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed mb-8">{item.description}</p>
                 <div className="grid grid-cols-2 gap-4 mb-10">
                   <div className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800/50">
                     <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-1">Capacity</p>
                     <p className="text-sm font-black dark:text-white mb-0">{item.capacity} guests</p>
                   </div>
                   <div className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800/50">
-                    <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-1">Status</p>
-                    <p className="text-sm font-black text-emerald-600 mb-0">Open</p>
+                    <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-1">Rate</p>
+                    <p className="text-sm font-black text-emerald-600 mb-0">₹{item.hourlyRate}/hr</p>
                   </div>
                 </div>
                 <button 
@@ -201,15 +200,15 @@ const Facilities: React.FC = () => {
             </div>
           ) : (
             myBookings.map((booking) => (
-              <div key={booking.id} className="bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 flex flex-col md:flex-row items-center justify-between gap-6">
+              <div key={booking._id} className="bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 flex flex-col md:flex-row items-center justify-between gap-6">
                 <div className="flex items-center gap-6">
                   <div className="w-16 h-16 bg-brand-50 dark:bg-brand-900/20 rounded-2xl flex items-center justify-center text-brand-600 shadow-inner">
-                    {getFacilityIcon(booking.facilityId)}
+                    {getFacilityIcon(booking.amenityId?.name || '')}
                   </div>
                   <div>
                     <h4 className="text-xl font-black text-slate-900 dark:text-white">{booking.purpose}</h4>
                     <p className="text-xs font-bold text-slate-400 flex items-center gap-2 mt-1">
-                      <Calendar size={12} /> {booking.date} • <Clock size={12} /> {booking.startTime} - {booking.endTime}
+                      <Calendar size={12} /> {new Date(booking.date).toLocaleDateString()} • <Clock size={12} /> {booking.startTime} - {booking.endTime}
                     </p>
                   </div>
                 </div>
@@ -217,9 +216,6 @@ const Facilities: React.FC = () => {
                   <span className={`px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border-2 ${getStatusStyle(booking.status)}`}>
                     {booking.status}
                   </span>
-                  <button className="p-3 text-slate-300 hover:text-rose-600 transition-all">
-                    <Trash2 size={20} />
-                  </button>
                 </div>
               </div>
             ))
@@ -237,25 +233,22 @@ const Facilities: React.FC = () => {
             </div>
           ) : (
             pendingBookings.map((booking) => (
-              <div key={booking.id} className="bg-white dark:bg-slate-900 p-10 rounded-[3.5rem] border border-slate-100 dark:border-slate-800 flex flex-col md:flex-row items-center justify-between gap-10 premium-shadow">
+              <div key={booking._id} className="bg-white dark:bg-slate-900 p-10 rounded-[3.5rem] border border-slate-100 dark:border-slate-800 flex flex-col md:flex-row items-center justify-between gap-10 premium-shadow">
                 <div className="flex items-center gap-8">
                   <div className="w-20 h-20 bg-amber-50 dark:bg-amber-900/10 rounded-[2rem] flex items-center justify-center text-amber-600">
-                    {getFacilityIcon(booking.facilityId)}
+                    {getFacilityIcon(booking.amenityId?.name || '')}
                   </div>
                   <div>
                     <div className="flex items-center gap-3 mb-2">
                        <h4 className="text-2xl font-black text-slate-900 dark:text-white">{booking.purpose}</h4>
-                       <span className="px-3 py-1 bg-slate-100 dark:bg-slate-800 rounded-lg text-[9px] font-black uppercase text-slate-400">Ref: {booking.id}</span>
+                       <span className="px-3 py-1 bg-slate-100 dark:bg-slate-800 rounded-lg text-[9px] font-black uppercase text-slate-400">Ref: {booking._id.slice(-6)}</span>
                     </div>
                     <div className="grid grid-cols-2 gap-x-8 gap-y-1">
                        <p className="text-xs font-bold text-slate-500 flex items-center gap-2">
-                          <User size={14} className="text-brand-600" /> {booking.userName} (Unit {booking.unitNumber})
+                          <User size={14} className="text-brand-600" /> {booking.userId?.name || 'User'} (Unit {booking.flatId})
                        </p>
                        <p className="text-xs font-bold text-slate-500 flex items-center gap-2">
-                          <Calendar size={14} className="text-brand-600" /> {booking.date}
-                       </p>
-                       <p className="text-xs font-bold text-slate-500 flex items-center gap-2">
-                          <Users size={14} className="text-brand-600" /> {booking.attendees} Guests
+                          <Calendar size={14} className="text-brand-600" /> {new Date(booking.date).toLocaleDateString()}
                        </p>
                        <p className="text-xs font-bold text-slate-500 flex items-center gap-2">
                           <Clock size={14} className="text-brand-600" /> {booking.startTime} - {booking.endTime}
@@ -265,13 +258,13 @@ const Facilities: React.FC = () => {
                 </div>
                 <div className="flex gap-4 w-full md:w-auto">
                   <button 
-                    onClick={() => handleStatusUpdate(booking.id, 'Rejected')}
+                    onClick={() => handleStatusUpdate(booking._id, 'REJECTED')}
                     className="flex-1 md:flex-none px-8 py-4 bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-rose-50 hover:text-rose-600 transition-all border border-slate-100 dark:border-slate-700"
                   >
                     Reject
                   </button>
                   <button 
-                    onClick={() => handleStatusUpdate(booking.id, 'Confirmed')}
+                    onClick={() => handleStatusUpdate(booking._id, 'APPROVED')}
                     className="flex-1 md:flex-none px-8 py-4 bg-emerald-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-emerald-500/20 hover:bg-emerald-700 transition-all active:scale-95"
                   >
                     Approve
@@ -291,12 +284,12 @@ const Facilities: React.FC = () => {
             <div className="p-10 border-b border-slate-100 dark:border-slate-800 flex flex-col md:flex-row justify-between items-center bg-white dark:bg-slate-900 sticky top-0 z-10 gap-6">
               <div className="flex items-center gap-6">
                 <div className="w-16 h-16 bg-brand-600 rounded-3xl flex items-center justify-center text-white shadow-xl">
-                  {getFacilityIcon(selectedAmenity.id)}
+                  {getFacilityIcon(selectedAmenity.name)}
                 </div>
                 <div>
                   <h3 className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter mb-1">{selectedAmenity.name}</h3>
                   <div className="flex items-center gap-4">
-                    <span className="text-[10px] font-black uppercase text-brand-600 tracking-widest flex items-center gap-1"><MapPin size={12} /> {selectedAmenity.location}</span>
+                    <span className="text-[10px] font-black uppercase text-brand-600 tracking-widest flex items-center gap-1"><MapPin size={12} /> {selectedAmenity.status}</span>
                   </div>
                 </div>
               </div>
@@ -324,17 +317,12 @@ const Facilities: React.FC = () => {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {allBookings.filter(b => b.facilityId === selectedAmenity.id && b.status === 'Confirmed').length > 0 ? (
-                    allBookings.filter(b => b.facilityId === selectedAmenity.id && b.status === 'Confirmed').map((booking: AmenityBooking) => (
-                      <div key={booking.id} className="bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 shadow-sm relative overflow-hidden">
-                        {booking.isPublic && (
-                          <div className="absolute top-0 right-0 px-4 py-1.5 bg-indigo-600 text-white text-[8px] font-black uppercase tracking-widest rounded-bl-2xl">
-                             Public Event
-                          </div>
-                        )}
+                  {allBookings.filter(b => b.amenityId?._id === selectedAmenity._id && b.status === 'APPROVED').length > 0 ? (
+                    allBookings.filter(b => b.amenityId?._id === selectedAmenity._id && b.status === 'APPROVED').map((booking: any) => (
+                      <div key={booking._id} className="bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 shadow-sm relative overflow-hidden">
                         <h5 className="text-lg font-black text-slate-900 dark:text-white mb-4">{booking.purpose}</h5>
                         <div className="grid grid-cols-2 gap-4 text-xs font-bold text-slate-500">
-                          <div className="flex items-center gap-2"><Calendar size={14} className="text-brand-600" /> {booking.date}</div>
+                          <div className="flex items-center gap-2"><Calendar size={14} className="text-brand-600" /> {new Date(booking.date).toLocaleDateString()}</div>
                           <div className="flex items-center gap-2"><Clock size={14} className="text-brand-600" /> {booking.startTime}</div>
                         </div>
                       </div>
@@ -384,18 +372,7 @@ const Facilities: React.FC = () => {
                  </div>
                </div>
 
-               <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase text-slate-400 ml-3 tracking-widest">Attendees</label>
-                    <div className="relative">
-                      <Users className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                      <input 
-                        type="number" className="w-full pl-14 pr-6 py-4.5 bg-slate-50 dark:bg-slate-800 rounded-[1.8rem] outline-none font-bold text-sm dark:text-white border-2 border-transparent focus:border-brand-600/20" 
-                        value={formData.attendees} onChange={e => setFormData({...formData, attendees: parseInt(e.target.value)})}
-                        required 
-                      />
-                    </div>
-                  </div>
+               <div className="grid grid-cols-1 gap-4">
                   <div className="space-y-2">
                     <label className="text-[10px] font-black uppercase text-slate-400 ml-3 tracking-widest">Event Date</label>
                     <input 
@@ -423,23 +400,6 @@ const Facilities: React.FC = () => {
                       required 
                     />
                   </div>
-               </div>
-
-               <div className="flex items-center justify-between p-6 bg-slate-50 dark:bg-slate-800 rounded-[1.8rem] border border-slate-100 dark:border-slate-700">
-                  <div className="flex items-center gap-4">
-                     <div className="w-10 h-10 bg-brand-600 rounded-xl flex items-center justify-center text-white shadow-lg">
-                       <Sparkles size={20} />
-                     </div>
-                     <div>
-                       <p className="text-xs font-black dark:text-white uppercase tracking-wider">Public Event</p>
-                       <p className="text-[9px] font-bold text-slate-400 uppercase">Allow other residents to join</p>
-                     </div>
-                  </div>
-                  <input 
-                    type="checkbox" 
-                    className="w-6 h-6 rounded-lg border-2 border-slate-200 text-brand-600 focus:ring-brand-500"
-                    checked={formData.isPublic} onChange={e => setFormData({...formData, isPublic: e.target.checked})}
-                  />
                </div>
 
                <button className="w-full py-5 bg-brand-600 text-white rounded-[2rem] font-black uppercase tracking-widest text-xs flex items-center justify-center gap-3 shadow-2xl shadow-brand-500/30 transition-all active:scale-95">

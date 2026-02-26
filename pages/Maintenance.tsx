@@ -124,8 +124,8 @@ const Maintenance: React.FC = () => {
 
   const isAdmin = user?.role === 'ADMIN' || user?.role === 'COMMITTEE';
 
-  const loadAllData = useCallback(async (u: any) => {
-    setLoading(true);
+  const loadAllData = useCallback(async (u: any, retries = 0) => {
+    if (retries === 0) setLoading(true);
     try {
       if (u.role === 'ADMIN' || u.role === 'COMMITTEE') {
         const current = await api.getAllMaintenanceRecords(currentMonth, currentYear);
@@ -137,10 +137,15 @@ const Maintenance: React.FC = () => {
         setRecords(myData.filter(r => r.month === currentMonth && r.year === currentYear));
         setHistoryRecords(myData.filter(r => !(r.month === currentMonth && r.year === currentYear)));
       }
-      setIsLocked(api.isMonthLocked(currentMonth, currentYear));
-    } catch (e) {
-      console.error(e);
-    } finally {
+      const isLockedVal = await api.isMonthLocked(currentMonth, currentYear);
+      setIsLocked(isLockedVal);
+      setLoading(false);
+    } catch (e: any) {
+      if (e.message === 'SERVER_STARTING' && retries < 5) {
+        setTimeout(() => loadAllData(u, retries + 1), 2000);
+        return;
+      }
+      console.error('Maintenance Load Error:', e);
       setLoading(false);
     }
   }, [currentMonth, currentYear]);
@@ -243,7 +248,7 @@ const Maintenance: React.FC = () => {
 
   const handleLockMonth = async () => {
     if (confirm(`Finalize ${currentMonth} ${currentYear}? This locks all records for auditing.`)) {
-      await api.lockMaintenanceMonth(currentMonth, currentYear);
+      await api.lockMaintenanceMonth(currentMonth, currentYear, SOCIETY_INFO.maintenanceAmount);
       setIsLocked(true);
     }
   };
