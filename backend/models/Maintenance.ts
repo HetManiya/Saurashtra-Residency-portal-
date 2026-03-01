@@ -10,7 +10,16 @@ const maintenanceSchema = new mongoose.Schema({
   occupancyType: { type: String, enum: ['Owner', 'Tenant'], required: true },
   paidDate: { type: Date },
   lastReminderSent: { type: Date }
-}, { timestamps: true });
+}, { 
+  timestamps: true,
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true }
+});
+
+// Virtual for id
+maintenanceSchema.virtual('id').get(function() {
+  return this._id.toHexString();
+});
 
 // Ensure unique record per flat per month
 maintenanceSchema.index({ flatId: 1, month: 1, year: 1 }, { unique: true });

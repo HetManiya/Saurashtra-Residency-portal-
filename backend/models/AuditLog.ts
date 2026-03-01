@@ -7,6 +7,14 @@ const auditLogSchema = new mongoose.Schema({
   entity: { type: String, required: true }, // e.g., 'User', 'Meeting', 'Notice'
   details: { type: String },
   timestamp: { type: Date, default: Date.now }
+}, { 
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true }
+});
+
+// Virtual for id
+auditLogSchema.virtual('id').get(function() {
+  return this._id.toHexString();
 });
 
 export default mongoose.model('AuditLog', auditLogSchema);

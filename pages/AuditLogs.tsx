@@ -27,7 +27,6 @@ const AuditLogs: React.FC = () => {
         setTimeout(() => fetchLogs(retries + 1), 2000);
         return;
       }
-      console.error('Audit Logs Load Error:', e);
       setLoading(false);
     }
   };

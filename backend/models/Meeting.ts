@@ -11,6 +11,15 @@ const meetingSchema = new mongoose.Schema({
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     status: { type: String, enum: ['YES', 'NO', 'MAYBE'] }
   }]
-}, { timestamps: true });
+}, { 
+  timestamps: true,
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true }
+});
+
+// Virtual for id
+meetingSchema.virtual('id').get(function() {
+  return this._id.toHexString();
+});
 
 export default mongoose.model('Meeting', meetingSchema);

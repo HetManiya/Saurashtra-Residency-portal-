@@ -1,8 +1,10 @@
 import express from 'express';
 import Stripe from 'stripe';
+import { GoogleGenAI } from "@google/genai";
 import { protect } from '../middleware/authMiddleware';
 import Maintenance from '../models/Maintenance';
 import Transaction from '../models/Transaction';
+import User from '../models/User';
 
 const router = express.Router();
 
@@ -15,6 +17,13 @@ const getStripe = () => {
     stripe = new Stripe(key);
   }
   return stripe;
+};
+
+// AI Client
+const getAI = () => {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) throw new Error('GEMINI_API_KEY is missing');
+  return new GoogleGenAI({ apiKey });
 };
 
 /**
@@ -53,15 +62,145 @@ router.post('/create-order', protect, async (req: any, res) => {
       status: 'PENDING'
     });
 
+    const publishableKey = process.env.STRIPE_PUBLISHABLE_KEY;
+    if (!publishableKey) {
+      throw new Error('STRIPE_PUBLISHABLE_KEY is missing in server environment');
+    }
+
     res.json({
       clientSecret: paymentIntent.client_secret,
-      publishableKey: process.env.STRIPE_PUBLISHABLE_KEY,
+      publishableKey: publishableKey,
       amount: bill.amount,
       currency: 'INR'
     });
   } catch (error: any) {
     console.error('Payment order creation failed:', error);
     res.status(500).json({ message: error.message || 'Payment initialization failed' });
+  }
+});
+
+/**
+ * @route   POST /api/v1/payments/setup-recurring
+ * @desc    Setup a Stripe Subscription for recurring maintenance
+ */
+router.post('/setup-recurring', protect, async (req: any, res) => {
+  try {
+    const stripeClient = getStripe();
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    let customerId = user.stripeCustomerId;
+
+    // 1. Create or get Stripe Customer
+    if (!customerId) {
+      const customer = await stripeClient.customers.create({
+        email: user.email,
+        name: user.name,
+        metadata: { userId: user._id.toString() }
+      });
+      customerId = customer.id;
+      user.stripeCustomerId = customerId;
+      await user.save();
+    }
+
+    // 2. Create a Product and Price for Maintenance if not exists
+    // In a real app, you'd fetch existing ones. For demo, we'll use a dynamic price.
+    const product = await stripeClient.products.create({
+      name: 'Monthly Maintenance Fee',
+      description: `Recurring maintenance for ${user.flatId}`
+    });
+
+    const price = await stripeClient.prices.create({
+      unit_amount: 2500 * 100, // 2500 INR
+      currency: 'inr',
+      recurring: { interval: 'month' },
+      product: product.id,
+    });
+
+    // 3. Create Checkout Session for Subscription
+    const session = await stripeClient.checkout.sessions.create({
+      mode: 'subscription',
+      customer: customerId,
+      line_items: [{ price: price.id, quantity: 1 }],
+      success_url: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/dashboard?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/payments`,
+    });
+
+    res.json({ url: session.url });
+  } catch (error: any) {
+    console.error('Recurring setup failed:', error);
+    res.status(500).json({ message: error.message || 'Failed to setup recurring payments' });
+  }
+});
+
+/**
+ * @route   GET /api/v1/payments/reminders
+ * @desc    Check for overdue payments and generate reminders
+ */
+router.get('/reminders', protect, async (req: any, res) => {
+  try {
+    // Only admins or committee can trigger reminders
+    if (req.user.role !== 'ADMIN' && req.user.role !== 'COMMITTEE') {
+      return res.status(403).json({ message: 'Unauthorized' });
+    }
+
+    const overdueBills = await Maintenance.find({ status: 'Pending' });
+    const reminders = overdueBills.map(bill => ({
+      flatId: bill.flatId,
+      amount: bill.amount,
+      month: bill.month,
+      year: bill.year,
+      message: `Friendly reminder: Maintenance for ${bill.month} ${bill.year} is pending for flat ${bill.flatId}.`
+    }));
+
+    // In a real app, you'd trigger emails/SMS/FCM here
+    console.log(`📢 Generated ${reminders.length} reminders.`);
+
+    res.json({ count: reminders.length, reminders });
+  } catch (error: any) {
+    res.status(500).json({ message: 'Failed to generate reminders' });
+  }
+});
+
+/**
+ * @route   POST /api/v1/payments/dispute-help
+ * @desc    AI-powered help for payment disputes
+ */
+router.post('/dispute-help', protect, async (req: any, res) => {
+  try {
+    const { transactionId, reason } = req.body;
+    const transaction = await Transaction.findById(transactionId).populate('maintenanceId');
+    
+    if (!transaction) return res.status(404).json({ message: 'Transaction not found' });
+
+    const ai = getAI();
+    const model = ai.models.generateContent({
+      model: "gemini-3-flash-preview",
+      contents: `
+        You are a financial dispute resolution assistant for a residential society named "Saurashtra Residency".
+        A resident is disputing a payment.
+        
+        Transaction Details:
+        - ID: ${transaction.gatewayOrderId}
+        - Amount: ${transaction.amount} INR
+        - Status: ${transaction.status}
+        - Date: ${transaction.createdAt}
+        - Reason for Dispute: ${reason}
+        
+        Please provide:
+        1. A professional explanation of the transaction status.
+        2. Steps the resident should take.
+        3. A recommendation for the society committee.
+        
+        Keep the tone helpful and neutral.
+      `,
+    });
+
+    const response = await model;
+    res.json({ advice: response.text });
+  } catch (error: any) {
+    console.error('AI Dispute Help failed:', error);
+    res.status(500).json({ message: 'AI assistance currently unavailable' });
   }
 });
 
@@ -99,6 +238,21 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
         paidDate: new Date()
       });
       console.log(`✅ Payment successful for Bill: ${transaction.maintenanceId}`);
+    }
+  }
+
+  // Handle Subscription Success
+  if (event.type === 'checkout.session.completed') {
+    const session = event.data.object as Stripe.Checkout.Session;
+    if (session.mode === 'subscription') {
+      const userId = session.metadata?.userId;
+      if (userId) {
+        await User.findByIdAndUpdate(userId, {
+          subscriptionId: session.subscription as string,
+          isRecurringEnabled: true
+        });
+        console.log(`🔁 Recurring payments enabled for user: ${userId}`);
+      }
     }
   }
 

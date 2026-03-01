@@ -34,7 +34,6 @@ const Notices: React.FC = () => {
         setTimeout(() => loadNotices(retries + 1), 2000);
         return;
       }
-      console.error('Notices Load Error:', e);
       setLoading(false);
     }
   };
@@ -44,7 +43,10 @@ const Notices: React.FC = () => {
     setIsBroadcasting(true);
     
     try {
-      await api.postNotice(formData);
+      const newNotice = await api.postNotice(formData);
+      
+      // Expert Pattern: Update state immediately
+      setNotices(prev => [newNotice, ...prev]);
       
       if (formData.broadcastType !== 'NONE') {
         await new Promise(resolve => setTimeout(resolve, 1000));
@@ -53,7 +55,6 @@ const Notices: React.FC = () => {
       
       setShowAddModal(false);
       setFormData({ title: '', content: '', category: 'General', broadcastType: 'NONE' });
-      await loadNotices();
     } catch (e) {
       alert("Failed to post notice");
     } finally {

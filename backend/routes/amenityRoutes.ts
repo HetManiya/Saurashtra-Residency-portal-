@@ -39,6 +39,11 @@ router.post('/bookings', protect, async (req: any, res) => {
       flatId: req.user.flatId
     });
     await booking.save();
+    
+    // Populate for immediate frontend update
+    const populatedBooking = await AmenityBooking.findById(booking._id)
+      .populate('amenityId')
+      .populate('userId', 'name');
 
     // Log action
     await AuditLog.create({
@@ -49,7 +54,7 @@ router.post('/bookings', protect, async (req: any, res) => {
       details: `Booked: ${booking.amenityId} on ${booking.date}`
     });
 
-    res.status(201).json(booking);
+    res.status(201).json(populatedBooking);
   } catch (error) {
     res.status(400).json({ message: 'Error creating booking' });
   }

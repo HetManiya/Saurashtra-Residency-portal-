@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
+import mongoose from 'mongoose';
 
 // Define the permissions mapping for each role
 export const ROLE_PERMISSIONS: Record<string, string[]> = {
@@ -20,6 +21,14 @@ export const protect = (req: any, res: Response, next: NextFunction) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret_key') as any;
+    
+    // Validate that the ID in the token is a valid MongoDB ObjectId
+    // This prevents CastErrors in downstream routes that use req.user.id
+    if (decoded.id && !mongoose.Types.ObjectId.isValid(decoded.id)) {
+      console.warn(`⚠️ Invalid User ID in token: ${decoded.id}`);
+      return res.status(401).json({ message: 'Invalid session. Please log in again.' });
+    }
+
     req.user = decoded; // { id, role, permissions }
     next();
   } catch (error: any) {

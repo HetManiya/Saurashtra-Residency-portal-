@@ -10,6 +10,15 @@ const amenityBookingSchema = new mongoose.Schema({
   purpose: { type: String },
   status: { type: String, enum: ['PENDING', 'APPROVED', 'REJECTED', 'CANCELLED'], default: 'PENDING' },
   totalAmount: { type: Number, default: 0 }
-}, { timestamps: true });
+}, { 
+  timestamps: true,
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true }
+});
+
+// Virtual for id
+amenityBookingSchema.virtual('id').get(function() {
+  return this._id.toHexString();
+});
 
 export default mongoose.model('AmenityBooking', amenityBookingSchema);

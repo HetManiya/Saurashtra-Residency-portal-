@@ -11,6 +11,15 @@ const noticeSchema = new mongoose.Schema({
   },
   author: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   date: { type: Date, default: Date.now }
-}, { timestamps: true });
+}, { 
+  timestamps: true,
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true }
+});
+
+// Virtual for id
+noticeSchema.virtual('id').get(function() {
+  return this._id.toHexString();
+});
 
 export default mongoose.model('Notice', noticeSchema);

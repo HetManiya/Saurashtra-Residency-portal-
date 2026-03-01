@@ -14,15 +14,10 @@ const router = express.Router();
 router.get('/resident', protect, async (req: any, res) => {
   try {
     const userId = req.user.id;
-    let user = await User.findById(userId);
+    const user = await User.findById(userId);
 
     if (!user) {
-      // Fallback for demo IDs if DB is not ready
-      if (userId === '507f1f77bcf86cd799439012') {
-        user = { name: 'John Doe', flatId: 'A-1-101', role: 'RESIDENT' } as any;
-      } else {
-        return res.status(404).json({ message: 'User not found' });
-      }
+      return res.status(404).json({ message: 'User not found' });
     }
 
     // 1. Get Pending Dues

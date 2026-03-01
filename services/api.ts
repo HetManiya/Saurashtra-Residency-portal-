@@ -1,6 +1,5 @@
 
 import { GoogleGenAI, Modality } from "@google/genai";
-import { supabase } from '../lib/supabase';
 import * as CONSTANTS from '../constants';
 import { MaintenanceRecord, PaymentStatus, Meeting, OccupancyType, AmenityBooking, AuditLogEntry, Notice } from '../types';
 
@@ -322,6 +321,36 @@ export const api = {
         ...getAuthHeader()
       },
       body: JSON.stringify({ maintenanceId })
+    });
+    return handleResponse(response);
+  },
+
+  setupRecurringPayments: async () => {
+    const response = await fetch('/api/v1/payments/setup-recurring', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthHeader()
+      }
+    });
+    return handleResponse(response);
+  },
+
+  getPaymentDisputeHelp: async (transactionId: string, reason: string) => {
+    const response = await fetch('/api/v1/payments/dispute-help', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthHeader()
+      },
+      body: JSON.stringify({ transactionId, reason })
+    });
+    return handleResponse(response);
+  },
+
+  getReminders: async () => {
+    const response = await fetch('/api/v1/payments/reminders', {
+      headers: getAuthHeader()
     });
     return handleResponse(response);
   },

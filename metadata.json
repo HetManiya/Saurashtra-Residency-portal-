@@ -3,6 +3,7 @@
   "description": "The next generation of society management. Featuring AI-powered assistance, secure Stripe payments, and a modern resident experience.",
   "requestFramePermissions": [
     "microphone",
-    "camera"
+    "camera",
+    "geolocation"
   ]
 }

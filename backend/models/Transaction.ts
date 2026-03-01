@@ -15,6 +15,15 @@ const transactionSchema = new mongoose.Schema({
   gatewayPaymentId: { type: String },
   gatewaySignature: { type: String },
   metadata: { type: Object }
-}, { timestamps: true });
+}, { 
+  timestamps: true,
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true }
+});
+
+// Virtual for id
+transactionSchema.virtual('id').get(function() {
+  return this._id.toHexString();
+});
 
 export default mongoose.model('Transaction', transactionSchema);

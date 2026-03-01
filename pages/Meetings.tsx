@@ -36,7 +36,7 @@ const Meetings: React.FC = () => {
       const data = await api.getMeetings();
       setMeetings(data);
     } catch (e) {
-      console.error(e);
+      // Silently handle error
     } finally {
       setLoading(false);
     }
@@ -46,14 +46,19 @@ const Meetings: React.FC = () => {
     e.preventDefault();
     setSubmitting(true);
     try {
-      await api.scheduleMeeting({
+      const newMeeting = await api.scheduleMeeting({
         ...formData,
         createdBy: user?.id || 'unknown'
       });
-      await loadMeetings();
+      
+      // Expert Pattern: Update state immediately with the new item
+      // This ensures the UI reflects the change without waiting for a full re-fetch
+      setMeetings(prev => [newMeeting, ...prev]);
+      
       setShowModal(false);
       setFormData({ title: '', date: '', time: '', location: '', description: '', category: 'General' });
     } catch (e) {
+      console.error("Schedule error:", e);
       alert("Failed to schedule meeting");
     } finally {
       setSubmitting(false);
@@ -67,7 +72,7 @@ const Meetings: React.FC = () => {
       const updatedMeeting = await api.rsvpMeeting(meetingId, nextStatus);
       setMeetings(prev => prev.map(m => m.id === meetingId ? updatedMeeting : m));
     } catch (e) {
-      console.error(e);
+      // Silently handle error
     }
   };
 
@@ -116,12 +121,12 @@ const Meetings: React.FC = () => {
               <p className="text-slate-500 text-sm">No society assemblies are currently scheduled.</p>
             </div>
           ) : (
-            upcomingMeetings.map((meeting: Meeting) => {
+            upcomingMeetings.map((meeting: Meeting, index: number) => {
               const userRsvp = meeting.rsvps?.find((r: any) => r.userId === userId);
               const isAttending = userRsvp?.status === 'YES';
               
               return (
-                <div key={meeting.id} className="bg-white dark:bg-slate-900 p-8 rounded-[3rem] border border-slate-100 dark:border-slate-800 premium-shadow group hover:border-brand-600/30 transition-all">
+                <div key={meeting.id || index} className="bg-white dark:bg-slate-900 p-8 rounded-[3rem] border border-slate-100 dark:border-slate-800 premium-shadow group hover:border-brand-600/30 transition-all">
                   <div className="flex flex-col md:flex-row gap-8">
                     <div className="flex-1">
                       <div className="flex flex-wrap gap-3 mb-4">
@@ -185,8 +190,8 @@ const Meetings: React.FC = () => {
             </h4>
             <div className="space-y-4">
               {pastMeetings.length > 0 ? (
-                pastMeetings.slice(0, 5).map((m: Meeting) => (
-                  <div key={m.id} className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl flex justify-between items-center">
+                pastMeetings.slice(0, 5).map((m: Meeting, index: number) => (
+                  <div key={m.id || index} className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl flex justify-between items-center">
                     <div>
                       <p className="text-xs font-bold text-slate-700 dark:text-slate-300 line-clamp-1">{m.title}</p>
                       <p className="text-[10px] text-slate-400 font-bold">{new Date(m.date).toLocaleDateString()}</p>

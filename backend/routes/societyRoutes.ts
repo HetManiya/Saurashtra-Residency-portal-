@@ -2,7 +2,6 @@
 import express from 'express';
 import Maintenance from '../models/Maintenance';
 import Building from '../models/Building';
-import Fund from '../models/Fund';
 import Notice from '../models/Notice';
 import { protect, authorize } from '../middleware/authMiddleware';
 
@@ -106,15 +105,31 @@ router.post('/maintenance/generate', protect, authorize(['ADMIN', 'COMMITTEE']),
   }
 });
 
-// Update maintenance status (Admin/Committee)
-router.patch('/maintenance/:id', protect, authorize(['ADMIN', 'COMMITTEE']), async (req, res) => {
+// Update maintenance status (Admin/Committee or Resident for their own)
+router.patch('/maintenance/:id', protect, async (req: any, res) => {
   try {
     const { status, paidDate } = req.body;
-    const record = await Maintenance.findByIdAndUpdate(
-      req.params.id, 
-      { status, paidDate: status === 'Paid' ? (paidDate || new Date()) : null },
-      { new: true }
-    );
+    const record = await Maintenance.findById(req.params.id);
+    
+    if (!record) return res.status(404).json({ message: 'Record not found' });
+
+    // Authorization: Admin/Committee can update any record. Residents can only update their own.
+    const isAdmin = ['ADMIN', 'COMMITTEE'].includes(req.user.role);
+    const isOwner = record.flatId === req.user.flatId;
+
+    if (!isAdmin && !isOwner) {
+      return res.status(403).json({ message: 'You are not authorized to update this record.' });
+    }
+
+    // Update the record
+    record.status = status;
+    if (status === 'Paid') {
+      record.paidDate = paidDate || new Date();
+    } else {
+      record.paidDate = undefined;
+    }
+
+    await record.save();
     res.json(record);
   } catch (error) {
     res.status(400).json({ message: 'Update failed' });

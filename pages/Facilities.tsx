@@ -43,7 +43,7 @@ const Facilities: React.FC = () => {
       setAllBookings(bookingsData);
       setAmenities(amenitiesData);
     } catch (e) {
-      console.error(e);
+      // Silently handle error
     } finally {
       setLoading(false);
     }
@@ -65,14 +65,17 @@ const Facilities: React.FC = () => {
     if (!selectedAmenity || !user) return;
 
     try {
-      await api.createAmenityBooking({
+      const newBooking = await api.createAmenityBooking({
         amenityId: selectedAmenity._id,
         purpose: formData.purpose,
         date: formData.date,
         startTime: formData.startTime,
         endTime: formData.endTime,
       });
-      await loadData();
+
+      // Expert Pattern: Update local state immediately
+      setAllBookings(prev => [newBooking, ...prev]);
+      
       setShowBookingForm(false);
       setFormData({ purpose: '', date: '', startTime: '10:00 AM', endTime: '02:00 PM' });
       alert("Booking request submitted successfully! Awaiting committee approval.");
@@ -150,8 +153,8 @@ const Facilities: React.FC = () => {
 
       {activeTab === 'explore' && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {amenities.map((item: any) => (
-            <div key={item._id} className="group bg-white dark:bg-slate-900 rounded-[3rem] border border-slate-100 dark:border-slate-800 overflow-hidden shadow-sm bento-card flex flex-col">
+          {amenities.map((item: any, index: number) => (
+            <div key={item.id || item._id || index} className="group bg-white dark:bg-slate-900 rounded-[3rem] border border-slate-100 dark:border-slate-800 overflow-hidden shadow-sm bento-card flex flex-col">
               <div className="h-64 relative overflow-hidden">
                 <img src={item.image || `https://picsum.photos/seed/${item.name}/800/600`} alt={item.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" referrerPolicy="no-referrer" />
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-slate-900/20 to-transparent" />
@@ -199,8 +202,8 @@ const Facilities: React.FC = () => {
               <p className="text-slate-400">You haven't requested any facilities yet.</p>
             </div>
           ) : (
-            myBookings.map((booking) => (
-              <div key={booking._id} className="bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 flex flex-col md:flex-row items-center justify-between gap-6">
+            myBookings.map((booking, index: number) => (
+              <div key={booking.id || booking._id || index} className="bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 flex flex-col md:flex-row items-center justify-between gap-6">
                 <div className="flex items-center gap-6">
                   <div className="w-16 h-16 bg-brand-50 dark:bg-brand-900/20 rounded-2xl flex items-center justify-center text-brand-600 shadow-inner">
                     {getFacilityIcon(booking.amenityId?.name || '')}
@@ -232,8 +235,8 @@ const Facilities: React.FC = () => {
               <p className="text-slate-400">All booking requests have been processed.</p>
             </div>
           ) : (
-            pendingBookings.map((booking) => (
-              <div key={booking._id} className="bg-white dark:bg-slate-900 p-10 rounded-[3.5rem] border border-slate-100 dark:border-slate-800 flex flex-col md:flex-row items-center justify-between gap-10 premium-shadow">
+            pendingBookings.map((booking, index: number) => (
+              <div key={booking.id || booking._id || index} className="bg-white dark:bg-slate-900 p-10 rounded-[3.5rem] border border-slate-100 dark:border-slate-800 flex flex-col md:flex-row items-center justify-between gap-10 premium-shadow">
                 <div className="flex items-center gap-8">
                   <div className="w-20 h-20 bg-amber-50 dark:bg-amber-900/10 rounded-[2rem] flex items-center justify-center text-amber-600">
                     {getFacilityIcon(booking.amenityId?.name || '')}
@@ -318,8 +321,8 @@ const Facilities: React.FC = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {allBookings.filter(b => b.amenityId?._id === selectedAmenity._id && b.status === 'APPROVED').length > 0 ? (
-                    allBookings.filter(b => b.amenityId?._id === selectedAmenity._id && b.status === 'APPROVED').map((booking: any) => (
-                      <div key={booking._id} className="bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 shadow-sm relative overflow-hidden">
+                    allBookings.filter(b => b.amenityId?._id === selectedAmenity._id && b.status === 'APPROVED').map((booking: any, index: number) => (
+                      <div key={booking.id || booking._id || index} className="bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 shadow-sm relative overflow-hidden">
                         <h5 className="text-lg font-black text-slate-900 dark:text-white mb-4">{booking.purpose}</h5>
                         <div className="grid grid-cols-2 gap-4 text-xs font-bold text-slate-500">
                           <div className="flex items-center gap-2"><Calendar size={14} className="text-brand-600" /> {new Date(booking.date).toLocaleDateString()}</div>

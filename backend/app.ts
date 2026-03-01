@@ -3,8 +3,7 @@ import mongoose from 'mongoose';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import bcrypt from 'bcryptjs';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import { MongoMemoryServer } from 'mongodb-memory-server';
 import authRoutes from './routes/authRoutes';
 import societyRoutes from './routes/societyRoutes';
 import expenseRoutes from './routes/expenseRoutes';
@@ -21,49 +20,53 @@ import Maintenance from './models/Maintenance';
 import Amenity from './models/Amenity';
 import Meeting from './models/Meeting';
 
-import { MongoMemoryServer } from 'mongodb-memory-server';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
 dotenv.config();
+
+// Disable buffering to avoid 10s timeouts when connection is not ready
+mongoose.set('bufferCommands', false);
 
 const app = express();
 
 // Database Connection
-let isConnecting = false;
+let connectionPromise: Promise<void> | null = null;
+let mongoServer: MongoMemoryServer | null = null;
+
 export const connectDB = async () => {
-  if (isConnecting || mongoose.connection.readyState === 1) return;
-  isConnecting = true;
-  
-  let MONGODB_URI = process.env.MONGODB_URI;
-  try {
-    if (!MONGODB_URI || MONGODB_URI.includes('localhost')) {
-      console.log('🧪 Starting In-Memory MongoDB for Demo...');
-      try {
-        const mongod = await MongoMemoryServer.create({
-          instance: { dbName: 'saurashtra_residency' },
-          binary: { version: '6.0.4' }
-        });
-        MONGODB_URI = mongod.getUri();
-      } catch (memErr) {
-        console.error('❌ MongoMemoryServer failed to start:', memErr);
-        MONGODB_URI = 'mongodb://127.0.0.1:27017/saurashtra_residency';
-      }
-    }
+  if (mongoose.connection.readyState === 1) return;
+  if (connectionPromise) return connectionPromise;
+
+  connectionPromise = (async () => {
+    let MONGODB_URI = process.env.MONGODB_URI;
     
-    console.log('🔌 Connecting to MongoDB...');
-    await mongoose.connect(MONGODB_URI, {
-      serverSelectionTimeoutMS: 10000,
-      connectTimeoutMS: 10000,
-    });
-    console.log('✅ MongoDB Connected');
-    await initializeData();
-  } catch (err) {
-    console.error('❌ MongoDB Connection Error:', err);
-  } finally {
-    isConnecting = false;
-  }
+    // Validate URI
+    const isValidUri = (uri: string | undefined) => 
+      uri && (uri.startsWith('mongodb://') || uri.startsWith('mongodb+srv://'));
+
+    try {
+      if (!isValidUri(MONGODB_URI)) {
+        console.warn('⚠️ MONGODB_URI missing or invalid. Starting In-Memory MongoDB...');
+        if (!mongoServer) {
+          mongoServer = await MongoMemoryServer.create();
+        }
+        MONGODB_URI = mongoServer.getUri();
+        console.log(`🧠 In-Memory MongoDB started at: ${MONGODB_URI}`);
+      }
+      
+      console.log('🔌 Connecting to MongoDB...');
+      await mongoose.connect(MONGODB_URI!, {
+        serverSelectionTimeoutMS: 5000,
+        connectTimeoutMS: 5000,
+      });
+      console.log('✅ MongoDB Connected');
+      await initializeData();
+    } catch (err) {
+      console.error('❌ MongoDB Connection Error:', err);
+      connectionPromise = null; // Reset so we can try again
+      throw err;
+    }
+  })();
+
+  return connectionPromise;
 };
 
 async function initializeData() {
@@ -217,19 +220,18 @@ app.use((req, res, next) => {
 });
 
 app.use(cors());
-app.use(express.json());
+app.use((req, res, next) => {
+  if (req.originalUrl === '/api/v1/payments/webhook') {
+    next();
+  } else {
+    express.json()(req, res, next);
+  }
+});
 
-// Middleware to ensure DB is connected before processing API requests
-app.use('/api', (req, res, next) => {
-  if (req.path === '/health') return next();
-  
-  if (mongoose.connection.readyState !== 1) {
-    console.log(`⏳ API Request ${req.path} waiting for DB connection (Current state: ${mongoose.connection.readyState})...`);
-    res.setHeader('Content-Type', 'application/json');
-    return res.status(503).json({ 
-      message: 'Database is initializing, please refresh in a few seconds.',
-      state: mongoose.connection.readyState 
-    });
+// Ensure DB connection for every request
+app.use(async (req, res, next) => {
+  if (req.path.startsWith('/api') && mongoose.connection.readyState !== 1) {
+    await connectDB();
   }
   next();
 });

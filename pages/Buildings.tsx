@@ -49,7 +49,6 @@ const Buildings: React.FC = () => {
         setTimeout(() => loadBuildingsAndOccupancy(retries + 1), 2000);
         return;
       }
-      console.error('Buildings Load Error:', e);
       setLoading(false);
     }
   };
@@ -188,11 +187,11 @@ const Buildings: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-        {filteredBuildings.map((building) => {
+        {filteredBuildings.map((building, index: number) => {
           const wingOccupied = registeredUnits.filter(p => p.flatId.startsWith(building.name)).length;
           return (
             <div 
-              key={building.id} 
+              key={building.id || index} 
               className="group bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 overflow-hidden shadow-sm premium-card flex flex-col cursor-pointer"
               onClick={() => setSelectedBuilding(building)}
             >

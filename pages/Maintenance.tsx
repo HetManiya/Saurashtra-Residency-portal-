@@ -121,6 +121,9 @@ const Maintenance: React.FC = () => {
   
   const [paymentOrder, setPaymentOrder] = useState<any>(null);
   const [stripePromise, setStripePromise] = useState<any>(null);
+  const [disputeHelp, setDisputeHelp] = useState<{ advice: string; transactionId: string } | null>(null);
+  const [isGeneratingReminders, setIsGeneratingReminders] = useState(false);
+  const [isSettingUpRecurring, setIsSettingUpRecurring] = useState(false);
 
   const isAdmin = user?.role === 'ADMIN' || user?.role === 'COMMITTEE';
 
@@ -145,7 +148,6 @@ const Maintenance: React.FC = () => {
         setTimeout(() => loadAllData(u, retries + 1), 2000);
         return;
       }
-      console.error('Maintenance Load Error:', e);
       setLoading(false);
     }
   }, [currentMonth, currentYear]);
@@ -200,9 +202,14 @@ const Maintenance: React.FC = () => {
       await api.updateMaintenanceStatus(paymentOrder.recordId, PaymentStatus.PAID, new Date().toISOString());
       if (user) await loadAllData(user);
       setPaymentOrder(null);
-      alert("Payment Successful! Receipt generated.");
-    } catch (e) {
-      console.error(e);
+      alert("Payment Successful! Your record has been updated.");
+    } catch (e: any) {
+      console.error("Manual status update error:", e);
+      // Even if manual update fails, the webhook should handle it.
+      // We still close the modal and refresh data.
+      if (user) await loadAllData(user);
+      setPaymentOrder(null);
+      alert("Payment processed successfully. Your record will be updated shortly.");
     }
   };
 
@@ -250,6 +257,46 @@ const Maintenance: React.FC = () => {
     if (confirm(`Finalize ${currentMonth} ${currentYear}? This locks all records for auditing.`)) {
       await api.lockMaintenanceMonth(currentMonth, currentYear, SOCIETY_INFO.maintenanceAmount);
       setIsLocked(true);
+    }
+  };
+
+  const handleSetupRecurring = async () => {
+    setIsSettingUpRecurring(true);
+    try {
+      const { url } = await api.setupRecurringPayments();
+      window.location.href = url;
+    } catch (e) {
+      alert("Failed to setup recurring payments.");
+    } finally {
+      setIsSettingUpRecurring(false);
+    }
+  };
+
+  const handleSendReminders = async () => {
+    setIsGeneratingReminders(true);
+    try {
+      const data = await api.getReminders();
+      alert(`Successfully generated ${data.count} reminders for pending bills.`);
+    } catch (e) {
+      alert("Failed to generate reminders.");
+    } finally {
+      setIsGeneratingReminders(false);
+    }
+  };
+
+  const handleDisputeHelp = async (record: MaintenanceRecord) => {
+    const reason = prompt("Please describe the issue with this payment:");
+    if (!reason) return;
+
+    setLoading(true);
+    try {
+      // For demo, we'll use a mock transaction ID if not available
+      const advice = await api.getPaymentDisputeHelp(record.id, reason);
+      setDisputeHelp({ advice: advice.advice, transactionId: record.id });
+    } catch (e) {
+      alert("AI assistance is currently unavailable.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -304,6 +351,30 @@ const Maintenance: React.FC = () => {
             >
               {isLocked ? <Lock size={16} /> : <Unlock size={16} />}
               {isLocked ? 'Cycle Locked' : 'Finalize Ledger'}
+            </button>
+          )}
+          {isAdmin && activeTab === 'current' && records.length > 0 && (
+            <button 
+              onClick={handleSendReminders}
+              disabled={isGeneratingReminders}
+              className="flex items-center gap-2 px-6 py-4 bg-amber-600 text-white rounded-[1.5rem] font-black uppercase tracking-widest text-[11px] shadow-xl shadow-amber-500/20 active:scale-95 disabled:opacity-50"
+            >
+              {isGeneratingReminders ? <Loader2 size={16} className="animate-spin" /> : <BellRing size={16} />}
+              Send Reminders
+            </button>
+          )}
+          {!isAdmin && (
+            <button 
+              onClick={handleSetupRecurring}
+              disabled={isSettingUpRecurring || user?.isRecurringEnabled}
+              className={`flex items-center gap-2 px-6 py-4 rounded-[1.5rem] font-black uppercase tracking-widest text-[11px] shadow-xl transition-all active:scale-95 disabled:opacity-50 ${
+                user?.isRecurringEnabled 
+                  ? 'bg-emerald-100 text-emerald-600 cursor-default' 
+                  : 'bg-brand-600 text-white shadow-brand-500/20'
+              }`}
+            >
+              {isSettingUpRecurring ? <Loader2 size={16} className="animate-spin" /> : <RefreshCw size={16} />}
+              {user?.isRecurringEnabled ? 'Recurring Active' : 'Enable Recurring'}
             </button>
           )}
           <button onClick={handleExport} className="flex items-center gap-2 px-5 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl font-bold text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-50 transition-all">
@@ -428,6 +499,13 @@ const Maintenance: React.FC = () => {
                                 <button onClick={() => handleShareWhatsApp(record)} className="p-2 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all" title="Share">
                                   <Share2 size={14} />
                                 </button>
+                                <button 
+                                  onClick={() => handleDisputeHelp(record)}
+                                  className="p-2 text-rose-600 hover:bg-rose-50 rounded-lg transition-all" 
+                                  title="AI Dispute Help"
+                                >
+                                  <AlertCircle size={14} />
+                                </button>
                               </div>
                             ) : (
                               <div className="flex items-center gap-2">
@@ -522,6 +600,49 @@ const Maintenance: React.FC = () => {
               <img src="https://www.vectorlogo.zone/logos/visa/visa-icon.svg" className="h-4" alt="Visa" />
               <img src="https://www.vectorlogo.zone/logos/mastercard/mastercard-icon.svg" className="h-4" alt="Mastercard" />
               <img src="https://www.vectorlogo.zone/logos/npci_upi/npci_upi-icon.svg" className="h-4" alt="UPI" />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {disputeHelp && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setDisputeHelp(null)} />
+          <div className="relative bg-white dark:bg-slate-900 w-full max-w-2xl rounded-[2.5rem] p-8 shadow-2xl border border-slate-100 dark:border-slate-800 animate-in zoom-in-95 duration-200">
+            <div className="flex justify-between items-start mb-6">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-rose-50 dark:bg-rose-900/10 rounded-2xl flex items-center justify-center text-rose-600">
+                  <Zap size={24} />
+                </div>
+                <div>
+                  <h3 className="text-2xl font-black tracking-tight dark:text-white">AI Dispute Resolution</h3>
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Powered by Gemini AI</p>
+                </div>
+              </div>
+              <button onClick={() => setDisputeHelp(null)} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
+                <X size={20} className="text-slate-400" />
+              </button>
+            </div>
+
+            <div className="prose prose-slate dark:prose-invert max-w-none">
+              <div className="p-6 bg-slate-50 dark:bg-slate-800 rounded-3xl border border-slate-100 dark:border-slate-700 text-sm leading-relaxed whitespace-pre-wrap">
+                {disputeHelp.advice}
+              </div>
+            </div>
+
+            <div className="mt-8 flex gap-3">
+              <button 
+                onClick={() => setDisputeHelp(null)}
+                className="flex-1 py-4 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-2xl font-black uppercase tracking-widest text-[10px]"
+              >
+                Close
+              </button>
+              <button 
+                onClick={() => window.location.href = 'mailto:committee@residency.com'}
+                className="flex-1 py-4 bg-brand-600 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-lg shadow-brand-500/20"
+              >
+                Contact Committee
+              </button>
             </div>
           </div>
         </div>

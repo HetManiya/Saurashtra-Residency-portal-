@@ -21,7 +21,7 @@ const Location: React.FC = () => {
       const info = await api.getLocalityInfo(`Saurashtra Residency Pasodara Surat 395013`);
       setLocalityInfo(info);
     } catch (e) {
-      console.error(e);
+      // Silently handle error
     }
     setLoading(false);
   };

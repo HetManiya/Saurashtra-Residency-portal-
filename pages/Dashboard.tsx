@@ -42,7 +42,6 @@ const Dashboard: React.FC = () => {
           setTimeout(() => fetchPrediction(retries + 1), 2000);
           return;
         }
-        console.error('AI Prediction Error:', e);
         setPrediction("Forecast temporarily unavailable.");
         setLoadingAi(false);
       }
@@ -59,7 +58,6 @@ const Dashboard: React.FC = () => {
           setTimeout(() => fetchNotices(retries + 1), 2000);
           return;
         }
-        console.error('Notices Fetch Error:', e);
         setNotices([]);
         setLoadingNotices(false);
       }
@@ -79,7 +77,6 @@ const Dashboard: React.FC = () => {
               setTimeout(() => fetchAdminData(retries + 1), 2000);
               return;
             }
-            console.error('Admin Summary Error:', e);
             setLoadingAdmin(false);
           }
         }

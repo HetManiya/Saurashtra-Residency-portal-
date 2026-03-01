@@ -40,55 +40,9 @@ router.post('/login', async (req, res) => {
     const { email, password } = req.body;
     console.log(`🔑 Login attempt for: ${email}`);
     
-    // 🛡️ DEMO FALLBACK - Guaranteed access for demo credentials
-    if (email === 'admin@residency.com' && password === 'admin123') {
-      const token = jwt.sign(
-        { id: 'demo-admin-id', role: 'ADMIN' },
-        process.env.JWT_SECRET || 'secret_key',
-        { expiresIn: '30d' }
-      );
-      return res.json({ 
-        token, 
-        user: { 
-          id: 'demo-admin-id', 
-          name: 'System Admin', 
-          role: 'ADMIN', 
-          flatId: 'A-1-Office', 
-          occupancyType: 'Owner' 
-        }
-      });
-    }
-
-    if (email === 'resident@residency.com' && password === 'resident123') {
-      const token = jwt.sign(
-        { id: 'demo-resident-id', role: 'RESIDENT' },
-        process.env.JWT_SECRET || 'secret_key',
-        { expiresIn: '30d' }
-      );
-      return res.json({ 
-        token, 
-        user: { 
-          id: 'demo-resident-id', 
-          name: 'John Doe', 
-          role: 'RESIDENT', 
-          flatId: 'A-1-101', 
-          occupancyType: 'Owner' 
-        }
-      });
-    }
-
     const user = await User.findOne({ email });
     
-    // If user not found in DB but matches demo credentials, return mock (fail-safe)
     if (!user) {
-      if (email === 'admin@residency.com' && password === 'admin123') {
-        const token = jwt.sign({ id: '507f1f77bcf86cd799439011', role: 'ADMIN' }, process.env.JWT_SECRET || 'secret_key', { expiresIn: '30d' });
-        return res.json({ token, user: { id: '507f1f77bcf86cd799439011', name: 'System Admin', role: 'ADMIN', flatId: 'A-1-Office', occupancyType: 'Owner' }});
-      }
-      if (email === 'resident@residency.com' && password === 'resident123') {
-        const token = jwt.sign({ id: '507f1f77bcf86cd799439012', role: 'RESIDENT' }, process.env.JWT_SECRET || 'secret_key', { expiresIn: '30d' });
-        return res.json({ token, user: { id: '507f1f77bcf86cd799439012', name: 'John Doe', role: 'RESIDENT', flatId: 'A-1-101', occupancyType: 'Owner' }});
-      }
       return res.status(404).json({ message: 'User not found' });
     }
 

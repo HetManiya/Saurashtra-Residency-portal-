@@ -34,7 +34,7 @@ const RegistrationApprovals: React.FC = () => {
       const data = await api.getPendingRegistrations();
       setPendingUsers(data);
     } catch (e) {
-      console.error("Fetch pending error:", e);
+      // Silently handle error
     } finally {
       setLoading(false);
     }
