@@ -6,6 +6,7 @@ const maintenanceSchema = new mongoose.Schema({
   month: { type: String, required: true }, // e.g., 'May'
   year: { type: Number, required: true },
   amount: { type: Number, required: true },
+  penaltyAmount: { type: Number, default: 0 },
   status: { type: String, enum: ['Paid', 'Pending', 'Overdue'], default: 'Pending' },
   occupancyType: { type: String, enum: ['Owner', 'Tenant'], required: true },
   paidDate: { type: Date },

@@ -5,12 +5,14 @@ const visitorSchema = new mongoose.Schema({
   phone: { type: String, required: true },
   flatId: { type: String, required: true },
   purpose: { type: String },
-  checkInTime: { type: Date, default: Date.now },
+  passId: { type: String, unique: true, sparse: true },
+  type: { type: String, enum: ['GUEST', 'DELIVERY', 'SERVICE'], default: 'GUEST' },
+  checkInTime: { type: Date },
   checkOutTime: { type: Date },
   status: { 
     type: String, 
-    enum: ['IN', 'OUT'], 
-    default: 'IN' 
+    enum: ['PENDING', 'IN', 'OUT'], 
+    default: 'PENDING' 
   }
 }, { timestamps: true });
 

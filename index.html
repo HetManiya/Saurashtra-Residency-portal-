@@ -128,6 +128,51 @@
     .dark .premium-card {
       background: linear-gradient(135deg, #0f172a 0%, #020617 100%);
     }
+
+    /* Mesh Background for Dark Mode */
+    .dark body::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: 
+        radial-gradient(circle at 0% 0%, rgba(16, 185, 129, 0.03) 0%, transparent 50%),
+        radial-gradient(circle at 100% 100%, rgba(16, 185, 129, 0.03) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    /* Premium Shadow */
+    .premium-shadow {
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.04);
+    }
+    .dark .premium-shadow {
+      box-shadow: 0 20px 50px -15px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Animated Border */
+    @keyframes borderRotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    
+    .glow-border {
+      position: relative;
+      overflow: hidden;
+    }
+    .glow-border::after {
+      content: "";
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: conic-gradient(from 0deg, transparent, rgba(16, 185, 129, 0.2), transparent);
+      animation: borderRotate 4s linear infinite;
+      pointer-events: none;
+    }
   </style>
 </head>
 <body class="bg-[#fcfdfe] text-slate-900 dark:bg-[#020617] dark:text-slate-100 selection:bg-brand-100 selection:text-brand-900">

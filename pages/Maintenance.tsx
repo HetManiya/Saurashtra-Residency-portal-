@@ -1,10 +1,19 @@
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { 
+  Box, Typography, Grid, Card, Button, IconButton, 
+  LinearProgress, Avatar, Chip, Tooltip, CircularProgress,
+  Paper, useTheme, Fade, Stack, Divider, TextField,
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
+  Dialog, DialogTitle, DialogContent, DialogActions,
+  FormControl, InputLabel, Select, MenuItem, InputAdornment,
+  Alert, Stepper, Step, StepLabel, Tab, Tabs
+} from '@mui/material';
+import { 
   Download, Plus, Clock, X, CreditCard, Zap, Droplets, Smartphone, 
   ArrowRight, Share2, BellRing, Settings2, Mail, MessageSquare, 
   Loader2, CheckCircle, Home, Key, MessageCircle, Lock, Unlock, AlertCircle, FileText,
-  History, Calendar, Users, Search, RefreshCw
+  History, Calendar, Users, Search, RefreshCw, ShieldCheck, Truck, Receipt, BrainCircuit
 } from 'lucide-react';
 import { SOCIETY_INFO, UTILITY_SUMMARY, BUILDINGS } from '../constants';
 import { MaintenanceRecord, PaymentStatus, OccupancyType } from '../types';
@@ -12,6 +21,7 @@ import { api } from '../services/api';
 import { useLanguage } from '../components/LanguageContext';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import { motion } from 'motion/react';
 
 const CheckoutForm: React.FC<{ 
   clientSecret: string; 
@@ -23,6 +33,7 @@ const CheckoutForm: React.FC<{
   const elements = useElements();
   const [error, setError] = useState<string | null>(null);
   const [processing, setProcessing] = useState(false);
+  const theme = useTheme();
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -49,58 +60,68 @@ const CheckoutForm: React.FC<{
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="mb-6">
-        <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-4">Select Payment Method</p>
-        <div className="flex items-center gap-4 mb-4 overflow-x-auto pb-2 custom-scrollbar">
-          <div className="flex flex-col items-center gap-1 min-w-[60px]">
-            <div className="w-10 h-10 bg-slate-50 dark:bg-slate-800 rounded-xl flex items-center justify-center border border-slate-200 dark:border-slate-700">
-              <img src="https://www.vectorlogo.zone/logos/google_pay/google_pay-icon.svg" className="w-6 h-6" alt="GPay" />
-            </div>
-            <span className="text-[8px] font-black uppercase text-slate-400">GPay</span>
-          </div>
-          <div className="flex flex-col items-center gap-1 min-w-[60px]">
-            <div className="w-10 h-10 bg-slate-50 dark:bg-slate-800 rounded-xl flex items-center justify-center border border-slate-200 dark:border-slate-700">
-              <img src="https://www.vectorlogo.zone/logos/paytm/paytm-icon.svg" className="w-6 h-6" alt="Paytm" />
-            </div>
-            <span className="text-[8px] font-black uppercase text-slate-400">Paytm</span>
-          </div>
-          <div className="flex flex-col items-center gap-1 min-w-[60px]">
-            <div className="w-10 h-10 bg-slate-50 dark:bg-slate-800 rounded-xl flex items-center justify-center border border-slate-200 dark:border-slate-700">
-              <img src="https://www.vectorlogo.zone/logos/npci_upi/npci_upi-icon.svg" className="w-6 h-6" alt="UPI" />
-            </div>
-            <span className="text-[8px] font-black uppercase text-slate-400">UPI</span>
-          </div>
-          <div className="flex flex-col items-center gap-1 min-w-[60px]">
-            <div className="w-10 h-10 bg-slate-50 dark:bg-slate-800 rounded-xl flex items-center justify-center border border-slate-200 dark:border-slate-700">
-              <CreditCard size={20} className="text-slate-400" />
-            </div>
-            <span className="text-[8px] font-black uppercase text-slate-400">Cards</span>
-          </div>
-        </div>
-      </div>
+    <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
+      <Typography variant="caption" sx={{ fontWeight: 900, color: 'text.secondary', textTransform: 'uppercase', letterSpacing: 2, mb: 2, display: 'block' }}>
+        Select Payment Method
+      </Typography>
+      
+      <Stack direction="row" spacing={2} sx={{ mb: 4, overflowX: 'auto', pb: 1 }}>
+        {[
+          { name: 'GPay', icon: 'https://www.vectorlogo.zone/logos/google_pay/google_pay-icon.svg' },
+          { name: 'Paytm', icon: 'https://www.vectorlogo.zone/logos/paytm/paytm-icon.svg' },
+          { name: 'UPI', icon: 'https://www.vectorlogo.zone/logos/npci_upi/npci_upi-icon.svg' },
+          { name: 'Cards', icon: <CreditCard size={20} /> }
+        ].map((method, i) => (
+          <Box key={i} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.5, minWidth: 64 }}>
+            <Box sx={{ 
+              width: 48, height: 48, 
+              bgcolor: 'action.hover', 
+              borderRadius: 4, 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center',
+              border: '1px solid',
+              borderColor: 'divider'
+            }}>
+              {typeof method.icon === 'string' ? (
+                <Box component="img" src={method.icon} sx={{ width: 24, height: 24 }} alt={method.name} />
+              ) : method.icon}
+            </Box>
+            <Typography variant="caption" sx={{ fontWeight: 900, color: 'text.secondary', fontSize: '0.6rem' }}>{method.name}</Typography>
+          </Box>
+        ))}
+      </Stack>
 
-      <div className="p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700">
+      <Paper sx={{ p: 3, borderRadius: 6, bgcolor: 'action.hover', border: '1px solid', borderColor: 'divider', mb: 3 }}>
         <PaymentElement />
-      </div>
-      {error && <div className="text-rose-600 text-xs font-bold">{error}</div>}
-      <div className="flex gap-3">
-        <button 
-          type="button" 
+      </Paper>
+
+      {error && (
+        <Alert severity="error" sx={{ mb: 3, borderRadius: 4, fontWeight: 700 }}>
+          {error}
+        </Alert>
+      )}
+
+      <Stack direction="row" spacing={2}>
+        <Button 
+          fullWidth 
+          variant="outlined" 
           onClick={onCancel}
-          className="flex-1 py-4 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-2xl font-black uppercase tracking-widest text-[10px]"
+          sx={{ py: 1.5, borderRadius: 4, fontWeight: 900, textTransform: 'uppercase' }}
         >
           Cancel
-        </button>
-        <button 
-          type="submit" 
+        </Button>
+        <Button 
+          fullWidth 
+          variant="contained" 
+          type="submit"
           disabled={!stripe || processing}
-          className="flex-1 py-4 bg-brand-600 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-lg shadow-brand-500/20 disabled:opacity-50"
+          sx={{ py: 1.5, borderRadius: 4, fontWeight: 900, textTransform: 'uppercase', boxShadow: 6 }}
         >
-          {processing ? 'Processing...' : `Pay ₹${amount}`}
-        </button>
-      </div>
-    </form>
+          {processing ? <CircularProgress size={20} color="inherit" /> : `Pay ₹${amount}`}
+        </Button>
+      </Stack>
+    </Box>
   );
 };
 
@@ -124,6 +145,8 @@ const Maintenance: React.FC = () => {
   const [disputeHelp, setDisputeHelp] = useState<{ advice: string; transactionId: string } | null>(null);
   const [isGeneratingReminders, setIsGeneratingReminders] = useState(false);
   const [isSettingUpRecurring, setIsSettingUpRecurring] = useState(false);
+  const [selectedReceipt, setSelectedReceipt] = useState<any | null>(null);
+  const [isCalculatingPenalties, setIsCalculatingPenalties] = useState(false);
 
   const isAdmin = user?.role === 'ADMIN' || user?.role === 'COMMITTEE';
 
@@ -253,6 +276,32 @@ const Maintenance: React.FC = () => {
     window.open(`https://wa.me/?text=${text}`, '_blank');
   };
 
+  const handleViewReceipt = async (record: MaintenanceRecord) => {
+    setLoading(true);
+    try {
+      const receipt = await api.generateReceipt(record.id);
+      setSelectedReceipt(receipt);
+    } catch (e) {
+      alert("Failed to load receipt.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCalculatePenalties = async () => {
+    if (!confirm(`Apply ₹100 penalty to all pending records for ${currentMonth} ${currentYear}?`)) return;
+    setIsCalculatingPenalties(true);
+    try {
+      await api.calculatePenalties(currentMonth, currentYear);
+      if (user) await loadAllData(user);
+      alert("Penalties applied successfully.");
+    } catch (e) {
+      alert("Penalty calculation failed.");
+    } finally {
+      setIsCalculatingPenalties(false);
+    }
+  };
+
   const handleLockMonth = async () => {
     if (confirm(`Finalize ${currentMonth} ${currentYear}? This locks all records for auditing.`)) {
       await api.lockMaintenanceMonth(currentMonth, currentYear, SOCIETY_INFO.maintenanceAmount);
@@ -320,334 +369,549 @@ const Maintenance: React.FC = () => {
   }, [activeTab, records, historyRecords, statusFilter, occupancyFilter, searchQuery]);
 
   return (
-    <div className="space-y-10 animate-fade-up">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-8 border-b border-slate-200 dark:border-slate-800">
-        <div>
-          <h1 className="text-4xl font-extrabold text-slate-900 dark:text-white tracking-tighter">{t('finance_hub')}</h1>
-          <p className="text-slate-500 dark:text-slate-400 mt-2 font-medium">
-            {activeTab === 'current' 
-              ? `Cycle: ${currentMonth} ${currentYear} • Total Units: ${records.length}` 
-              : 'Audit & Historical Payment Logs'}
-          </p>
-        </div>
-        <div className="flex gap-3">
-          {isAdmin && activeTab === 'current' && records.length === 0 && (
-            <button 
-              onClick={handleGenerateMonthly}
-              className="flex items-center gap-2 px-6 py-4 bg-emerald-600 text-white rounded-[1.5rem] font-black uppercase tracking-widest text-[11px] shadow-xl shadow-emerald-500/20 active:scale-95"
-            >
-              <RefreshCw size={16} /> Generate Cycle
-            </button>
-          )}
-          {isAdmin && activeTab === 'current' && records.length > 0 && (
-            <button 
-              onClick={handleLockMonth}
-              disabled={isLocked}
-              className={`flex items-center gap-2 px-6 py-4 rounded-[1.5rem] font-black uppercase tracking-widest text-[11px] transition-all shadow-xl ${
-                isLocked 
-                  ? 'bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-600 cursor-not-allowed' 
-                  : 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-indigo-500/20'
-              }`}
-            >
-              {isLocked ? <Lock size={16} /> : <Unlock size={16} />}
-              {isLocked ? 'Cycle Locked' : 'Finalize Ledger'}
-            </button>
-          )}
-          {isAdmin && activeTab === 'current' && records.length > 0 && (
-            <button 
-              onClick={handleSendReminders}
-              disabled={isGeneratingReminders}
-              className="flex items-center gap-2 px-6 py-4 bg-amber-600 text-white rounded-[1.5rem] font-black uppercase tracking-widest text-[11px] shadow-xl shadow-amber-500/20 active:scale-95 disabled:opacity-50"
-            >
-              {isGeneratingReminders ? <Loader2 size={16} className="animate-spin" /> : <BellRing size={16} />}
-              Send Reminders
-            </button>
-          )}
-          {!isAdmin && (
-            <button 
-              onClick={handleSetupRecurring}
-              disabled={isSettingUpRecurring || user?.isRecurringEnabled}
-              className={`flex items-center gap-2 px-6 py-4 rounded-[1.5rem] font-black uppercase tracking-widest text-[11px] shadow-xl transition-all active:scale-95 disabled:opacity-50 ${
-                user?.isRecurringEnabled 
-                  ? 'bg-emerald-100 text-emerald-600 cursor-default' 
-                  : 'bg-brand-600 text-white shadow-brand-500/20'
-              }`}
-            >
-              {isSettingUpRecurring ? <Loader2 size={16} className="animate-spin" /> : <RefreshCw size={16} />}
-              {user?.isRecurringEnabled ? 'Recurring Active' : 'Enable Recurring'}
-            </button>
-          )}
-          <button onClick={handleExport} className="flex items-center gap-2 px-5 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl font-bold text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-50 transition-all">
-            <Download size={18} /> {t('export')}
-          </button>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-        <div className="lg:col-span-4 space-y-8">
-          <div className="bg-white dark:bg-slate-900 rounded-[3rem] border border-slate-100 dark:border-slate-800 premium-shadow overflow-hidden">
-            <div className="p-8 border-b border-slate-50 dark:border-slate-800/50 flex flex-col xl:flex-row justify-between items-center gap-6">
-              <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-2xl w-full xl:w-auto overflow-x-auto shrink-0">
-                <button 
-                  onClick={() => setActiveTab('current')} 
-                  className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${activeTab === 'current' ? 'bg-white dark:bg-slate-700 text-brand-600 dark:text-brand-400 shadow-xl' : 'text-slate-400 hover:text-slate-600'}`}
-                >
-                  <Calendar size={14} /> Current Ledger
-                </button>
-                <button 
-                  onClick={() => setActiveTab('history')} 
-                  className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${activeTab === 'history' ? 'bg-white dark:bg-slate-700 text-brand-600 dark:text-brand-400 shadow-xl' : 'text-slate-400 hover:text-slate-600'}`}
-                >
-                  <History size={14} /> History
-                </button>
-              </div>
-
-              <div className="flex flex-col sm:flex-row items-center gap-4 w-full xl:w-auto">
-                <div className="relative w-full sm:w-64">
-                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-                  <input 
-                    type="text" 
-                    placeholder="Search Flat (e.g. A-1-101)..."
-                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-brand-500/20"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                  />
-                </div>
-
-                <div className="flex bg-slate-50 dark:bg-slate-800/50 p-1 rounded-2xl border border-slate-100 dark:border-slate-800 w-full sm:w-auto">
-                  {['ALL', OccupancyType.OWNER, OccupancyType.TENANT].map((o) => (
-                    <button 
-                      key={o} 
-                      onClick={() => setOccupancyFilter(o as any)} 
-                      className={`flex-1 sm:flex-none px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${occupancyFilter === o ? 'bg-white dark:bg-slate-900 text-brand-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
-                    >
-                      {o}
-                    </button>
-                  ))}
-                </div>
-
-                {activeTab === 'current' && (
-                  <div className="flex bg-slate-50 dark:bg-slate-800/50 p-1 rounded-2xl border border-slate-100 dark:border-slate-800 w-full sm:w-auto">
-                    {['ALL', PaymentStatus.PAID, PaymentStatus.PENDING, PaymentStatus.OVERDUE].map((s) => (
-                      <button 
-                        key={s} 
-                        onClick={() => setStatusFilter(s as any)} 
-                        className={`flex-1 sm:flex-none px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${statusFilter === s ? 'bg-white dark:bg-slate-900 text-brand-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
-                      >
-                        {s}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="overflow-x-auto max-h-[600px] custom-scrollbar">
-              {loading ? (
-                <div className="py-20 flex flex-col items-center justify-center"><Loader2 className="animate-spin text-brand-600 mb-2" /><p className="text-[10px] font-black uppercase text-slate-400">Loading Cloud Data...</p></div>
-              ) : (
-                <table className="w-full text-left">
-                  <thead className="sticky top-0 z-20 bg-slate-50 dark:bg-slate-800">
-                    <tr>
-                      <th className="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('unit')}</th>
-                      <th className="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Type</th>
-                      {activeTab === 'history' && <th className="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Period</th>}
-                      <th className="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('amount')}</th>
-                      <th className="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</th>
-                      <th className="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">{t('actions')}</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-50 dark:divide-slate-800/50">
-                    {filteredRecords.map((record) => (
-                      <tr key={record.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors group">
-                        <td className="px-10 py-6">
-                          <div className="flex items-center gap-4">
-                            <div className="w-10 h-10 rounded-xl bg-brand-50 dark:bg-brand-900/10 text-brand-600 flex items-center justify-center font-black text-sm">{record.flatId.split('-').pop()}</div>
-                            <span className="font-black text-slate-800 dark:text-slate-200 tracking-tight">{record.flatId}</span>
-                          </div>
-                        </td>
-                        <td className="px-10 py-6">
-                          <div className="flex items-center gap-2">
-                             {record.occupancyType === OccupancyType.OWNER ? <Key size={12} className="text-emerald-500" /> : <Users size={12} className="text-blue-500" />}
-                             <span className={`text-[10px] font-black uppercase tracking-widest ${record.occupancyType === OccupancyType.OWNER ? 'text-emerald-600' : 'text-blue-600'}`}>
-                               {record.occupancyType}
-                             </span>
-                          </div>
-                        </td>
-                        {activeTab === 'history' && (
-                          <td className="px-10 py-6">
-                            <div className="flex flex-col">
-                              <span className="font-bold text-sm text-slate-700 dark:text-slate-300">{record.month} {record.year}</span>
-                              {record.paidDate && <span className="text-[10px] text-slate-400 font-medium">{new Date(record.paidDate).toLocaleDateString()}</span>}
-                            </div>
-                          </td>
-                        )}
-                        <td className="px-10 py-6 font-black text-slate-900 dark:text-white">₹{record.amount}</td>
-                        <td className="px-10 py-6">
-                          <span className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest border-2 ${getStatusStyle(record.status)}`}>{record.status}</span>
-                        </td>
-                        <td className="px-10 py-6">
-                          <div className="flex items-center justify-end gap-2">
-                            {record.status === PaymentStatus.PAID ? (
-                              <div className="flex gap-2">
-                                <button 
-                                  onClick={() => api.generateReceipt(record)}
-                                  className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-brand-50 hover:text-brand-600 transition-all"
-                                >
-                                  <FileText size={12} /> {t('receipt')}
-                                </button>
-                                <button onClick={() => handleShareWhatsApp(record)} className="p-2 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all" title="Share">
-                                  <Share2 size={14} />
-                                </button>
-                                <button 
-                                  onClick={() => handleDisputeHelp(record)}
-                                  className="p-2 text-rose-600 hover:bg-rose-50 rounded-lg transition-all" 
-                                  title="AI Dispute Help"
-                                >
-                                  <AlertCircle size={14} />
-                                </button>
-                              </div>
-                            ) : (
-                              <div className="flex items-center gap-2">
-                                {(activeTab === 'current' || record.status === PaymentStatus.OVERDUE) && !isLocked && (
-                                  <button 
-                                    onClick={() => handlePayStripe(record)}
-                                    disabled={isProcessingPayment}
-                                    className="flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-brand-700 transition-all shadow-lg"
-                                  >
-                                    {isProcessingPayment ? <Loader2 size={12} className="animate-spin" /> : <CreditCard size={12} />} 
-                                    {t('pay_now')}
-                                  </button>
-                                )}
-                                {isAdmin && (
-                                  <button 
-                                    onClick={() => handleWhatsAppReminder(record)}
-                                    className="p-2.5 bg-emerald-50 dark:bg-emerald-900/10 text-emerald-600 rounded-xl hover:bg-emerald-100 transition-all border border-emerald-100"
-                                    title="Reminder"
-                                  >
-                                    <MessageCircle size={14} />
-                                  </button>
-                                )}
-                              </div>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              )}
-              {!loading && filteredRecords.length === 0 && (
-                <div className="p-20 text-center">
-                   <AlertCircle className="w-12 h-12 text-slate-200 mx-auto mb-4" />
-                   <p className="text-slate-400 font-bold text-sm">No records found matching your filters.</p>
-                </div>
-              )}
-            </div>
-            
-            <div className="p-6 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center">
-               <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">
-                 Showing {filteredRecords.length} units
-               </p>
-               <div className="flex gap-4">
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
-                    <span className="text-[9px] font-black uppercase text-slate-500">Paid: {filteredRecords.filter(r => r.status === PaymentStatus.PAID).length}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-amber-500"></div>
-                    <span className="text-[9px] font-black uppercase text-slate-500">Pending: {filteredRecords.filter(r => r.status === PaymentStatus.PENDING).length}</span>
-                  </div>
-               </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {paymentOrder && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setPaymentOrder(null)} />
-          <div className="relative bg-white dark:bg-slate-900 w-full max-w-md rounded-[2.5rem] p-8 shadow-2xl border border-slate-100 dark:border-slate-800 animate-in zoom-in-95 duration-200">
-            <div className="flex justify-between items-start mb-6">
-              <div>
-                <h3 className="text-2xl font-black tracking-tight dark:text-white">Checkout</h3>
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Secure Society Payments</p>
-              </div>
-              <button onClick={() => setPaymentOrder(null)} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
-                <X size={20} className="text-slate-400" />
-              </button>
-            </div>
-
-            <div className="p-4 bg-brand-50 dark:bg-brand-900/10 rounded-2xl border border-brand-100 dark:border-brand-900/20 mb-8">
-              <div className="flex justify-between items-center">
-                <span className="text-xs font-bold text-slate-500 dark:text-slate-400">Total Amount</span>
-                <span className="text-xl font-black text-brand-600">₹{paymentOrder.amount}</span>
-              </div>
-            </div>
-            
-            {stripePromise && (
-              <Elements stripe={stripePromise} options={{ clientSecret: paymentOrder.clientSecret }}>
-                <CheckoutForm 
-                  clientSecret={paymentOrder.clientSecret} 
-                  amount={paymentOrder.amount}
-                  onSuccess={handlePaymentSuccess}
-                  onCancel={() => setPaymentOrder(null)}
-                />
-              </Elements>
+    <Fade in={true}>
+      <Box sx={{ pb: 8 }}>
+        <Box sx={{ 
+          display: 'flex', 
+          flexDirection: { xs: 'column', md: 'row' }, 
+          justifyContent: 'space-between', 
+          alignItems: { md: 'center' }, 
+          gap: 3, 
+          mb: 6,
+          pb: 4,
+          borderBottom: '1px solid',
+          borderColor: 'divider'
+        }}>
+          <Box>
+            <Typography variant="h4" sx={{ fontWeight: 900, tracking: '-0.04em' }}>
+              {t('finance_hub')}
+            </Typography>
+            <Typography variant="body1" sx={{ color: 'text.secondary', mt: 1, fontWeight: 500 }}>
+              {activeTab === 'current' 
+                ? `Cycle: ${currentMonth} ${currentYear} • Total Units: ${records.length}` 
+                : 'Audit & Historical Payment Logs'}
+            </Typography>
+          </Box>
+          <Stack direction="row" spacing={2}>
+            {isAdmin && activeTab === 'current' && records.length === 0 && (
+              <Button 
+                variant="contained" 
+                color="success"
+                startIcon={<RefreshCw size={18} />}
+                onClick={handleGenerateMonthly}
+                sx={{ borderRadius: 6, px: 4, py: 1.5, fontWeight: 900, textTransform: 'uppercase', boxShadow: 6 }}
+              >
+                Generate Cycle
+              </Button>
             )}
-
-            <div className="mt-8 pt-6 border-t border-slate-100 dark:border-slate-800 flex items-center justify-center gap-4 opacity-50 grayscale">
-              <img src="https://www.vectorlogo.zone/logos/visa/visa-icon.svg" className="h-4" alt="Visa" />
-              <img src="https://www.vectorlogo.zone/logos/mastercard/mastercard-icon.svg" className="h-4" alt="Mastercard" />
-              <img src="https://www.vectorlogo.zone/logos/npci_upi/npci_upi-icon.svg" className="h-4" alt="UPI" />
-            </div>
-          </div>
-        </div>
-      )}
-
-      {disputeHelp && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setDisputeHelp(null)} />
-          <div className="relative bg-white dark:bg-slate-900 w-full max-w-2xl rounded-[2.5rem] p-8 shadow-2xl border border-slate-100 dark:border-slate-800 animate-in zoom-in-95 duration-200">
-            <div className="flex justify-between items-start mb-6">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-rose-50 dark:bg-rose-900/10 rounded-2xl flex items-center justify-center text-rose-600">
-                  <Zap size={24} />
-                </div>
-                <div>
-                  <h3 className="text-2xl font-black tracking-tight dark:text-white">AI Dispute Resolution</h3>
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Powered by Gemini AI</p>
-                </div>
-              </div>
-              <button onClick={() => setDisputeHelp(null)} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
-                <X size={20} className="text-slate-400" />
-              </button>
-            </div>
-
-            <div className="prose prose-slate dark:prose-invert max-w-none">
-              <div className="p-6 bg-slate-50 dark:bg-slate-800 rounded-3xl border border-slate-100 dark:border-slate-700 text-sm leading-relaxed whitespace-pre-wrap">
-                {disputeHelp.advice}
-              </div>
-            </div>
-
-            <div className="mt-8 flex gap-3">
-              <button 
-                onClick={() => setDisputeHelp(null)}
-                className="flex-1 py-4 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-2xl font-black uppercase tracking-widest text-[10px]"
+            {isAdmin && activeTab === 'current' && records.length > 0 && (
+              <Button 
+                variant="contained" 
+                color={isLocked ? "inherit" : "primary"}
+                disabled={isLocked}
+                startIcon={isLocked ? <Lock size={18} /> : <Unlock size={18} />}
+                onClick={handleLockMonth}
+                sx={{ borderRadius: 6, px: 4, py: 1.5, fontWeight: 900, textTransform: 'uppercase', boxShadow: isLocked ? 0 : 6 }}
               >
-                Close
-              </button>
-              <button 
-                onClick={() => window.location.href = 'mailto:committee@residency.com'}
-                className="flex-1 py-4 bg-brand-600 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-lg shadow-brand-500/20"
+                {isLocked ? 'Cycle Locked' : 'Finalize Ledger'}
+              </Button>
+            )}
+            {isAdmin && activeTab === 'current' && records.length > 0 && (
+              <Button 
+                variant="contained" 
+                color="warning"
+                disabled={isGeneratingReminders}
+                startIcon={isGeneratingReminders ? <CircularProgress size={18} color="inherit" /> : <BellRing size={18} />}
+                onClick={handleSendReminders}
+                sx={{ borderRadius: 6, px: 4, py: 1.5, fontWeight: 900, textTransform: 'uppercase', boxShadow: 6 }}
               >
-                Contact Committee
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
+                Send Reminders
+              </Button>
+            )}
+            {isAdmin && activeTab === 'current' && records.length > 0 && (
+              <Button 
+                variant="contained" 
+                color="error"
+                disabled={isCalculatingPenalties}
+                startIcon={isCalculatingPenalties ? <CircularProgress size={18} color="inherit" /> : <Zap size={18} />}
+                onClick={handleCalculatePenalties}
+                sx={{ borderRadius: 6, px: 4, py: 1.5, fontWeight: 900, textTransform: 'uppercase', boxShadow: 6 }}
+              >
+                Apply Penalties
+              </Button>
+            )}
+            {!isAdmin && (
+              <Button 
+                variant="contained" 
+                color={user?.isRecurringEnabled ? "success" : "primary"}
+                disabled={isSettingUpRecurring || user?.isRecurringEnabled}
+                startIcon={isSettingUpRecurring ? <CircularProgress size={18} color="inherit" /> : <RefreshCw size={18} />}
+                onClick={handleSetupRecurring}
+                sx={{ borderRadius: 6, px: 4, py: 1.5, fontWeight: 900, textTransform: 'uppercase', boxShadow: 6 }}
+              >
+                {user?.isRecurringEnabled ? 'Recurring Active' : 'Enable Recurring'}
+              </Button>
+            )}
+            <Button 
+              variant="outlined" 
+              startIcon={<Download size={18} />}
+              onClick={handleExport}
+              sx={{ borderRadius: 6, px: 4, py: 1.5, fontWeight: 900, textTransform: 'uppercase' }}
+            >
+              {t('export')}
+            </Button>
+          </Stack>
+        </Box>
+
+        <Grid container spacing={4}>
+          <Grid size={12}>
+            <Stack spacing={4}>
+              <Paper sx={{ p: 3, borderRadius: 8, border: '1px solid', borderColor: 'divider' }}>
+                <Box sx={{ p: 1, display: 'flex', flexDirection: { xs: 'column', xl: 'row' }, justifyContent: 'space-between', alignItems: 'center', gap: 3 }}>
+                  <Box sx={{ display: 'flex', bgcolor: 'action.hover', p: 0.5, borderRadius: 4, width: { xs: '100%', xl: 'auto' }, overflowX: 'auto' }}>
+                    <Button 
+                      onClick={() => setActiveTab('current')} 
+                      startIcon={<Calendar size={14} />}
+                      sx={{ 
+                        flex: { xs: 1, xl: 'none' },
+                        px: 3, py: 1, borderRadius: 3, 
+                        fontWeight: 900, textTransform: 'uppercase', fontSize: '0.65rem',
+                        bgcolor: activeTab === 'current' ? 'background.paper' : 'transparent',
+                        color: activeTab === 'current' ? 'primary.main' : 'text.secondary',
+                        boxShadow: activeTab === 'current' ? 2 : 0,
+                        '&:hover': { bgcolor: activeTab === 'current' ? 'background.paper' : 'action.selected' }
+                      }}
+                    >
+                      Current Ledger
+                    </Button>
+                    <Button 
+                      onClick={() => setActiveTab('history')} 
+                      startIcon={<History size={14} />}
+                      sx={{ 
+                        flex: { xs: 1, xl: 'none' },
+                        px: 3, py: 1, borderRadius: 3, 
+                        fontWeight: 900, textTransform: 'uppercase', fontSize: '0.65rem',
+                        bgcolor: activeTab === 'history' ? 'background.paper' : 'transparent',
+                        color: activeTab === 'history' ? 'primary.main' : 'text.secondary',
+                        boxShadow: activeTab === 'history' ? 2 : 0,
+                        '&:hover': { bgcolor: activeTab === 'history' ? 'background.paper' : 'action.selected' }
+                      }}
+                    >
+                      History
+                    </Button>
+                  </Box>
+
+                  <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ width: { xs: '100%', xl: 'auto' } }}>
+                    <TextField 
+                      size="small"
+                      placeholder="Search Flat (e.g. A-1-101)..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <Search size={16} />
+                          </InputAdornment>
+                        ),
+                        sx: { borderRadius: 4, bgcolor: 'action.hover', fontSize: '0.75rem', fontWeight: 700 }
+                      }}
+                      sx={{ width: { sm: 260 } }}
+                    />
+
+                    <Box sx={{ display: 'flex', bgcolor: 'action.hover', p: 0.5, borderRadius: 4, border: '1px solid', borderColor: 'divider' }}>
+                      {['ALL', OccupancyType.OWNER, OccupancyType.TENANT].map((o) => (
+                        <Button
+                          key={o}
+                          size="small"
+                          onClick={() => setOccupancyFilter(o as any)}
+                          sx={{
+                            px: 2, py: 0.5, borderRadius: 3,
+                            fontWeight: 900, textTransform: 'uppercase', fontSize: '0.6rem',
+                            bgcolor: occupancyFilter === o ? 'background.paper' : 'transparent',
+                            color: occupancyFilter === o ? 'primary.main' : 'text.secondary',
+                            boxShadow: occupancyFilter === o ? 1 : 0,
+                            '&:hover': { bgcolor: occupancyFilter === o ? 'background.paper' : 'action.selected' }
+                          }}
+                        >
+                          {o}
+                        </Button>
+                      ))}
+                    </Box>
+
+                    {activeTab === 'current' && (
+                      <Box sx={{ display: 'flex', bgcolor: 'action.hover', p: 0.5, borderRadius: 4, border: '1px solid', borderColor: 'divider' }}>
+                        {['ALL', PaymentStatus.PAID, PaymentStatus.PENDING, PaymentStatus.OVERDUE].map((s) => (
+                          <Button
+                            key={s}
+                            size="small"
+                            onClick={() => setStatusFilter(s as any)}
+                            sx={{
+                              px: 2, py: 0.5, borderRadius: 3,
+                              fontWeight: 900, textTransform: 'uppercase', fontSize: '0.6rem',
+                              bgcolor: statusFilter === s ? 'background.paper' : 'transparent',
+                              color: statusFilter === s ? 'primary.main' : 'text.secondary',
+                              boxShadow: statusFilter === s ? 1 : 0,
+                              '&:hover': { bgcolor: statusFilter === s ? 'background.paper' : 'action.selected' }
+                            }}
+                          >
+                            {s}
+                          </Button>
+                        ))}
+                      </Box>
+                    )}
+                  </Stack>
+                </Box>
+              </Paper>
+
+              <TableContainer component={Paper} sx={{ borderRadius: 8, border: '1px solid', borderColor: 'divider', boxShadow: 0, overflow: 'hidden' }}>
+                <Table stickyHeader>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell sx={{ bgcolor: 'action.hover', fontWeight: 900, textTransform: 'uppercase', fontSize: '0.65rem', letterSpacing: 1, py: 3 }}>{t('unit')}</TableCell>
+                      <TableCell sx={{ bgcolor: 'action.hover', fontWeight: 900, textTransform: 'uppercase', fontSize: '0.65rem', letterSpacing: 1, py: 3 }}>Type</TableCell>
+                      {activeTab === 'history' && <TableCell sx={{ bgcolor: 'action.hover', fontWeight: 900, textTransform: 'uppercase', fontSize: '0.65rem', letterSpacing: 1, py: 3 }}>Period</TableCell>}
+                      <TableCell sx={{ bgcolor: 'action.hover', fontWeight: 900, textTransform: 'uppercase', fontSize: '0.65rem', letterSpacing: 1, py: 3 }}>{t('amount')}</TableCell>
+                      <TableCell sx={{ bgcolor: 'action.hover', fontWeight: 900, textTransform: 'uppercase', fontSize: '0.65rem', letterSpacing: 1, py: 3 }}>Status</TableCell>
+                      <TableCell align="right" sx={{ bgcolor: 'action.hover', fontWeight: 900, textTransform: 'uppercase', fontSize: '0.65rem', letterSpacing: 1, py: 3 }}>{t('actions')}</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {loading ? (
+                      <TableRow>
+                        <TableCell colSpan={6} align="center" sx={{ py: 10 }}>
+                          <CircularProgress size={32} sx={{ mb: 2 }} />
+                          <Typography variant="caption" sx={{ display: 'block', fontWeight: 900, color: 'text.secondary', textTransform: 'uppercase', letterSpacing: 2 }}>
+                            Loading Cloud Data...
+                          </Typography>
+                        </TableCell>
+                      </TableRow>
+                    ) : filteredRecords.length > 0 ? (
+                      filteredRecords.map((record) => (
+                        <TableRow key={record.id} hover sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                          <TableCell sx={{ py: 2.5 }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                              <Avatar sx={{ width: 36, height: 36, borderRadius: 3, bgcolor: 'primary.light', color: 'primary.main', fontWeight: 900, fontSize: '0.8rem' }}>
+                                {record.flatId.split('-').pop()}
+                              </Avatar>
+                              <Typography variant="body2" sx={{ fontWeight: 900 }}>{record.flatId}</Typography>
+                            </Box>
+                          </TableCell>
+                          <TableCell sx={{ py: 2.5 }}>
+                            <Stack direction="row" spacing={1} alignItems="center">
+                              {record.occupancyType === OccupancyType.OWNER ? <Key size={12} style={{ color: '#10b981' }} /> : <Users size={12} style={{ color: '#3b82f6' }} />}
+                              <Typography variant="caption" sx={{ 
+                                fontWeight: 900, 
+                                textTransform: 'uppercase', 
+                                color: record.occupancyType === OccupancyType.OWNER ? 'success.main' : 'info.main',
+                                fontSize: '0.6rem'
+                              }}>
+                                {record.occupancyType}
+                              </Typography>
+                            </Stack>
+                          </TableCell>
+                          {activeTab === 'history' && (
+                            <TableCell sx={{ py: 2.5 }}>
+                              <Typography variant="body2" sx={{ fontWeight: 700 }}>{record.month} {record.year}</Typography>
+                              {record.paidDate && <Typography variant="caption" sx={{ color: 'text.secondary' }}>{new Date(record.paidDate).toLocaleDateString()}</Typography>}
+                            </TableCell>
+                          )}
+                          <TableCell sx={{ py: 2.5 }}>
+                            <Typography variant="body2" sx={{ fontWeight: 900 }}>₹{record.amount}</Typography>
+                            {record.penaltyAmount && record.penaltyAmount > 0 && (
+                              <Typography variant="caption" sx={{ color: 'error.main', fontWeight: 900, fontSize: '0.6rem', display: 'block' }}>
+                                + ₹{record.penaltyAmount} Penalty
+                              </Typography>
+                            )}
+                          </TableCell>
+                          <TableCell sx={{ py: 2.5 }}>
+                            <Chip 
+                              label={record.status} 
+                              size="small"
+                              sx={{ 
+                                fontWeight: 900, 
+                                textTransform: 'uppercase', 
+                                fontSize: '0.6rem',
+                                borderRadius: 2,
+                                border: '2px solid',
+                                bgcolor: record.status === PaymentStatus.PAID ? 'success.light' : (record.status === PaymentStatus.OVERDUE ? 'error.light' : 'warning.light'),
+                                color: record.status === PaymentStatus.PAID ? 'success.main' : (record.status === PaymentStatus.OVERDUE ? 'error.main' : 'warning.main'),
+                                borderColor: 'currentColor',
+                                opacity: 0.8
+                              }} 
+                            />
+                          </TableCell>
+                          <TableCell align="right" sx={{ py: 2.5 }}>
+                            <Stack direction="row" spacing={1} justifyContent="flex-end">
+                              {record.status === PaymentStatus.PAID ? (
+                                <>
+                                  <Button 
+                                    size="small" 
+                                    variant="outlined"
+                                    startIcon={<FileText size={12} />}
+                                    onClick={() => handleViewReceipt(record)}
+                                    sx={{ borderRadius: 3, fontWeight: 900, textTransform: 'uppercase', fontSize: '0.6rem', py: 0.5 }}
+                                  >
+                                    {t('receipt')}
+                                  </Button>
+                                  <IconButton size="small" color="success" onClick={() => handleShareWhatsApp(record)}>
+                                    <Share2 size={14} />
+                                  </IconButton>
+                                  <IconButton size="small" color="error" onClick={() => handleDisputeHelp(record)}>
+                                    <AlertCircle size={14} />
+                                  </IconButton>
+                                </>
+                              ) : (
+                                <>
+                                  {(activeTab === 'current' || record.status === PaymentStatus.OVERDUE) && !isLocked && (
+                                    <Button 
+                                      variant="contained" 
+                                      size="small"
+                                      startIcon={isProcessingPayment ? <CircularProgress size={12} color="inherit" /> : <CreditCard size={12} />}
+                                      onClick={() => handlePayStripe(record)}
+                                      disabled={isProcessingPayment}
+                                      sx={{ borderRadius: 4, fontWeight: 900, textTransform: 'uppercase', fontSize: '0.65rem', boxShadow: 4 }}
+                                    >
+                                      {t('pay_now')}
+                                    </Button>
+                                  )}
+                                  {isAdmin && (
+                                    <IconButton size="small" color="success" onClick={() => handleWhatsAppReminder(record)} sx={{ border: '1px solid', borderColor: 'success.light' }}>
+                                      <MessageCircle size={14} />
+                                    </IconButton>
+                                  )}
+                                </>
+                              )}
+                            </Stack>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={6} align="center" sx={{ py: 10 }}>
+                          <AlertCircle size={48} style={{ opacity: 0.1, marginBottom: 16 }} />
+                          <Typography variant="body2" sx={{ fontWeight: 900, color: 'text.secondary', textTransform: 'uppercase' }}>
+                            No records found matching your filters.
+                          </Typography>
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+
+              <Paper sx={{ p: 3, bgcolor: 'action.hover', borderTop: '1px solid', borderColor: 'divider', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderRadius: '0 0 32px 32px' }}>
+                <Typography variant="caption" sx={{ fontWeight: 900, color: 'text.secondary', textTransform: 'uppercase', letterSpacing: 1 }}>
+                  Showing {filteredRecords.length} units
+                </Typography>
+                <Stack direction="row" spacing={3}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Box sx={{ w: 8, h: 8, borderRadius: '50%', bgcolor: 'success.main' }} />
+                    <Typography variant="caption" sx={{ fontWeight: 900, color: 'text.secondary', textTransform: 'uppercase', fontSize: '0.6rem' }}>
+                      Paid: {filteredRecords.filter(r => r.status === PaymentStatus.PAID).length}
+                    </Typography>
+                  </Box>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Box sx={{ w: 8, h: 8, borderRadius: '50%', bgcolor: 'warning.main' }} />
+                    <Typography variant="caption" sx={{ fontWeight: 900, color: 'text.secondary', textTransform: 'uppercase', fontSize: '0.6rem' }}>
+                      Pending: {filteredRecords.filter(r => r.status === PaymentStatus.PENDING).length}
+                    </Typography>
+                  </Box>
+                </Stack>
+              </Paper>
+            </Stack>
+          </Grid>
+        </Grid>
+
+        {/* Modals */}
+        <Dialog 
+          open={!!paymentOrder} 
+          onClose={() => setPaymentOrder(null)}
+          PaperProps={{ sx: { borderRadius: 8, p: 2, maxWidth: 450, width: '100%', border: '1px solid', borderColor: 'divider' } }}
+        >
+          <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Box>
+              <Typography variant="h5" sx={{ fontWeight: 900 }}>Checkout</Typography>
+              <Typography variant="caption" sx={{ fontWeight: 900, color: 'text.secondary', textTransform: 'uppercase', letterSpacing: 1 }}>Secure Society Payments</Typography>
+            </Box>
+            <IconButton onClick={() => setPaymentOrder(null)}>
+              <X size={20} />
+            </IconButton>
+          </DialogTitle>
+          <DialogContent>
+            {paymentOrder && (
+              <>
+                <Paper sx={{ p: 3, bgcolor: 'primary.light', color: 'primary.main', borderRadius: 4, border: '1px solid', borderColor: 'primary.main', mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Typography variant="body2" sx={{ fontWeight: 900 }}>Total Amount</Typography>
+                  <Typography variant="h5" sx={{ fontWeight: 900 }}>₹{paymentOrder.amount}</Typography>
+                </Paper>
+                <Elements stripe={stripePromise} options={{ clientSecret: paymentOrder.clientSecret }}>
+                  <CheckoutForm 
+                    clientSecret={paymentOrder.clientSecret}
+                    amount={paymentOrder.amount}
+                    onSuccess={handlePaymentSuccess}
+                    onCancel={() => setPaymentOrder(null)}
+                  />
+                </Elements>
+                <Stack direction="row" spacing={2} justifyContent="center" sx={{ mt: 4, opacity: 0.5, filter: 'grayscale(1)' }}>
+                  <Box component="img" src="https://www.vectorlogo.zone/logos/visa/visa-icon.svg" sx={{ h: 16 }} />
+                  <Box component="img" src="https://www.vectorlogo.zone/logos/mastercard/mastercard-icon.svg" sx={{ h: 16 }} />
+                  <Box component="img" src="https://www.vectorlogo.zone/logos/npci_upi/npci_upi-icon.svg" sx={{ h: 16 }} />
+                </Stack>
+              </>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        <Dialog 
+          open={!!selectedReceipt} 
+          onClose={() => setSelectedReceipt(null)}
+          PaperProps={{ sx: { borderRadius: 10, p: 4, maxWidth: 600, width: '100%', overflow: 'hidden' } }}
+        >
+          <DialogContent sx={{ p: 0, position: 'relative' }}>
+            <Box sx={{ position: 'absolute', top: -40, right: -40, width: 160, height: 160, bgcolor: 'primary.main', opacity: 0.05, borderRadius: '50%', filter: 'blur(40px)' }} />
+            {selectedReceipt && (
+              <Box sx={{ position: 'relative', zIndex: 1 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 6 }}>
+                  <Stack direction="row" spacing={2} alignItems="center">
+                    <Avatar sx={{ width: 48, height: 48, bgcolor: 'primary.main', borderRadius: 4, boxShadow: 6 }}>
+                      <ShieldCheck size={24} />
+                    </Avatar>
+                    <Box>
+                      <Typography variant="h6" sx={{ fontWeight: 900, tracking: '-0.02em' }}>{selectedReceipt.societyName}</Typography>
+                      <Typography variant="caption" sx={{ fontWeight: 900, color: 'text.secondary', textTransform: 'uppercase', letterSpacing: 1 }}>Official Payment Receipt</Typography>
+                    </Box>
+                  </Stack>
+                  <IconButton onClick={() => setSelectedReceipt(null)}>
+                    <X size={20} />
+                  </IconButton>
+                </Box>
+
+                <Stack spacing={4}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', pb: 4, borderBottom: '1px solid', borderColor: 'divider' }}>
+                    <Box>
+                      <Typography variant="caption" sx={{ fontWeight: 900, color: 'text.secondary', textTransform: 'uppercase', letterSpacing: 1, mb: 0.5, display: 'block' }}>Receipt No</Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 900 }}>{selectedReceipt.receiptNo}</Typography>
+                    </Box>
+                    <Box sx={{ textAlign: 'right' }}>
+                      <Typography variant="caption" sx={{ fontWeight: 900, color: 'text.secondary', textTransform: 'uppercase', letterSpacing: 1, mb: 0.5, display: 'block' }}>Date</Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 900 }}>{new Date(selectedReceipt.paidDate).toLocaleDateString()}</Typography>
+                    </Box>
+                  </Box>
+
+                  <Stack spacing={2}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>Unit Number</Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 900 }}>{selectedReceipt.flatId}</Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>Billing Period</Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 900 }}>{selectedReceipt.period}</Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>Base Amount</Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 900 }}>₹{selectedReceipt.amount}</Typography>
+                    </Box>
+                    {selectedReceipt.penalty > 0 && (
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>Penalty Charges</Typography>
+                        <Typography variant="body2" sx={{ fontWeight: 900, color: 'error.main' }}>₹{selectedReceipt.penalty}</Typography>
+                      </Box>
+                    )}
+                  </Stack>
+
+                  <Paper sx={{ p: 4, bgcolor: 'action.hover', borderRadius: 6, border: '1px solid', borderColor: 'divider' }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <Typography variant="body1" sx={{ fontWeight: 900, textTransform: 'uppercase', letterSpacing: 1 }}>Total Paid</Typography>
+                      <Typography variant="h4" sx={{ fontWeight: 900, color: 'primary.main', tracking: '-0.04em' }}>₹{selectedReceipt.total}</Typography>
+                    </Box>
+                  </Paper>
+
+                  <Box sx={{ textAlign: 'center' }}>
+                    <Chip 
+                      icon={<CheckCircle size={14} />} 
+                      label="Payment Verified" 
+                      color="success" 
+                      sx={{ fontWeight: 900, textTransform: 'uppercase', fontSize: '0.65rem', mb: 2 }} 
+                    />
+                    <Typography variant="caption" sx={{ display: 'block', color: 'text.secondary', fontWeight: 500, maxWidth: 240, mx: 'auto' }}>
+                      This is a computer-generated receipt and does not require a physical signature.
+                    </Typography>
+                  </Box>
+
+                  <Stack direction="row" spacing={2}>
+                    <Button 
+                      fullWidth 
+                      variant="contained" 
+                      startIcon={<Download size={18} />}
+                      onClick={() => window.print()}
+                      sx={{ py: 1.5, borderRadius: 4, fontWeight: 900, textTransform: 'uppercase' }}
+                    >
+                      Print PDF
+                    </Button>
+                    <Button 
+                      fullWidth 
+                      variant="contained" 
+                      color="success"
+                      startIcon={<Share2 size={18} />}
+                      onClick={() => handleShareWhatsApp({ ...selectedReceipt, amount: selectedReceipt.total } as any)}
+                      sx={{ py: 1.5, borderRadius: 4, fontWeight: 900, textTransform: 'uppercase' }}
+                    >
+                      Share
+                    </Button>
+                  </Stack>
+                </Stack>
+              </Box>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        <Dialog 
+          open={!!disputeHelp} 
+          onClose={() => setDisputeHelp(null)}
+          PaperProps={{ sx: { borderRadius: 8, p: 3, maxWidth: 650, width: '100%', border: '1px solid', borderColor: 'divider' } }}
+        >
+          <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Stack direction="row" spacing={2} alignItems="center">
+              <Avatar sx={{ bgcolor: 'error.light', color: 'error.main', borderRadius: 4 }}>
+                <Zap size={24} />
+              </Avatar>
+              <Box>
+                <Typography variant="h5" sx={{ fontWeight: 900 }}>AI Dispute Resolution</Typography>
+                <Typography variant="caption" sx={{ fontWeight: 900, color: 'text.secondary', textTransform: 'uppercase', letterSpacing: 1 }}>Powered by Gemini AI</Typography>
+              </Box>
+            </Stack>
+            <IconButton onClick={() => setDisputeHelp(null)}>
+              <X size={20} />
+            </IconButton>
+          </DialogTitle>
+          <DialogContent>
+            <Paper sx={{ p: 4, bgcolor: 'action.hover', borderRadius: 6, border: '1px solid', borderColor: 'divider', mt: 2 }}>
+              <Typography variant="body2" sx={{ lineHeight: 1.8, whiteSpace: 'pre-wrap', color: 'text.primary' }}>
+                {disputeHelp?.advice}
+              </Typography>
+            </Paper>
+          </DialogContent>
+          <DialogActions sx={{ p: 3 }}>
+            <Button 
+              fullWidth 
+              variant="outlined" 
+              onClick={() => setDisputeHelp(null)}
+              sx={{ py: 1.5, borderRadius: 4, fontWeight: 900, textTransform: 'uppercase' }}
+            >
+              Close
+            </Button>
+            <Button 
+              fullWidth 
+              variant="contained" 
+              onClick={() => window.location.href = 'mailto:committee@residency.com'}
+              sx={{ py: 1.5, borderRadius: 4, fontWeight: 900, textTransform: 'uppercase' }}
+            >
+              Contact Committee
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </Box>
+    </Fade>
   );
 };
 

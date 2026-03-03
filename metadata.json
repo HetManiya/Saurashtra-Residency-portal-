@@ -1,6 +1,6 @@
 {
   "name": "Saurashtra Residency V2",
-  "description": "The next generation of society management. Featuring AI-powered assistance, secure Stripe payments, and a modern resident experience.",
+  "description": "The next generation of society management. Featuring AI-powered assistance, secure visitor gate management, community polls, and a modern resident experience.",
   "requestFramePermissions": [
     "microphone",
     "camera",

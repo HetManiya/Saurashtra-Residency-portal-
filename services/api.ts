@@ -404,8 +404,23 @@ export const api = {
     link.click();
   },
 
-  generateReceipt: (record: any) => {
-    alert(`Receipt generated for unit ${record.flatId}`);
+  generateReceipt: async (recordId: string) => {
+    const response = await fetch(`/api/society/maintenance/${recordId}/receipt`, {
+      headers: getAuthHeader()
+    });
+    return handleResponse(response);
+  },
+
+  calculatePenalties: async (month: string, year: number) => {
+    const response = await fetch('/api/society/maintenance/calculate-penalties', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthHeader()
+      },
+      body: JSON.stringify({ month, year })
+    });
+    return handleResponse(response);
   },
 
   async isMonthLocked(month: string, year: number) {
@@ -480,7 +495,45 @@ export const api = {
   },
 
   async generateVisitorPass(visitorData: any) {
-    return { ...visitorData, id: Math.random().toString(36).substr(2, 9), timestamp: new Date().toISOString() };
+    const response = await fetch('/api/society/visitors/generate', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthHeader()
+      },
+      body: JSON.stringify(visitorData)
+    });
+    return handleResponse(response);
+  },
+
+  async verifyVisitorPass(passId: string) {
+    const response = await fetch(`/api/society/visitors/verify/${passId}`, {
+      headers: getAuthHeader()
+    });
+    return handleResponse(response);
+  },
+
+  async checkInVisitor(passId: string) {
+    const response = await fetch(`/api/society/visitors/check-in/${passId}`, {
+      method: 'POST',
+      headers: getAuthHeader()
+    });
+    return handleResponse(response);
+  },
+
+  async checkOutVisitor(visitorId: string) {
+    const response = await fetch(`/api/society/visitors/check-out/${visitorId}`, {
+      method: 'POST',
+      headers: getAuthHeader()
+    });
+    return handleResponse(response);
+  },
+
+  async getActiveVisitors() {
+    const response = await fetch('/api/society/visitors/active', {
+      headers: getAuthHeader()
+    });
+    return handleResponse(response);
   },
 
   async getLocalityInfo(address?: string) {
@@ -490,6 +543,33 @@ export const api = {
         { web: { uri: 'https://www.google.com/maps/search/Pasodara+Surat', title: 'Pasodara Neighborhood Map' } }
       ]
     };
+  },
+
+  async getPackages() {
+    const response = await fetch('/api/society/packages', {
+      headers: getAuthHeader()
+    });
+    return handleResponse(response);
+  },
+
+  async logPackage(packageData: any) {
+    const response = await fetch('/api/society/packages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthHeader()
+      },
+      body: JSON.stringify(packageData)
+    });
+    return handleResponse(response);
+  },
+
+  async collectPackage(packageId: string) {
+    const response = await fetch(`/api/society/packages/${packageId}/collect`, {
+      method: 'PATCH',
+      headers: getAuthHeader()
+    });
+    return handleResponse(response);
   }
 };
 

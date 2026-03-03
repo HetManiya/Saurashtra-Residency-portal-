@@ -1,5 +1,10 @@
-
 import React, { useState, useEffect } from 'react';
+import { 
+  Box, Typography, Grid, Card, Button, IconButton, 
+  Avatar, Chip, CircularProgress, Paper, useTheme, 
+  Fade, Stack, Divider, TextField, InputAdornment,
+  useMediaQuery, Tooltip
+} from '@mui/material';
 import { 
   ShieldCheck, UserCheck, UserX, Clock, MapPin, 
   Home, Mail, Loader2, AlertCircle, Info, CheckCircle2,
@@ -10,6 +15,8 @@ import { useNavigate } from 'react-router-dom';
 
 const RegistrationApprovals: React.FC = () => {
   const navigate = useNavigate();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [pendingUsers, setPendingUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [processingId, setProcessingId] = useState<string | null>(null);
@@ -53,7 +60,7 @@ const RegistrationApprovals: React.FC = () => {
   };
 
   const handleReject = async (userId: string) => {
-    if (!confirm("Are you sure you want to REJECT this registration?")) return;
+    if (!window.confirm("Are you sure you want to REJECT this registration?")) return;
     setProcessingId(userId);
     try {
       await api.rejectRegistration(userId);
@@ -67,132 +74,204 @@ const RegistrationApprovals: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="h-[60vh] flex flex-col items-center justify-center">
-        <Loader2 className="animate-spin text-brand-600 mb-4" size={40} />
-        <p className="font-black uppercase tracking-widest text-xs text-slate-400">Syncing Authorization Queue...</p>
-      </div>
+      <Box sx={{ height: '60vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+        <CircularProgress size={40} sx={{ mb: 2 }} />
+        <Typography variant="caption" sx={{ fontWeight: 900, textTransform: 'uppercase', color: 'text.secondary', letterSpacing: 2 }}>
+          Syncing Authorization Queue...
+        </Typography>
+      </Box>
     );
   }
 
   return (
-    <div className="space-y-10 animate-fade-up max-w-6xl mx-auto">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-8 border-b border-slate-200 dark:border-slate-800">
-        <div className="space-y-2">
-          <div className="inline-flex items-center gap-2 px-3 py-1 bg-amber-600 text-white rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg shadow-amber-600/20">
-             <ShieldAlert size={14} /> Society Management Authority
-          </div>
-          <h1 className="text-5xl font-black text-slate-900 dark:text-white tracking-tighter">Membership <span className="text-brand-600">Verification</span></h1>
-          <p className="text-slate-500 dark:text-slate-400 font-medium">Approve or reject new resident requests for Saurashtra Residency</p>
-        </div>
-        <div className="flex items-center gap-4 px-8 py-5 bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 shadow-sm">
-           <div className="w-12 h-12 bg-amber-50 dark:bg-amber-900/20 rounded-2xl flex items-center justify-center text-amber-600">
-             <Clock size={24} />
-           </div>
-           <div>
-              <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest leading-none mb-1">Pending Requests</p>
-              <p className="text-2xl font-black dark:text-white leading-none">{pendingUsers.length}</p>
-           </div>
-        </div>
-      </div>
+    <Fade in={true}>
+      <Box sx={{ maxWidth: 1100, mx: 'auto', pb: 8 }}>
+        <Box sx={{ 
+          display: 'flex', 
+          flexDirection: { xs: 'column', md: 'row' }, 
+          justifyContent: 'space-between', 
+          alignItems: { md: 'flex-end' }, 
+          gap: 3, 
+          mb: 6,
+          pb: 4,
+          borderBottom: '1px solid',
+          borderColor: 'divider'
+        }}>
+          <Box>
+            <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 1.5 }}>
+              <Chip 
+                icon={<ShieldAlert size={14} />} 
+                label="Society Management Authority" 
+                color="warning" 
+                sx={{ fontWeight: 900, textTransform: 'uppercase', fontSize: '0.6rem', borderRadius: 4, boxShadow: 4 }} 
+              />
+            </Stack>
+            <Typography variant="h3" sx={{ fontWeight: 900, tracking: '-0.04em' }}>
+              Membership <Box component="span" sx={{ color: 'primary.main' }}>Verification</Box>
+            </Typography>
+            <Typography variant="body1" sx={{ color: 'text.secondary', mt: 1, fontWeight: 500 }}>
+              Approve or reject new resident requests for Saurashtra Residency
+            </Typography>
+          </Box>
+          <Paper sx={{ p: 2, px: 4, borderRadius: 8, border: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center', gap: 3, boxShadow: 0 }}>
+            <Avatar sx={{ bgcolor: 'warning.light', color: 'warning.main', borderRadius: 3, width: 48, height: 48 }}>
+              <Clock size={24} />
+            </Avatar>
+            <Box>
+              <Typography variant="caption" sx={{ fontWeight: 900, color: 'text.disabled', textTransform: 'uppercase', fontSize: '0.55rem' }}>Pending Requests</Typography>
+              <Typography variant="h4" sx={{ fontWeight: 900 }}>{pendingUsers.length}</Typography>
+            </Box>
+          </Paper>
+        </Box>
 
-      {pendingUsers.length === 0 ? (
-        <div className="py-24 text-center bg-white dark:bg-slate-900 rounded-[4rem] border-2 border-dashed border-slate-100 dark:border-slate-800 flex flex-col items-center">
-           <div className="w-24 h-24 bg-emerald-50 dark:bg-emerald-900/10 rounded-[3rem] flex items-center justify-center text-emerald-600 mb-8 shadow-xl">
-              <CheckCircle2 size={48} />
-           </div>
-           <h3 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">Access Control Clear</h3>
-           <p className="text-slate-500 dark:text-slate-400 font-medium max-w-sm mx-auto mt-2">All registration requests have been processed. Digital gateway is secure.</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 gap-8">
-          {pendingUsers.map((pUser) => (
-            <div key={pUser.id} className="group bg-white dark:bg-slate-900 p-10 md:p-12 rounded-[4rem] border border-slate-100 dark:border-slate-800 premium-shadow flex flex-col lg:flex-row items-center justify-between gap-12 transition-all hover:border-brand-600/30 overflow-hidden relative">
-              <div className="absolute top-0 right-0 w-40 h-40 bg-brand-600/5 rounded-full blur-[60px] -mr-20 -mt-20 group-hover:scale-150 transition-transform duration-700" />
-              
-              <div className="flex flex-col md:flex-row items-center gap-10 w-full lg:w-auto relative z-10">
-                <div className="relative">
-                  <div className="w-28 h-28 rounded-[3rem] overflow-hidden bg-slate-50 dark:bg-slate-800 border-4 border-white dark:border-slate-700 shrink-0 shadow-2xl transition-transform group-hover:scale-105">
-                    <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${pUser.email}`} alt="User" />
-                  </div>
-                  <div className="absolute -bottom-2 -right-2 w-10 h-10 bg-brand-600 rounded-2xl flex items-center justify-center text-white border-4 border-white dark:border-slate-900 shadow-xl">
-                    <Fingerprint size={18} />
-                  </div>
-                </div>
+        {pendingUsers.length === 0 ? (
+          <Paper sx={{ py: 12, textAlign: 'center', borderRadius: 16, border: '2px dashed', borderColor: 'divider', boxShadow: 0, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+             <Avatar sx={{ width: 96, height: 96, bgcolor: 'success.light', color: 'success.main', borderRadius: 10, mb: 4, boxShadow: 10 }}>
+                <CheckCircle2 size={48} />
+             </Avatar>
+             <Typography variant="h4" sx={{ fontWeight: 900, mb: 1 }}>Access Control Clear</Typography>
+             <Typography variant="body1" sx={{ color: 'text.secondary', maxWidth: 400, fontWeight: 500 }}>
+               All registration requests have been processed. Digital gateway is secure.
+             </Typography>
+          </Paper>
+        ) : (
+          <Stack spacing={4}>
+            {pendingUsers.map((pUser) => (
+              <Card 
+                key={pUser.id} 
+                sx={{ 
+                  p: { xs: 4, md: 6 }, 
+                  borderRadius: 16, 
+                  border: '1px solid', 
+                  borderColor: 'divider', 
+                  boxShadow: 0,
+                  position: 'relative',
+                  overflow: 'hidden',
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    borderColor: 'primary.main',
+                    boxShadow: 10
+                  }
+                }}
+              >
+                <Box sx={{ position: 'absolute', top: -40, right: -40, width: 160, height: 160, bgcolor: 'primary.main', opacity: 0.05, borderRadius: '50%', filter: 'blur(60px)', transition: 'transform 0.7s ease', '.MuiCard-root:hover &': { transform: 'scale(1.5)' } }} />
+                
+                <Grid container spacing={4} alignItems="center" sx={{ position: 'relative', zIndex: 1 }}>
+                  <Grid item xs={12} lg={8}>
+                    <Stack direction={{ xs: 'column', md: 'row' }} spacing={4} alignItems={{ xs: 'center', md: 'flex-start' }}>
+                      <Box sx={{ position: 'relative' }}>
+                        <Avatar 
+                          src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${pUser.email}`} 
+                          sx={{ width: 112, height: 112, borderRadius: 10, border: '4px solid', borderColor: 'background.paper', boxShadow: 10 }} 
+                        />
+                        <Avatar sx={{ position: 'absolute', bottom: -8, right: -8, width: 40, height: 40, bgcolor: 'primary.main', border: '4px solid', borderColor: 'background.paper', boxShadow: 4 }}>
+                          <Fingerprint size={18} color="white" />
+                        </Avatar>
+                      </Box>
 
-                <div className="text-center md:text-left space-y-4">
-                  <div>
-                    <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 mb-2">
-                      <h3 className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter">{pUser.name}</h3>
-                      <div className="flex items-center gap-2 px-3 py-1 bg-brand-50 dark:bg-brand-900/20 text-brand-600 rounded-xl">
-                        <ShieldCheck size={12} />
-                        <span className="text-[10px] font-black uppercase tracking-widest">{pUser.role}</span>
-                      </div>
-                    </div>
-                    <p className="text-slate-400 font-bold text-xs uppercase tracking-widest flex items-center justify-center md:justify-start gap-2">
-                      <Mail size={14} className="text-brand-600" /> {pUser.email}
-                    </p>
-                  </div>
+                      <Box sx={{ textAlign: { xs: 'center', md: 'left' } }}>
+                        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems="center" sx={{ mb: 2 }}>
+                          <Typography variant="h4" sx={{ fontWeight: 900, tracking: '-0.04em' }}>{pUser.name}</Typography>
+                          <Chip 
+                            icon={<ShieldCheck size={12} />} 
+                            label={pUser.role} 
+                            size="small"
+                            color="primary" 
+                            variant="outlined"
+                            sx={{ fontWeight: 900, textTransform: 'uppercase', fontSize: '0.6rem', borderRadius: 2, bgcolor: 'primary.light' }} 
+                          />
+                        </Stack>
+                        <Stack direction="row" spacing={1} alignItems="center" justifyContent={{ xs: 'center', md: 'flex-start' }} sx={{ mb: 3, color: 'text.disabled' }}>
+                          <Mail size={14} color={theme.palette.primary.main} />
+                          <Typography variant="caption" sx={{ fontWeight: 900, textTransform: 'uppercase', letterSpacing: 1 }}>{pUser.email}</Typography>
+                        </Stack>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-3">
-                    <div className="flex items-center gap-3 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm">
-                       <MapPin size={18} className="text-brand-600" />
-                       <div>
-                         <p className="text-[9px] font-black uppercase text-slate-400 leading-none mb-1">Mapping</p>
-                         <p className="text-sm font-black dark:text-white">{pUser.flatId || 'N/A'}</p>
-                       </div>
-                    </div>
-                    <div className="flex items-center gap-3 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm">
-                       <Home size={18} className="text-brand-600" />
-                       <div>
-                         <p className="text-[9px] font-black uppercase text-slate-400 leading-none mb-1">Tenure</p>
-                         <p className="text-sm font-black dark:text-white">{pUser.occupancyType}</p>
-                       </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+                        <Grid container spacing={2}>
+                          <Grid item xs={12} sm={6}>
+                            <Paper sx={{ p: 2, borderRadius: 4, bgcolor: 'action.hover', border: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center', gap: 2, boxShadow: 0 }}>
+                               <Avatar sx={{ bgcolor: 'primary.light', color: 'primary.main', borderRadius: 2, width: 36, height: 36 }}>
+                                 <MapPin size={18} />
+                               </Avatar>
+                               <Box>
+                                 <Typography variant="caption" sx={{ fontWeight: 900, color: 'text.disabled', textTransform: 'uppercase', fontSize: '0.55rem' }}>Mapping</Typography>
+                                 <Typography variant="body2" sx={{ fontWeight: 900 }}>{pUser.flatId || 'N/A'}</Typography>
+                               </Box>
+                            </Paper>
+                          </Grid>
+                          <Grid item xs={12} sm={6}>
+                            <Paper sx={{ p: 2, borderRadius: 4, bgcolor: 'action.hover', border: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center', gap: 2, boxShadow: 0 }}>
+                               <Avatar sx={{ bgcolor: 'primary.light', color: 'primary.main', borderRadius: 2, width: 36, height: 36 }}>
+                                 <Home size={18} />
+                               </Avatar>
+                               <Box>
+                                 <Typography variant="caption" sx={{ fontWeight: 900, color: 'text.disabled', textTransform: 'uppercase', fontSize: '0.55rem' }}>Tenure</Typography>
+                                 <Typography variant="body2" sx={{ fontWeight: 900 }}>{pUser.occupancyType}</Typography>
+                               </Box>
+                            </Paper>
+                          </Grid>
+                        </Grid>
+                      </Box>
+                    </Stack>
+                  </Grid>
 
-              <div className="flex flex-col sm:flex-row gap-4 w-full lg:w-auto relative z-10">
-                <button 
-                  disabled={processingId === pUser.id}
-                  onClick={() => handleReject(pUser.id)}
-                  className="flex-1 lg:flex-none px-12 py-5 bg-white dark:bg-slate-800 text-rose-600 dark:text-rose-400 rounded-[2.5rem] font-black text-xs uppercase tracking-widest hover:bg-rose-600 hover:text-white transition-all border-2 border-rose-100 dark:border-rose-900/30 active:scale-[0.98] shadow-xl shadow-rose-500/5"
-                >
-                  {processingId === pUser.id ? <Loader2 className="animate-spin mx-auto" size={18} /> : (
-                    <div className="flex items-center justify-center gap-2"><UserX size={18} /> Reject</div>
-                  )}
-                </button>
-                <button 
-                  disabled={processingId === pUser.id}
-                  onClick={() => handleApprove(pUser.id)}
-                  className="flex-1 lg:flex-none px-12 py-5 bg-brand-600 text-white rounded-[2.5rem] font-black text-xs uppercase tracking-widest shadow-2xl shadow-brand-500/40 hover:bg-brand-700 transition-all active:scale-[0.98] flex items-center justify-center gap-3 border-2 border-brand-500"
-                >
-                  {processingId === pUser.id ? <Loader2 className="animate-spin mx-auto" size={18} /> : (
-                    <><UserCheck size={18} /> Authorize</>
-                  )}
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+                  <Grid item xs={12} lg={4}>
+                    <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ width: '100%' }}>
+                      <Button 
+                        fullWidth
+                        variant="outlined"
+                        color="error"
+                        disabled={processingId === pUser.id}
+                        onClick={() => handleReject(pUser.id)}
+                        startIcon={processingId !== pUser.id && <UserX size={18} />}
+                        sx={{ 
+                          borderRadius: 8, py: 2, 
+                          fontWeight: 900, textTransform: 'uppercase', fontSize: '0.7rem',
+                          borderColor: 'error.light',
+                          '&:hover': { bgcolor: 'error.main', color: 'white', borderColor: 'error.main' }
+                        }}
+                      >
+                        {processingId === pUser.id ? <CircularProgress size={18} color="inherit" /> : 'Reject'}
+                      </Button>
+                      <Button 
+                        fullWidth
+                        variant="contained"
+                        disabled={processingId === pUser.id}
+                        onClick={() => handleApprove(pUser.id)}
+                        startIcon={processingId !== pUser.id && <UserCheck size={18} />}
+                        sx={{ 
+                          borderRadius: 8, py: 2, 
+                          fontWeight: 900, textTransform: 'uppercase', fontSize: '0.7rem',
+                          boxShadow: 10,
+                          '&:active': { transform: 'scale(0.95)' }
+                        }}
+                      >
+                        {processingId === pUser.id ? <CircularProgress size={18} color="inherit" /> : 'Authorize'}
+                      </Button>
+                    </Stack>
+                  </Grid>
+                </Grid>
+              </Card>
+            ))}
+          </Stack>
+        )}
 
-      <div className="p-12 bg-[#0F172A] rounded-[4rem] text-white relative overflow-hidden shadow-2xl">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-brand-600/10 rounded-full blur-[100px] -mr-48 -mt-48" />
-        <div className="relative z-10 flex flex-col md:flex-row items-center gap-10">
-           <div className="w-20 h-20 bg-white/5 backdrop-blur-md rounded-3xl flex items-center justify-center text-amber-500 border border-white/10 shrink-0">
-              <ShieldAlert size={40} />
-           </div>
-           <div className="space-y-4">
-              <h4 className="text-2xl font-black tracking-tight">Security Protocol Verification</h4>
-              <p className="text-slate-400 text-lg font-medium leading-relaxed">
-                Approving a membership request grants access to internal society records and ledger details.
-                <span className="text-white font-black ml-1">Always verify identities via physical registers before granting digital entry.</span>
-              </p>
-           </div>
-        </div>
-      </div>
-    </div>
+        <Paper sx={{ mt: 8, p: 6, borderRadius: 16, bgcolor: '#0F172A', color: 'white', position: 'relative', overflow: 'hidden', boxShadow: 10 }}>
+          <Box sx={{ position: 'absolute', top: -80, right: -80, width: 320, height: 320, bgcolor: 'primary.main', opacity: 0.1, borderRadius: '50%', filter: 'blur(80px)' }} />
+          <Stack direction={{ xs: 'column', md: 'row' }} spacing={5} alignItems="center" sx={{ position: 'relative', zIndex: 1 }}>
+             <Avatar sx={{ width: 80, height: 80, bgcolor: 'rgba(255,255,255,0.05)', backdropFilter: 'blur(10px)', borderRadius: 6, border: '1px solid rgba(255,255,255,0.1)', color: 'warning.main' }}>
+                <ShieldAlert size={40} />
+             </Avatar>
+             <Box>
+                <Typography variant="h5" sx={{ fontWeight: 900, mb: 1.5, tracking: '-0.02em' }}>Security Protocol Verification</Typography>
+                <Typography variant="body1" sx={{ color: 'rgba(255,255,255,0.6)', fontSize: '1.1rem', fontWeight: 500, lineHeight: 1.6 }}>
+                  Approving a membership request grants access to internal society records and ledger details.
+                  <Box component="span" sx={{ color: 'white', fontWeight: 900, ml: 1 }}>Always verify identities via physical registers before granting digital entry.</Box>
+                </Typography>
+             </Box>
+          </Stack>
+        </Paper>
+      </Box>
+    </Fade>
   );
 };
 

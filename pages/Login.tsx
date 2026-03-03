@@ -1,10 +1,21 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
-import { Lock, Mail, Loader2, Shield, CheckCircle, AlertTriangle, UserPlus, Info, ShieldCheck, Home, ArrowRight, User, ShieldAlert } from 'lucide-react';
+import { 
+  Box, Container, Paper, Typography, TextField, 
+  Button, IconButton, InputAdornment, Alert, 
+  CircularProgress, Link as MuiLink, Stack, Chip,
+  Fade, useTheme, Avatar
+} from '@mui/material';
+import { 
+  Lock, Mail, Loader2, Shield, CheckCircle, AlertTriangle, 
+  UserPlus, Info, ShieldCheck, Home, ArrowRight, User, 
+  ShieldAlert 
+} from 'lucide-react';
 import { api } from '../services/api';
 
 const Login: React.FC = () => {
+  const theme = useTheme();
   const location = useLocation();
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
@@ -55,94 +66,179 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#FDFEFF] dark:bg-[#020617] p-6 transition-all duration-500 relative overflow-hidden">
-      <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-brand-600/5 rounded-full blur-[120px] -mr-96 -mt-96" />
-      <div className="absolute bottom-0 left-0 w-[800px] h-[800px] bg-indigo-600/5 rounded-full blur-[120px] -ml-96 -mb-96" />
+    <Box sx={{ 
+      minHeight: '100vh', 
+      display: 'flex', 
+      alignItems: 'center', 
+      justifyContent: 'center', 
+      bgcolor: 'background.default',
+      position: 'relative',
+      overflow: 'hidden',
+      p: 3
+    }}>
+      {/* Decorative Background Elements */}
+      <Box sx={{ 
+        position: 'absolute', top: 0, right: 0, 
+        width: 800, height: 800, 
+        bgcolor: 'primary.main', opacity: 0.05, 
+        borderRadius: '50%', filter: 'blur(120px)',
+        mr: -40, mt: -40
+      }} />
+      <Box sx={{ 
+        position: 'absolute', bottom: 0, left: 0, 
+        width: 800, height: 800, 
+        bgcolor: 'secondary.main', opacity: 0.05, 
+        borderRadius: '50%', filter: 'blur(120px)',
+        ml: -40, mb: -40
+      }} />
 
-      <div className="max-w-lg w-full relative z-10">
-        <div className="bg-white dark:bg-slate-900 rounded-[3.5rem] shadow-2xl p-10 md:p-14 border border-slate-100 dark:border-slate-800 premium-shadow">
-          <div className="text-center mb-10">
-            <div className="w-16 h-16 bg-brand-600 rounded-2xl flex items-center justify-center text-white mx-auto mb-6 shadow-2xl shadow-brand-500/20 rotate-3">
-              <Shield size={32} strokeWidth={2.5} />
-            </div>
-            <h1 className="text-3xl font-black text-slate-900 dark:text-white mb-2 tracking-tighter">Saurashtra Residency <span className="text-brand-600">Portal</span></h1>
-            <p className="text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-widest">Premium Community Access</p>
-          </div>
+      <Container maxWidth="sm" sx={{ position: 'relative', zIndex: 1 }}>
+        <Fade in timeout={800}>
+          <Paper sx={{ 
+            p: { xs: 5, md: 8 }, 
+            borderRadius: 10, 
+            boxShadow: 24,
+            border: '1px solid',
+            borderColor: 'divider'
+          }}>
+            <Box sx={{ textAlign: 'center', mb: 6 }}>
+              <Avatar sx={{ 
+                width: 64, height: 64, 
+                bgcolor: 'primary.main', 
+                mx: 'auto', mb: 3,
+                boxShadow: 10,
+                transform: 'rotate(5deg)'
+              }}>
+                <Shield size={32} />
+              </Avatar>
+              <Typography variant="h4" sx={{ fontWeight: 900, mb: 1, tracking: '-0.02em' }}>
+                Saurashtra Residency <Box component="span" sx={{ color: 'primary.main' }}>Portal</Box>
+              </Typography>
+              <Typography variant="caption" sx={{ fontWeight: 900, color: 'text.secondary', textTransform: 'uppercase', letterSpacing: 2 }}>
+                Premium Community Access
+              </Typography>
+            </Box>
 
-          {success && <div className="mb-6 p-4 rounded-2xl bg-emerald-50 text-emerald-600 text-xs font-bold flex gap-3 animate-in zoom-in-95"><CheckCircle size={18} /> {success}</div>}
-          {error && <div className="mb-6 p-4 rounded-2xl bg-rose-50 text-rose-600 text-[10px] font-black uppercase tracking-widest flex gap-3 leading-relaxed"><AlertTriangle size={18} className="shrink-0" /> {error}</div>}
+            {success && (
+              <Alert severity="success" icon={<CheckCircle size={20} />} sx={{ mb: 4, borderRadius: 4, fontWeight: 700 }}>
+                {success}
+              </Alert>
+            )}
+            {error && (
+              <Alert severity="error" icon={<AlertTriangle size={20} />} sx={{ mb: 4, borderRadius: 4, fontWeight: 700 }}>
+                {error}
+              </Alert>
+            )}
 
-          <form onSubmit={handleAuth} className="space-y-5">
-            <div className="space-y-1.5">
-              <label className="text-[9px] font-black uppercase text-slate-400 ml-3 tracking-widest">User ID</label>
-              <div className="relative">
-                <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                <input 
-                  type="email" required placeholder="name@residency.com"
-                  className="w-full pl-14 pr-6 py-4 bg-slate-50 dark:bg-slate-800 rounded-[1.5rem] outline-none text-sm font-bold border-2 border-transparent focus:border-brand-600/20 transition-all dark:text-white"
-                  value={email} onChange={e => setEmail(e.target.value)}
-                  disabled={!!success || loading}
-                />
-              </div>
-            </div>
+            <form onSubmit={handleAuth}>
+              <Stack spacing={3}>
+                <Box>
+                  <Typography variant="caption" sx={{ fontWeight: 900, color: 'text.secondary', textTransform: 'uppercase', ml: 2, mb: 0.5, display: 'block' }}>
+                    User ID
+                  </Typography>
+                  <TextField 
+                    fullWidth
+                    placeholder="name@residency.com"
+                    value={email}
+                    onChange={e => setEmail(e.target.value)}
+                    disabled={loading || !!success}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <Mail size={18} color={theme.palette.text.secondary} />
+                        </InputAdornment>
+                      ),
+                      sx: { borderRadius: 4, bgcolor: 'action.hover' }
+                    }}
+                  />
+                </Box>
 
-            <div className="space-y-1.5">
-              <label className="text-[9px] font-black uppercase text-slate-400 ml-3 tracking-widest">Password</label>
-              <div className="relative">
-                <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                <input 
-                  type="password" required placeholder="••••••••"
-                  className="w-full pl-14 pr-6 py-4 bg-slate-50 dark:bg-slate-800 rounded-[1.5rem] outline-none text-sm font-bold border-2 border-transparent focus:border-brand-600/20 transition-all dark:text-white"
-                  value={password} onChange={e => setPassword(e.target.value)}
-                  disabled={!!success || loading}
-                />
-              </div>
-            </div>
+                <Box>
+                  <Typography variant="caption" sx={{ fontWeight: 900, color: 'text.secondary', textTransform: 'uppercase', ml: 2, mb: 0.5, display: 'block' }}>
+                    Password
+                  </Typography>
+                  <TextField 
+                    fullWidth
+                    type="password"
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={e => setPassword(e.target.value)}
+                    disabled={loading || !!success}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <Lock size={18} color={theme.palette.text.secondary} />
+                        </InputAdornment>
+                      ),
+                      sx: { borderRadius: 4, bgcolor: 'action.hover' }
+                    }}
+                  />
+                </Box>
 
-            <button 
-              disabled={loading || !!success}
-              className="w-full py-5 bg-brand-600 text-white rounded-[2rem] font-black uppercase tracking-widest text-xs shadow-2xl shadow-brand-500/20 hover:bg-brand-700 transition-all active:scale-[0.98] mt-6 disabled:opacity-70"
-            >
-              {loading && !success ? <Loader2 className="animate-spin mx-auto" size={20} /> : 'Login'}
-            </button>
-          </form>
+                <Button 
+                  fullWidth 
+                  variant="contained" 
+                  size="large"
+                  type="submit"
+                  disabled={loading || !!success}
+                  sx={{ py: 2, mt: 2, borderRadius: 6, fontSize: '1rem' }}
+                >
+                  {loading && !success ? <CircularProgress size={24} color="inherit" /> : 'Login'}
+                </Button>
+              </Stack>
+            </form>
 
-          {/* Demo Access Panel */}
-          <div className="mt-10 p-6 bg-slate-50 dark:bg-slate-800/40 rounded-[2.5rem] border border-slate-100 dark:border-slate-800">
-             <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 text-center mb-4 flex items-center justify-center gap-2">
-               <ShieldCheck size={12} className="text-brand-600" /> Demo Suite Access
-             </p>
-             <div className="flex flex-col gap-3">
-                <div className="flex gap-3">
-                  <button 
-                    onClick={() => quickDemoLogin('admin')}
-                    disabled={loading}
-                    className="flex-1 py-3 bg-amber-500 text-white rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-amber-600 transition-all shadow-md flex items-center justify-center gap-2"
-                  >
-                    <ShieldAlert size={12} /> System Admin
-                  </button>
-                  <button 
-                    onClick={() => quickDemoLogin('resident')}
-                    disabled={loading}
-                    className="flex-1 py-3 bg-white dark:bg-slate-900 rounded-xl text-[9px] font-black uppercase tracking-widest text-slate-600 hover:text-brand-600 hover:border-brand-600/30 border border-transparent transition-all shadow-sm flex items-center justify-center gap-2"
-                  >
-                    <User size={12} /> Live Resident
-                  </button>
-                </div>
-                <p className="text-[8px] text-slate-400 font-bold text-center italic">
-                  Note: Admin access is restricted to verified committee credentials in production.
-                </p>
-             </div>
-          </div>
+            {/* Demo Access Panel */}
+            <Paper elevation={0} sx={{ mt: 6, p: 3, bgcolor: 'action.hover', borderRadius: 6, border: '1px solid', borderColor: 'divider' }}>
+              <Typography variant="caption" sx={{ fontWeight: 900, color: 'text.secondary', textTransform: 'uppercase', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1, mb: 3 }}>
+                <ShieldCheck size={14} color={theme.palette.primary.main} /> Demo Suite Access
+              </Typography>
+              <Stack direction="row" spacing={2}>
+                <Button 
+                  fullWidth 
+                  variant="contained" 
+                  color="warning" 
+                  onClick={() => quickDemoLogin('admin')}
+                  startIcon={<ShieldAlert size={14} />}
+                  sx={{ borderRadius: 3, fontSize: '0.65rem' }}
+                >
+                  System Admin
+                </Button>
+                <Button 
+                  fullWidth 
+                  variant="outlined" 
+                  onClick={() => quickDemoLogin('resident')}
+                  startIcon={<User size={14} />}
+                  sx={{ borderRadius: 3, fontSize: '0.65rem', bgcolor: 'background.paper' }}
+                >
+                  Live Resident
+                </Button>
+              </Stack>
+              <Typography variant="caption" sx={{ display: 'block', textAlign: 'center', mt: 2, color: 'text.secondary', fontStyle: 'italic', fontSize: '0.6rem' }}>
+                Note: Admin access is restricted to verified committee credentials in production.
+              </Typography>
+            </Paper>
 
-          <div className="mt-8 text-center">
-            <Link to="/register" className="text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-brand-600 transition-colors">
-              New to residency? <span className="text-brand-600">Register Property</span>
-            </Link>
-          </div>
-        </div>
-      </div>
-    </div>
+            <Box sx={{ mt: 4, textAlign: 'center' }}>
+              <MuiLink 
+                component={Link} 
+                to="/register" 
+                sx={{ 
+                  fontSize: '0.75rem', 
+                  fontWeight: 900, 
+                  textTransform: 'uppercase', 
+                  color: 'text.secondary',
+                  textDecoration: 'none',
+                  '&:hover': { color: 'primary.main' }
+                }}
+              >
+                New to residency? <Box component="span" sx={{ color: 'primary.main' }}>Register Property</Box>
+              </MuiLink>
+            </Box>
+          </Paper>
+        </Fade>
+      </Container>
+    </Box>
   );
 };
 

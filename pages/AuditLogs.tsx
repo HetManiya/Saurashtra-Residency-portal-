@@ -1,5 +1,10 @@
-
 import React, { useState, useEffect } from 'react';
+import { 
+  Box, Typography, Grid, Card, Button, IconButton, 
+  Avatar, Chip, CircularProgress, Paper, useTheme, 
+  Fade, Stack, Divider, TextField, InputAdornment,
+  List, ListItem, ListItemAvatar, ListItemText
+} from '@mui/material';
 import { History, Clock, Search, Database, FileText, Settings, Key, Loader2 } from 'lucide-react';
 import { api } from '../services/api';
 import { AuditLogEntry } from '../types';
@@ -7,6 +12,7 @@ import { useLanguage } from '../components/LanguageContext';
 
 const AuditLogs: React.FC = () => {
   const { t } = useLanguage();
+  const theme = useTheme();
   const [logs, setLogs] = useState<AuditLogEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -40,84 +46,158 @@ const AuditLogs: React.FC = () => {
 
   const getActionIcon = (action: string) => {
     switch (action?.toLowerCase()) {
-      case 'login': return <Key className="text-emerald-500" size={16} />;
-      case 'create': return <Database className="text-blue-500" size={16} />;
-      case 'update': return <Settings className="text-amber-500" size={16} />;
-      case 'delete': return <FileText className="text-rose-500" size={16} />;
-      default: return <History className="text-slate-400" size={16} />;
+      case 'login': return <Key size={18} />;
+      case 'create': return <Database size={18} />;
+      case 'update': return <Settings size={18} />;
+      case 'delete': return <FileText size={18} />;
+      default: return <History size={18} />;
+    }
+  };
+
+  const getActionColor = (action: string) => {
+    switch (action?.toLowerCase()) {
+      case 'login': return 'success';
+      case 'create': return 'info';
+      case 'update': return 'warning';
+      case 'delete': return 'error';
+      default: return 'default';
     }
   };
 
   return (
-    <div className="space-y-10 animate-fade-up">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-8 border-b border-slate-100 dark:border-slate-800">
-        <div>
-          <h1 className="text-4xl font-extrabold text-slate-900 dark:text-white tracking-tighter">{t('saurashtra')} <span className="text-brand-600">{t('audit')}</span></h1>
-          <p className="text-slate-500 dark:text-slate-400 mt-2 font-medium">{t('audit_desc')}</p>
-        </div>
-        <div className="flex gap-3">
-          <div className="relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-            <input 
-              type="text" placeholder={t('audit_search')}
-              className="pl-12 pr-6 py-3.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-brand-500/20 outline-none transition-all"
-              value={searchTerm} onChange={e => setSearchTerm(e.target.value)}
+    <Fade in={true}>
+      <Box sx={{ pb: 8 }}>
+        <Box sx={{ 
+          display: 'flex', 
+          flexDirection: { xs: 'column', md: 'row' }, 
+          justifyContent: 'space-between', 
+          alignItems: { md: 'flex-end' }, 
+          gap: 3, 
+          mb: 6,
+          pb: 4,
+          borderBottom: '1px solid',
+          borderColor: 'divider'
+        }}>
+          <Box>
+            <Typography variant="h4" sx={{ fontWeight: 900, tracking: '-0.04em' }}>
+              {t('saurashtra')} <Box component="span" sx={{ color: 'primary.main' }}>{t('audit')}</Box>
+            </Typography>
+            <Typography variant="body1" sx={{ color: 'text.secondary', mt: 1, fontWeight: 500 }}>
+              {t('audit_desc')}
+            </Typography>
+          </Box>
+          <Box sx={{ width: { xs: '100%', md: 320 } }}>
+            <TextField 
+              fullWidth
+              placeholder={t('audit_search')}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Search size={18} />
+                  </InputAdornment>
+                ),
+                sx: { borderRadius: 4, bgcolor: 'background.paper' }
+              }}
             />
-          </div>
-        </div>
-      </div>
+          </Box>
+        </Box>
 
-      <div className="grid grid-cols-1 gap-4">
-        <div className="bg-white dark:bg-slate-900 rounded-[3rem] border border-slate-100 dark:border-slate-800 premium-shadow overflow-hidden">
-          <div className="p-8 border-b border-slate-50 dark:border-slate-800/50 flex flex-wrap gap-3">
+        <Paper sx={{ borderRadius: 8, overflow: 'hidden', border: '1px solid', borderColor: 'divider', boxShadow: 0 }}>
+          <Box sx={{ p: 3, borderBottom: '1px solid', borderColor: 'divider', bgcolor: 'action.hover', display: 'flex', flexWrap: 'wrap', gap: 1.5 }}>
             {['ALL', 'CREATE', 'UPDATE', 'DELETE', 'LOGIN', 'EXPORT'].map(a => (
-              <button 
+              <Button 
                 key={a}
                 onClick={() => setFilterAction(a)}
-                className={`px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${filterAction === a ? 'bg-brand-600 text-white shadow-lg' : 'bg-slate-50 dark:bg-slate-800 text-slate-400 hover:text-slate-600'}`}
+                variant={filterAction === a ? 'contained' : 'text'}
+                sx={{ 
+                  borderRadius: 3, 
+                  px: 3, 
+                  py: 0.75, 
+                  fontWeight: 900, 
+                  textTransform: 'uppercase', 
+                  fontSize: '0.65rem',
+                  bgcolor: filterAction === a ? 'primary.main' : 'transparent',
+                  color: filterAction === a ? 'white' : 'text.secondary',
+                  '&:hover': { bgcolor: filterAction === a ? 'primary.dark' : 'action.selected' }
+                }}
               >
                 {a}
-              </button>
+              </Button>
             ))}
-          </div>
-          
+          </Box>
+
           {loading ? (
-            <div className="py-20 flex flex-col items-center justify-center">
-              <Loader2 className="animate-spin text-brand-600 mb-4" size={32} />
-              <p className="text-xs font-black uppercase tracking-widest text-slate-400">Retrieving Cloud Logs...</p>
-            </div>
+            <Box sx={{ py: 20, textAlign: 'center' }}>
+              <CircularProgress size={40} sx={{ mb: 2 }} />
+              <Typography variant="caption" sx={{ display: 'block', fontWeight: 900, color: 'text.secondary', textTransform: 'uppercase', letterSpacing: 2 }}>
+                Retrieving Cloud Logs...
+              </Typography>
+            </Box>
           ) : (
-            <div className="divide-y divide-slate-50 dark:divide-slate-800/50">
-              {filteredLogs.map((log) => (
-                <div key={log.id} className="p-8 hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-all flex items-start gap-6 group">
-                  <div className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 group-hover:bg-brand-50 group-hover:text-brand-600 transition-all">
-                    {getActionIcon(log.action)}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-3">
-                        <span className="font-black text-slate-900 dark:text-white text-base tracking-tight">{log.userName}</span>
-                        <span className="px-3 py-1 bg-slate-100 dark:bg-slate-800 rounded-full text-[9px] font-black uppercase tracking-widest text-slate-500">{log.action}</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-slate-400 text-xs font-bold">
-                        <Clock size={14} />
+            <List disablePadding>
+              {filteredLogs.map((log, index) => (
+                <React.Fragment key={log.id}>
+                  <ListItem 
+                    sx={{ 
+                      p: 4, 
+                      transition: 'all 0.2s ease',
+                      '&:hover': { bgcolor: 'action.hover' }
+                    }}
+                  >
+                    <ListItemAvatar sx={{ mr: 2 }}>
+                      <Avatar sx={{ 
+                        width: 48, height: 48, 
+                        borderRadius: 4, 
+                        bgcolor: 'action.hover', 
+                        color: 'text.secondary',
+                        border: '1px solid',
+                        borderColor: 'divider'
+                      }}>
+                        {getActionIcon(log.action)}
+                      </Avatar>
+                    </ListItemAvatar>
+                    <ListItemText 
+                      primary={
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 0.5 }}>
+                          <Typography variant="subtitle1" sx={{ fontWeight: 900 }}>{log.userName}</Typography>
+                          <Chip 
+                            label={log.action} 
+                            size="small" 
+                            color={getActionColor(log.action) as any}
+                            sx={{ fontWeight: 900, textTransform: 'uppercase', fontSize: '0.6rem', borderRadius: 1.5, height: 20 }} 
+                          />
+                        </Box>
+                      }
+                      secondary={
+                        <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500, lineHeight: 1.6 }}>
+                          {log.details}
+                        </Typography>
+                      }
+                    />
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: 'text.disabled', ml: 2 }}>
+                      <Clock size={14} />
+                      <Typography variant="caption" sx={{ fontWeight: 700 }}>
                         {new Date(log.timestamp).toLocaleString()}
-                      </div>
-                    </div>
-                    <p className="text-slate-600 dark:text-slate-400 font-medium text-sm leading-relaxed">
-                      {log.details}
-                    </p>
-                  </div>
-                </div>
+                      </Typography>
+                    </Box>
+                  </ListItem>
+                  {index < filteredLogs.length - 1 && <Divider />}
+                </React.Fragment>
               ))}
               {filteredLogs.length === 0 && (
-                <div className="p-20 text-center text-slate-400 font-bold uppercase tracking-widest text-xs">No records found</div>
+                <Box sx={{ py: 10, textAlign: 'center' }}>
+                  <Typography variant="caption" sx={{ fontWeight: 900, color: 'text.secondary', textTransform: 'uppercase' }}>
+                    No records found
+                  </Typography>
+                </Box>
               )}
-            </div>
+            </List>
           )}
-        </div>
-      </div>
-    </div>
+        </Paper>
+      </Box>
+    </Fade>
   );
 };
 

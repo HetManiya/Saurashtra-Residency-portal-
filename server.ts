@@ -1,7 +1,9 @@
 
 import express from "express";
 import { createServer as createViteServer } from "vite";
+import { createServer as createHttpServer } from "http";
 import app, { connectDB } from "./backend/app";
+import { initSocket } from "./backend/socket";
 
 async function startServer() {
   const PORT = 3000;
@@ -9,6 +11,10 @@ async function startServer() {
   // API routes are already in 'app'
   // We just need to make sure 'app' is used correctly
   const server = express();
+  const httpServer = createHttpServer(server);
+
+  // Initialize Socket.io
+  initSocket(httpServer);
 
   // Connect to Database
   await connectDB();
@@ -31,7 +37,7 @@ async function startServer() {
     });
   }
 
-  server.listen(PORT, "0.0.0.0", () => {
+  httpServer.listen(PORT, "0.0.0.0", () => {
     console.log(`🚀 Server running on http://localhost:${PORT}`);
   });
 }

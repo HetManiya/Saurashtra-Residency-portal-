@@ -6,9 +6,8 @@ import {
   LogOut, ShieldCheck, ChevronRight, Compass, PieChart, Moon, 
   Sun, LayoutGrid, CalendarDays, History, Siren, Search, 
   BellRing, Settings, Command, UserPlus, QrCode, Clock,
-  Globe, Sofa, LifeBuoy, Zap, ShieldAlert, Waves, UserCheck
+  Globe, Sofa, LifeBuoy, Zap, ShieldAlert, Waves, UserCheck, Package
 } from 'lucide-react';
-import VoiceAssistant from './VoiceAssistant';
 import ChatAssistant from './ChatAssistant';
 import { useLanguage } from './LanguageContext';
 
@@ -35,6 +34,7 @@ const SidebarContent: React.FC<{
       title: 'Security & Access',
       adminOnly: true,
       items: [
+         { name: 'Security Gate', path: '/security-gate', icon: ShieldCheck },
          { name: 'Approvals', path: '/approvals', icon: UserCheck },
          { name: t('audit'), path: '/audit-logs', icon: History },
       ]
@@ -51,6 +51,7 @@ const SidebarContent: React.FC<{
       title: 'Services',
       items: [
          { name: t('maintenance'), path: '/maintenance', icon: Wallet },
+         { name: 'Deliveries', path: '/deliveries', icon: Package },
          { name: t('visitors'), path: '/visitor-pass', icon: QrCode },
          { name: t('meetings'), path: '/meetings', icon: CalendarDays },
          { name: t('facilities'), path: '/facilities', icon: Sofa },
@@ -62,6 +63,7 @@ const SidebarContent: React.FC<{
       items: [
          { name: t('funds'), path: '/funds', icon: HandCoins },
          { name: t('leadership'), path: '/committee', icon: Users },
+         { name: 'Polls', path: '/polls', icon: PieChart },
          { name: t('emergency'), path: '/emergency', icon: Siren },
       ]
     },
@@ -116,8 +118,8 @@ const SidebarContent: React.FC<{
                       }}
                       className={`flex items-center gap-3 px-4 py-3 rounded-2xl transition-all font-bold text-sm ${
                         isActive 
-                          ? 'bg-brand-600 text-white shadow-lg shadow-brand-500/30' 
-                          : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/60 hover:text-brand-600'
+                          ? 'bg-brand-600 text-white shadow-xl shadow-brand-500/30 ring-4 ring-brand-500/10' 
+                          : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/40 hover:text-brand-600'
                       }`}
                     >
                       <Icon size={18} className="shrink-0" />
@@ -197,10 +199,15 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const isAdmin = user?.role === 'ADMIN' || user?.role === 'COMMITTEE';
 
   return (
-    <div className="flex h-screen bg-[#f8fafc] dark:bg-[#020617] overflow-hidden font-sans">
+    <div className="flex h-screen bg-[#f8fafc] dark:bg-slate-950 overflow-hidden font-sans relative">
+      {/* Background Pattern */}
+      <div className="fixed inset-0 pointer-events-none z-0">
+        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(#e2e8f0_1px,transparent_1px)] dark:bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:32px_32px] [mask-image:radial-gradient(ellipse_50%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-40" />
+      </div>
+
       {/* Desktop Sidebar */}
       <aside 
-        className={`hidden lg:block h-full transition-all duration-300 ease-in-out shrink-0 ${isSidebarOpen ? 'w-[280px]' : 'w-0'}`}
+        className={`hidden lg:block h-full transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] shrink-0 z-[100] bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-r border-slate-200/50 dark:border-slate-800/50 ${isSidebarOpen ? 'w-[280px]' : 'w-0'}`}
         style={{ opacity: isSidebarOpen ? 1 : 0, visibility: isSidebarOpen ? 'visible' : 'hidden' }}
       >
         <SidebarContent 
@@ -215,9 +222,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       </aside>
 
       {/* Mobile Sidebar Overlay */}
-      <div className={`fixed inset-0 z-[100] lg:hidden transition-opacity duration-300 ${isSidebarOpen ? 'opacity-100 visible' : 'opacity-0 invisible'}`}>
-        <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setIsSidebarOpen(false)} />
-        <aside className={`absolute left-0 top-0 h-full w-[280px] transition-transform duration-300 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+      <div className={`fixed inset-0 z-[110] lg:hidden transition-opacity duration-500 ${isSidebarOpen ? 'opacity-100 visible' : 'opacity-0 invisible'}`}>
+        <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={() => setIsSidebarOpen(false)} />
+        <aside className={`absolute left-0 top-0 h-full w-[280px] bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-r border-slate-200/50 dark:border-slate-800/50 transition-transform duration-500 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
           <SidebarContent 
             user={user} 
             isAdmin={isAdmin} 
@@ -231,8 +238,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       </div>
 
       {/* Main Area */}
-      <div className="flex-1 flex flex-col min-w-0 h-full relative">
-        <header className="h-20 flex-none flex items-center justify-between px-6 md:px-10 border-b glass-border glass sticky top-0 z-40">
+      <div className="flex-1 flex flex-col min-w-0 h-full relative z-10">
+        <header className="h-20 flex-none flex items-center justify-between px-6 md:px-10 border-b border-slate-200/50 dark:border-slate-800/50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md sticky top-0 z-40">
           <div className="flex items-center gap-6">
             <button 
               onClick={() => setIsSidebarOpen(!isSidebarOpen)} 
@@ -272,7 +279,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           </div>
         </main>
       </div>
-      <VoiceAssistant />
       <ChatAssistant />
     </div>
   );

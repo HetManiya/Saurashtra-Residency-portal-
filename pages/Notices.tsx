@@ -1,9 +1,17 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
-import { Bell, Calendar, ChevronRight, Pin, Loader2, Plus, X, AlertTriangle, CheckCircle, Clock, Smartphone, Mail, Globe, Volume2, Waves } from 'lucide-react';
+import { 
+  Box, Typography, Grid, Card, Button, IconButton, 
+  Avatar, Chip, CircularProgress, Paper, useTheme, 
+  Fade, Stack, Divider, TextField, InputAdornment,
+  Dialog, DialogTitle, DialogContent, DialogActions,
+  useMediaQuery, Tooltip
+} from '@mui/material';
+import { Bell, Calendar, ChevronRight, Pin, Loader2, Plus, X, AlertTriangle, CheckCircle, Clock, Smartphone, Mail, Globe, Volume2, Waves, BellRing } from 'lucide-react';
 import { api } from '../services/api';
 
 const Notices: React.FC = () => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [notices, setNotices] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -45,7 +53,6 @@ const Notices: React.FC = () => {
     try {
       const newNotice = await api.postNotice(formData);
       
-      // Expert Pattern: Update state immediately
       setNotices(prev => [newNotice, ...prev]);
       
       if (formData.broadcastType !== 'NONE') {
@@ -78,198 +85,279 @@ const Notices: React.FC = () => {
 
   if (loading && notices.length === 0) {
     return (
-      <div className="h-[60vh] flex flex-col items-center justify-center">
-        <Loader2 className="animate-spin text-brand-600 mb-4" size={40} />
-        <p className="font-black uppercase tracking-widest text-xs text-slate-400">Syncing Announcements...</p>
-      </div>
+      <Box sx={{ height: '60vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+        <CircularProgress size={40} sx={{ mb: 2 }} />
+        <Typography variant="caption" sx={{ fontWeight: 900, textTransform: 'uppercase', color: 'text.secondary', letterSpacing: 2 }}>
+          Syncing Announcements...
+        </Typography>
+      </Box>
     );
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8 animate-fade-up">
-      {/* Dynamic Live Ticker */}
-      {urgentNotices.length > 0 && (
-        <div className="bg-rose-600/10 border border-rose-200 dark:border-rose-900/50 rounded-3xl overflow-hidden relative">
-          <div className="flex items-center">
-            <div className="bg-rose-600 text-white px-6 py-4 flex items-center gap-3 shrink-0 z-10">
-              <Volume2 size={18} className="animate-pulse" />
-              <span className="text-[10px] font-black uppercase tracking-widest whitespace-nowrap">Live Broadcast</span>
-            </div>
-            <div className="flex-1 overflow-hidden relative h-12 flex items-center">
-              <div className="animate-marquee whitespace-nowrap absolute">
-                {urgentNotices.map((n, idx) => (
-                  <span key={idx} className="inline-flex items-center gap-4 mx-8 text-rose-700 dark:text-rose-400 font-bold text-sm">
-                    <span className="w-2 h-2 rounded-full bg-rose-600" />
-                    {n.title}: {n.content.substring(0, 80)}...
-                  </span>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <style>
-        {`
-          @keyframes marquee {
-            0% { transform: translateX(100%); }
-            100% { transform: translateX(-100%); }
-          }
-          .animate-marquee {
-            animation: marquee 20s linear infinite;
-          }
-        `}
-      </style>
-
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 border-b border-slate-100 dark:border-slate-800 pb-8">
-        <div>
-          <h1 className="text-4xl font-black text-slate-900 dark:text-white tracking-tighter">Society <span className="text-brand-600">Bulletin</span></h1>
-          <p className="text-slate-500 dark:text-slate-400 font-medium mt-1">Broadcast official updates to residents</p>
-        </div>
-        {isAdmin && (
-          <button 
-            onClick={() => setShowAddModal(true)}
-            className="flex items-center gap-2 px-6 py-4 bg-brand-600 text-white rounded-3xl font-black text-xs uppercase tracking-widest hover:bg-brand-700 transition-all shadow-xl shadow-brand-500/20 active:scale-95"
-          >
-            <Plus size={18} strokeWidth={3} /> Post Notice
-          </button>
+    <Fade in={true}>
+      <Box sx={{ maxWidth: 900, mx: 'auto', pb: 8 }}>
+        {/* Dynamic Live Ticker */}
+        {urgentNotices.length > 0 && (
+          <Paper sx={{ 
+            mb: 4, 
+            borderRadius: 8, 
+            overflow: 'hidden', 
+            border: '1px solid', 
+            borderColor: 'error.light',
+            bgcolor: 'error.light',
+            opacity: 0.1,
+            display: 'flex',
+            alignItems: 'center'
+          }}>
+             <Box sx={{ bgcolor: 'error.main', color: 'white', px: 3, py: 1.5, display: 'flex', alignItems: 'center', gap: 1.5, zIndex: 1 }}>
+               <Volume2 size={18} className="animate-pulse" />
+               <Typography variant="caption" sx={{ fontWeight: 900, textTransform: 'uppercase', letterSpacing: 1, whiteSpace: 'nowrap' }}>Live Broadcast</Typography>
+             </Box>
+             <Box sx={{ flexGrow: 1, overflow: 'hidden', position: 'relative', height: 40, display: 'flex', alignItems: 'center' }}>
+               <Box sx={{ 
+                 position: 'absolute', 
+                 whiteSpace: 'nowrap',
+                 animation: 'marquee 20s linear infinite',
+                 '@keyframes marquee': {
+                   '0%': { transform: 'translateX(100%)' },
+                   '100%': { transform: 'translateX(-100%)' }
+                 }
+               }}>
+                 {urgentNotices.map((n, idx) => (
+                   <Typography key={idx} component="span" sx={{ mx: 4, color: 'error.main', fontWeight: 700, fontSize: '0.85rem' }}>
+                     • {n.title}: {n.content.substring(0, 80)}...
+                   </Typography>
+                 ))}
+               </Box>
+             </Box>
+          </Paper>
         )}
-      </div>
 
-      <div className="space-y-8 pb-20">
-        {notices.length === 0 ? (
-          <div className="py-20 text-center bg-white dark:bg-slate-900 rounded-[3rem] border-2 border-dashed border-slate-200 dark:border-slate-800">
-             <Bell className="w-16 h-16 text-slate-200 mx-auto mb-4" />
-             <p className="text-slate-400 font-bold">No announcements have been posted yet.</p>
-          </div>
-        ) : (
-          notices.map((notice, i) => (
-            <div key={notice.id || notice._id || i} className="relative group bg-white dark:bg-slate-900 p-8 md:p-10 rounded-[3rem] border border-slate-100 dark:border-slate-800 hover:shadow-2xl transition-all duration-500 premium-shadow overflow-hidden">
-              {i === 0 && (
-                <div className="absolute top-0 right-0 bg-brand-600 text-white px-6 py-2 rounded-bl-3xl text-[9px] font-black uppercase tracking-widest flex items-center gap-2 shadow-xl">
-                  <Waves size={12} className="animate-pulse" /> Live Update
-                </div>
-              )}
-              
-              <div className="flex flex-col gap-6">
-                <div className="flex-1">
-                  <div className="flex flex-wrap items-center gap-4 mb-6">
-                    <span className={`px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest border-2 ${
-                      notice.category === 'Urgent' 
-                        ? 'bg-rose-50 text-rose-600 border-rose-100 dark:bg-rose-900/10 dark:border-rose-900/30' 
-                        : notice.category === 'Event'
-                        ? 'bg-emerald-50 text-emerald-600 border-emerald-100 dark:bg-emerald-900/10 dark:border-emerald-900/30'
-                        : 'bg-slate-50 text-slate-600 border-slate-100 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700'
-                    }`}>
-                      {notice.category}
-                    </span>
-                    <div className="flex items-center gap-2 text-slate-400 text-[11px] font-bold">
+        <Box sx={{ 
+          display: 'flex', 
+          flexDirection: { xs: 'column', md: 'row' }, 
+          justifyContent: 'space-between', 
+          alignItems: { md: 'flex-end' }, 
+          gap: 3, 
+          mb: 6,
+          pb: 4,
+          borderBottom: '1px solid',
+          borderColor: 'divider'
+        }}>
+          <Box>
+            <Typography variant="h3" sx={{ fontWeight: 900, tracking: '-0.04em' }}>
+              Society <Box component="span" sx={{ color: 'primary.main' }}>Bulletin</Box>
+            </Typography>
+            <Typography variant="body1" sx={{ color: 'text.secondary', mt: 1, fontWeight: 500 }}>
+              Broadcast official updates to residents
+            </Typography>
+          </Box>
+          {isAdmin && (
+            <Button 
+              variant="contained" 
+              startIcon={<Plus size={18} strokeWidth={3} />}
+              onClick={() => setShowAddModal(true)}
+              sx={{ 
+                borderRadius: 6, px: 4, py: 1.5, 
+                fontWeight: 900, textTransform: 'uppercase', fontSize: '0.7rem',
+                boxShadow: 10,
+                '&:active': { transform: 'scale(0.95)' }
+              }}
+            >
+              Post Notice
+            </Button>
+          )}
+        </Box>
+
+        <Stack spacing={4}>
+          {notices.length === 0 ? (
+            <Paper sx={{ py: 12, textAlign: 'center', borderRadius: 12, border: '2px dashed', borderColor: 'divider', boxShadow: 0 }}>
+               <Bell size={64} style={{ opacity: 0.1, marginBottom: 16 }} />
+               <Typography variant="h6" sx={{ fontWeight: 900, color: 'text.disabled' }}>No announcements have been posted yet.</Typography>
+            </Paper>
+          ) : (
+            notices.map((notice, i) => (
+              <Card 
+                key={notice.id || notice._id || i} 
+                sx={{ 
+                  p: { xs: 4, md: 6 }, 
+                  borderRadius: 12, 
+                  border: '1px solid', 
+                  borderColor: 'divider', 
+                  boxShadow: 0,
+                  position: 'relative',
+                  overflow: 'hidden',
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    borderColor: 'primary.main',
+                    boxShadow: 10
+                  }
+                }}
+              >
+                {i === 0 && (
+                  <Box sx={{ 
+                    position: 'absolute', top: 0, right: 0, 
+                    bgcolor: 'primary.main', color: 'white', 
+                    px: 3, py: 1, borderRadius: '0 0 0 24px',
+                    display: 'flex', alignItems: 'center', gap: 1,
+                    boxShadow: 4
+                  }}>
+                    <Waves size={12} className="animate-pulse" />
+                    <Typography variant="caption" sx={{ fontWeight: 900, textTransform: 'uppercase', fontSize: '0.6rem', letterSpacing: 1 }}>Live Update</Typography>
+                  </Box>
+                )}
+                
+                <Box>
+                  <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 3 }}>
+                    <Chip 
+                      label={notice.category} 
+                      size="small"
+                      variant="outlined"
+                      color={notice.category === 'Urgent' ? 'error' : notice.category === 'Event' ? 'success' : 'default'}
+                      sx={{ fontWeight: 900, textTransform: 'uppercase', fontSize: '0.6rem', borderRadius: 2 }} 
+                    />
+                    <Stack direction="row" spacing={1} alignItems="center" sx={{ color: 'text.disabled' }}>
                       <Clock size={14} />
-                      {formatDateTime(notice.date)}
-                    </div>
-                  </div>
+                      <Typography variant="caption" sx={{ fontWeight: 700 }}>{formatDateTime(notice.date)}</Typography>
+                    </Stack>
+                  </Stack>
                   
-                  <h3 className="text-3xl font-black text-slate-900 dark:text-white mb-4 leading-tight group-hover:text-brand-600 transition-colors tracking-tighter">
+                  <Typography variant="h4" sx={{ fontWeight: 900, mb: 2, tracking: '-0.02em', '.MuiCard-root:hover &': { color: 'primary.main' }, transition: 'color 0.3s ease' }}>
                     {notice.title}
-                  </h3>
-                  <p className="text-slate-600 dark:text-slate-400 leading-relaxed text-lg font-medium">
+                  </Typography>
+                  <Typography variant="body1" sx={{ color: 'text.secondary', lineHeight: 1.8, fontSize: '1.1rem', fontWeight: 500 }}>
                     {notice.content}
-                  </p>
-                </div>
-              </div>
-            </div>
-          ))
-        )}
-      </div>
+                  </Typography>
+                </Box>
+              </Card>
+            ))
+          )}
+        </Stack>
 
-      {showAddModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-6">
-          <div className="absolute inset-0 bg-slate-900/80 backdrop-blur-xl animate-in fade-in duration-300" onClick={() => setShowAddModal(false)} />
-          <div className="relative w-full max-w-xl bg-white dark:bg-slate-900 rounded-[3.5rem] shadow-2xl overflow-hidden animate-in zoom-in-95 border border-slate-100 dark:border-slate-800">
-            <form onSubmit={handlePostNotice} className="p-10 md:p-14 space-y-8 max-h-[90vh] overflow-y-auto">
-              <div className="flex justify-between items-center">
-                <h3 className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter">New Notice</h3>
-                <button type="button" onClick={() => setShowAddModal(false)} className="p-3 text-slate-300 hover:text-slate-900 dark:hover:text-white transition-all">
-                   <X size={28} />
-                </button>
-              </div>
-
-              <div className="space-y-6">
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Broadcast Method</label>
-                  <div className="grid grid-cols-4 gap-3">
-                    {[
-                      { id: 'NONE', icon: Globe, label: 'Portal' },
-                      { id: 'WHATSAPP', icon: Smartphone, label: 'WA' },
-                      { id: 'EMAIL', icon: Mail, label: 'Email' },
-                      { id: 'BOTH', icon: BellRing, label: 'All' }
-                    ].map(type => (
-                      <button 
-                        key={type.id} type="button"
+        {/* Add Notice Modal */}
+        <Dialog 
+          open={showAddModal} 
+          onClose={() => setShowAddModal(false)}
+          maxWidth="sm"
+          fullWidth
+          PaperProps={{ sx: { borderRadius: 10, p: 0, overflow: 'hidden' } }}
+        >
+          <DialogTitle sx={{ p: 4, borderBottom: '1px solid', borderColor: 'divider', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Typography variant="h4" sx={{ fontWeight: 900, tracking: '-0.04em' }}>New Notice</Typography>
+            <IconButton onClick={() => setShowAddModal(false)}>
+              <X size={28} />
+            </IconButton>
+          </DialogTitle>
+          <DialogContent sx={{ p: 4 }}>
+            <Stack spacing={4} component="form" onSubmit={handlePostNotice} sx={{ mt: 1 }}>
+              <Box>
+                <Typography variant="caption" sx={{ fontWeight: 900, color: 'text.disabled', textTransform: 'uppercase', ml: 1, mb: 1, display: 'block' }}>Broadcast Method</Typography>
+                <Grid container spacing={2}>
+                  {[
+                    { id: 'NONE', icon: Globe, label: 'Portal' },
+                    { id: 'WHATSAPP', icon: Smartphone, label: 'WA' },
+                    { id: 'EMAIL', icon: Mail, label: 'Email' },
+                    { id: 'BOTH', icon: BellRing, label: 'All' }
+                  ].map(type => (
+                    <Grid item xs={3} key={type.id}>
+                      <Button
+                        fullWidth
+                        variant={formData.broadcastType === type.id ? 'contained' : 'outlined'}
                         onClick={() => setFormData({...formData, broadcastType: type.id as any})}
-                        className={`flex-col items-center justify-center py-4 rounded-2xl border-2 transition-all gap-2 ${
-                          formData.broadcastType === type.id ? 'border-brand-600 bg-brand-50 text-brand-600 dark:bg-brand-900/10' : 'border-slate-100 text-slate-400 dark:border-slate-800'
-                        }`}
+                        sx={{ 
+                          height: 80, 
+                          borderRadius: 6, 
+                          display: 'flex', 
+                          flexDirection: 'column', 
+                          gap: 1,
+                          borderColor: formData.broadcastType === type.id ? 'primary.main' : 'divider',
+                          bgcolor: formData.broadcastType === type.id ? 'primary.light' : 'transparent',
+                          color: formData.broadcastType === type.id ? 'primary.main' : 'text.disabled',
+                          '&:hover': { bgcolor: 'primary.light', borderColor: 'primary.main' }
+                        }}
                       >
                         <type.icon size={18} />
-                        <span className="text-[9px] font-black uppercase">{type.label}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
+                        <Typography variant="caption" sx={{ fontWeight: 900, textTransform: 'uppercase', fontSize: '0.6rem' }}>{type.label}</Typography>
+                      </Button>
+                    </Grid>
+                  ))}
+                </Grid>
+              </Box>
 
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Title</label>
-                  <input 
-                    type="text" required placeholder="Notice Title..."
-                    className="w-full px-8 py-5 bg-slate-50 dark:bg-slate-800 rounded-[2rem] outline-none text-sm font-bold border-2 border-transparent focus:border-brand-600/20 transition-all dark:text-white"
-                    value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})}
-                  />
-                </div>
+              <Box>
+                <Typography variant="caption" sx={{ fontWeight: 900, color: 'text.disabled', textTransform: 'uppercase', ml: 1, mb: 1, display: 'block' }}>Title</Typography>
+                <TextField 
+                  fullWidth 
+                  placeholder="Notice Title..." 
+                  required
+                  value={formData.title}
+                  onChange={(e) => setFormData({...formData, title: e.target.value})}
+                  InputProps={{ sx: { borderRadius: 8, bgcolor: 'action.hover' } }}
+                />
+              </Box>
 
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Message</label>
-                  <textarea 
-                    required placeholder="Enter message..." rows={4}
-                    className="w-full px-8 py-6 bg-slate-50 dark:bg-slate-800 rounded-[2rem] outline-none text-sm font-bold border-2 border-transparent focus:border-brand-600/20 transition-all dark:text-white resize-none"
-                    value={formData.content} onChange={e => setFormData({...formData, content: e.target.value})}
-                  />
-                </div>
+              <Box>
+                <Typography variant="caption" sx={{ fontWeight: 900, color: 'text.disabled', textTransform: 'uppercase', ml: 1, mb: 1, display: 'block' }}>Message</Typography>
+                <TextField 
+                  fullWidth 
+                  multiline
+                  rows={4}
+                  placeholder="Enter message..."
+                  required
+                  value={formData.content}
+                  onChange={(e) => setFormData({...formData, content: e.target.value})}
+                  InputProps={{ sx: { borderRadius: 8, bgcolor: 'action.hover' } }}
+                />
+              </Box>
 
-                <div className="flex gap-3">
+              <Box>
+                <Typography variant="caption" sx={{ fontWeight: 900, color: 'text.disabled', textTransform: 'uppercase', ml: 1, mb: 1, display: 'block' }}>Category</Typography>
+                <Stack direction="row" spacing={2}>
                   {['General', 'Urgent', 'Event'].map(cat => (
-                    <button 
-                      key={cat} type="button"
+                    <Button 
+                      key={cat} 
+                      fullWidth
+                      variant={formData.category === cat ? 'contained' : 'outlined'}
                       onClick={() => setFormData({...formData, category: cat as any})}
-                      className={`flex-1 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest border-2 transition-all ${
-                        formData.category === cat ? 'border-brand-600 bg-brand-50 text-brand-600 dark:bg-brand-900/10' : 'border-slate-100 text-slate-400 dark:border-slate-800'
-                      }`}
+                      sx={{ 
+                        borderRadius: 4, py: 1.5, 
+                        fontWeight: 900, textTransform: 'uppercase', fontSize: '0.7rem',
+                        borderColor: formData.category === cat ? 'primary.main' : 'divider',
+                        bgcolor: formData.category === cat ? 'primary.light' : 'transparent',
+                        color: formData.category === cat ? 'primary.main' : 'text.disabled',
+                        '&:hover': { bgcolor: 'primary.light', borderColor: 'primary.main' }
+                      }}
                     >
                       {cat}
-                    </button>
+                    </Button>
                   ))}
-                </div>
-              </div>
+                </Stack>
+              </Box>
 
-              <button 
-                type="submit" disabled={isBroadcasting}
-                className="w-full py-5 bg-brand-600 text-white rounded-[2rem] font-black uppercase tracking-widest text-xs shadow-2xl shadow-brand-500/20 flex items-center justify-center gap-3 transition-all active:scale-95"
+              <Button 
+                fullWidth 
+                variant="contained" 
+                size="large"
+                disabled={isBroadcasting}
+                type="submit"
+                startIcon={isBroadcasting ? <CircularProgress size={20} color="inherit" /> : <Globe size={18} />}
+                sx={{ 
+                  borderRadius: 10, py: 2, 
+                  fontWeight: 900, textTransform: 'uppercase', 
+                  letterSpacing: 1.5,
+                  boxShadow: 10,
+                  '&:active': { transform: 'scale(0.95)' }
+                }}
               >
-                {isBroadcasting ? <Loader2 className="animate-spin" /> : <Globe size={18} />}
                 {isBroadcasting ? 'Broadcasting...' : 'Publish to Residency'}
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
-    </div>
+              </Button>
+            </Stack>
+          </DialogContent>
+        </Dialog>
+      </Box>
+    </Fade>
   );
 };
-
-const BellRing = ({ size, className }: { size: number, className?: string }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" /><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
-  </svg>
-);
 
 export default Notices;

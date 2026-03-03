@@ -7,6 +7,7 @@ const amenityBookingSchema = new mongoose.Schema({
   date: { type: Date, required: true },
   startTime: { type: String, required: true },
   endTime: { type: String, required: true },
+  duration: { type: Number }, // Duration in hours
   purpose: { type: String },
   status: { type: String, enum: ['PENDING', 'APPROVED', 'REJECTED', 'CANCELLED'], default: 'PENDING' },
   totalAmount: { type: Number, default: 0 }

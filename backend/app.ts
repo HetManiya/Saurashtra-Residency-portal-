@@ -13,6 +13,7 @@ import adminRoutes from './routes/adminRoutes';
 import meetingRoutes from './routes/meetingRoutes';
 import amenityRoutes from './routes/amenityRoutes';
 import auditRoutes from './routes/auditRoutes';
+import packageRoutes from './routes/packageRoutes';
 import Building from './models/Building';
 import User from './models/User';
 import Notice from './models/Notice';
@@ -246,6 +247,7 @@ app.use('/api/v1/admin', adminRoutes);
 app.use('/api/v1/meetings', meetingRoutes);
 app.use('/api/v1/amenities', amenityRoutes);
 app.use('/api/v1/audit', auditRoutes);
+app.use('/api/society/packages', packageRoutes);
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', db: mongoose.connection.readyState });

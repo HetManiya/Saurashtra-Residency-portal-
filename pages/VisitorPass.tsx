@@ -1,13 +1,27 @@
 
-import React, { useState } from 'react';
-import { User, Phone, ClipboardList, Clock, ShieldCheck, QrCode, Share2, Download, CheckCircle2, Loader2, ArrowRight } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { 
+  Box, Typography, Button, IconButton, TextField, 
+  Grid, Card, CardContent, Avatar, Chip, Stack, 
+  Paper, Divider, useTheme, Fade, FormControl, 
+  InputLabel, Select, MenuItem, CircularProgress,
+  Tooltip
+} from '@mui/material';
+import { 
+  User, Phone, ClipboardList, Clock, ShieldCheck, 
+  QrCode, Share2, Download, CheckCircle2, Loader2, 
+  ArrowRight 
+} from 'lucide-react';
 import { api } from '../services/api';
 import { useLanguage } from '../components/LanguageContext';
+import { QRCodeCanvas } from 'qrcode.react';
 
 const VisitorPass: React.FC = () => {
+  const theme = useTheme();
   const { t } = useLanguage();
   const [loading, setLoading] = useState(false);
   const [passData, setPassData] = useState<any>(null);
+  const qrRef = useRef<HTMLDivElement>(null);
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -19,8 +33,11 @@ const VisitorPass: React.FC = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      const result = await api.generateVisitorPass(formData);
+      const result = await api.generateVisitorPass({
+        ...formData,
+        type: formData.purpose.includes('Delivery') ? 'DELIVERY' : 
+              formData.purpose.includes('Service') ? 'SERVICE' : 'GUEST'
+      });
       setPassData(result);
     } catch (err) {
       alert("Pass generation failed.");
@@ -29,133 +46,258 @@ const VisitorPass: React.FC = () => {
     }
   };
 
+  const shareToWhatsApp = () => {
+    if (!passData) return;
+    const text = `Saurashtra Residency - Visitor Pass\n\nName: ${passData.name}\nPass ID: ${passData.passId}\nPurpose: ${passData.purpose}\nValidity: ${passData.validity}\n\nPlease show this pass at the main gate.`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+  };
+
+  const downloadPass = () => {
+    const canvas = document.querySelector('canvas');
+    if (canvas) {
+      const url = canvas.toDataURL('image/png');
+      const link = document.createElement('a');
+      link.download = `VisitorPass_${passData.name}.png`;
+      link.href = url;
+      link.click();
+    }
+  };
+
   return (
-    <div className="max-w-4xl mx-auto space-y-12 animate-fade-up">
-      <div className="border-b border-slate-100 dark:border-slate-800 pb-10 text-center md:text-left">
-        <h1 className="text-4xl font-black text-slate-900 dark:text-white tracking-tighter">{t('visitors')}</h1>
-        <p className="text-slate-500 dark:text-slate-400 font-medium mt-2">Generate instant QR passes for your guests</p>
-      </div>
+    <Box sx={{ maxWidth: '1000px', mx: 'auto', p: { xs: 2, md: 4 } }}>
+      <Fade in timeout={800}>
+        <Box>
+          <Box sx={{ 
+            textAlign: { xs: 'center', md: 'left' },
+            mb: 8,
+            pb: 4,
+            borderBottom: '1px solid',
+            borderColor: 'divider'
+          }}>
+            <Typography variant="h3" sx={{ fontWeight: 900, tracking: '-0.04em' }}>
+              {t('visitors')}
+            </Typography>
+            <Typography variant="body1" sx={{ color: 'text.secondary', mt: 1, fontWeight: 500 }}>
+              Generate instant QR passes for your guests
+            </Typography>
+          </Box>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-        <div className="bg-white dark:bg-slate-900 p-10 rounded-[3.5rem] border border-slate-100 dark:border-slate-800 premium-shadow">
-          <form onSubmit={handleGenerate} className="space-y-6">
-            <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">{t('visitor_name')}</label>
-              <div className="relative">
-                <User className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                <input 
-                  type="text" required placeholder="Guest Full Name"
-                  className="w-full pl-14 pr-6 py-4 bg-slate-50 dark:bg-slate-800 rounded-2xl outline-none font-bold text-sm dark:text-white"
-                  value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})}
-                />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">{t('visitor_phone')}</label>
-              <div className="relative">
-                <Phone className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                <input 
-                  type="tel" required placeholder="+91 00000 00000"
-                  className="w-full pl-14 pr-6 py-4 bg-slate-50 dark:bg-slate-800 rounded-2xl outline-none font-bold text-sm dark:text-white"
-                  value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})}
-                />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">{t('visitor_purpose')}</label>
-              <div className="relative">
-                <ClipboardList className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                <select 
-                  className="w-full pl-14 pr-10 py-4 bg-slate-50 dark:bg-slate-800 rounded-2xl outline-none font-bold text-sm appearance-none dark:text-white"
-                  value={formData.purpose} onChange={e => setFormData({...formData, purpose: e.target.value})}
-                >
-                  <option value="">Select Purpose</option>
-                  <option>Personal Guest</option>
-                  <option>Delivery / Courier</option>
-                  <option>Maintenance Work</option>
-                  <option>Home Service</option>
-                </select>
-              </div>
-            </div>
-            <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">{t('visitor_validity')}</label>
-              <div className="grid grid-cols-2 gap-3">
-                {['4 hours', '24 hours'].map(v => (
-                  <button 
-                    key={v} type="button"
-                    onClick={() => setFormData({...formData, validity: v})}
-                    className={`py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest border-2 transition-all ${
-                      formData.validity === v ? 'border-brand-600 bg-brand-50 text-brand-600 dark:bg-brand-900/10' : 'border-slate-100 dark:border-slate-800 text-slate-400'
-                    }`}
-                  >
-                    {v}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <button 
-              disabled={loading}
-              className="w-full py-5 bg-brand-600 text-white rounded-[2rem] font-black uppercase tracking-widest text-xs flex items-center justify-center gap-3 shadow-2xl shadow-brand-500/20 active:scale-95 transition-all"
-            >
-              {loading ? <Loader2 className="animate-spin" /> : <QrCode size={18} />}
-              {loading ? 'Authorizing Access...' : t('visitor_generate')}
-            </button>
-          </form>
-        </div>
+          <Grid container spacing={6}>
+            <Grid size={{ xs: 12, md: 6 }}>
+              <Paper sx={{ p: { xs: 4, md: 6 }, borderRadius: 10, border: '1px solid', borderColor: 'divider', boxShadow: 4 }}>
+                <form onSubmit={handleGenerate}>
+                  <Stack spacing={4}>
+                    <Box>
+                      <Typography variant="caption" sx={{ fontWeight: 900, color: 'text.secondary', textTransform: 'uppercase', ml: 2, mb: 0.5, display: 'block' }}>
+                        {t('visitor_name')}
+                      </Typography>
+                      <TextField 
+                        fullWidth
+                        placeholder="Guest Full Name"
+                        value={formData.name}
+                        onChange={e => setFormData({...formData, name: e.target.value})}
+                        InputProps={{
+                          startAdornment: <User size={18} style={{ marginRight: 12, opacity: 0.5 }} />,
+                          sx: { borderRadius: 4, bgcolor: 'action.hover' }
+                        }}
+                      />
+                    </Box>
+                    <Box>
+                      <Typography variant="caption" sx={{ fontWeight: 900, color: 'text.secondary', textTransform: 'uppercase', ml: 2, mb: 0.5, display: 'block' }}>
+                        {t('visitor_phone')}
+                      </Typography>
+                      <TextField 
+                        fullWidth
+                        placeholder="+91 00000 00000"
+                        value={formData.phone}
+                        onChange={e => setFormData({...formData, phone: e.target.value})}
+                        InputProps={{
+                          startAdornment: <Phone size={18} style={{ marginRight: 12, opacity: 0.5 }} />,
+                          sx: { borderRadius: 4, bgcolor: 'action.hover' }
+                        }}
+                      />
+                    </Box>
+                    <Box>
+                      <Typography variant="caption" sx={{ fontWeight: 900, color: 'text.secondary', textTransform: 'uppercase', ml: 2, mb: 0.5, display: 'block' }}>
+                        {t('visitor_purpose')}
+                      </Typography>
+                      <FormControl fullWidth>
+                        <Select
+                          value={formData.purpose}
+                          onChange={e => setFormData({...formData, purpose: e.target.value})}
+                          displayEmpty
+                          startAdornment={<ClipboardList size={18} style={{ marginRight: 12, opacity: 0.5 }} />}
+                          sx={{ borderRadius: 4, bgcolor: 'action.hover' }}
+                        >
+                          <MenuItem value="">Select Purpose</MenuItem>
+                          <MenuItem value="Personal Guest">Personal Guest</MenuItem>
+                          <MenuItem value="Delivery / Courier">Delivery / Courier</MenuItem>
+                          <MenuItem value="Maintenance Work">Maintenance Work</MenuItem>
+                          <MenuItem value="Home Service">Home Service</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </Box>
+                    <Box>
+                      <Typography variant="caption" sx={{ fontWeight: 900, color: 'text.secondary', textTransform: 'uppercase', ml: 2, mb: 1, display: 'block' }}>
+                        {t('visitor_validity')}
+                      </Typography>
+                      <Grid container spacing={2}>
+                        {['4 hours', '24 hours'].map(v => (
+                          <Grid size={6} key={v}>
+                            <Button 
+                              fullWidth 
+                              variant={formData.validity === v ? 'contained' : 'outlined'}
+                              onClick={() => setFormData({...formData, validity: v})}
+                              sx={{ 
+                                py: 2, 
+                                borderRadius: 4, 
+                                fontWeight: 900, 
+                                textTransform: 'uppercase', 
+                                fontSize: '0.7rem',
+                                bgcolor: formData.validity === v ? 'primary.main' : 'transparent',
+                                color: formData.validity === v ? 'white' : 'text.secondary',
+                                borderColor: formData.validity === v ? 'primary.main' : 'divider'
+                              }}
+                            >
+                              {v}
+                            </Button>
+                          </Grid>
+                        ))}
+                      </Grid>
+                    </Box>
+                    <Button 
+                      fullWidth 
+                      variant="contained" 
+                      size="large"
+                      type="submit"
+                      disabled={loading}
+                      startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <QrCode size={18} />}
+                      sx={{ py: 2, borderRadius: 6, fontWeight: 900, boxShadow: 10 }}
+                    >
+                      {loading ? 'Authorizing Access...' : t('visitor_generate')}
+                    </Button>
+                  </Stack>
+                </form>
+              </Paper>
+            </Grid>
 
-        <div className="flex items-center justify-center">
-          {passData ? (
-            <div className="w-full bg-[#0F172A] p-8 rounded-[3.5rem] text-white shadow-2xl relative overflow-hidden animate-in zoom-in-95 duration-500">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-brand-600/20 rounded-full blur-3xl -mr-16 -mt-16" />
-              <div className="relative z-10 space-y-8 text-center">
-                <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 rounded-full text-[9px] font-black uppercase tracking-widest border border-white/10">
-                  <ShieldCheck size={14} className="text-emerald-400" /> {t('visitor_auth')}
-                </div>
-                
-                <div className="p-6 bg-white rounded-[2.5rem] w-fit mx-auto shadow-2xl">
-                   <QrCode size={180} className="text-slate-900" />
-                </div>
+            <Grid size={{ xs: 12, md: 6 }} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              {passData ? (
+                <Box sx={{ 
+                  width: '100%', 
+                  bgcolor: '#0F172A', 
+                  p: 6, 
+                  borderRadius: 12, 
+                  color: 'white', 
+                  boxShadow: 20, 
+                  position: 'relative', 
+                  overflow: 'hidden',
+                  textAlign: 'center'
+                }}>
+                  <Box sx={{ position: 'absolute', top: 0, right: 0, width: 120, height: 120, bgcolor: 'primary.main', opacity: 0.1, borderRadius: '50%', filter: 'blur(40px)', mr: -8, mt: -8 }} />
+                  <Stack spacing={4} sx={{ position: 'relative', zIndex: 1 }} ref={qrRef}>
+                    <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 1, px: 2, py: 0.5, bgcolor: 'rgba(255,255,255,0.05)', borderRadius: 4, border: '1px solid rgba(255,255,255,0.1)', mx: 'auto' }}>
+                      <ShieldCheck size={14} color={theme.palette.success.main} />
+                      <Typography variant="caption" sx={{ fontWeight: 900, textTransform: 'uppercase', letterSpacing: 1 }}>
+                        {t('visitor_auth')}
+                      </Typography>
+                    </Box>
+                    
+                    <Paper sx={{ p: 4, bgcolor: 'white', borderRadius: 8, width: 'fit-content', mx: 'auto', boxShadow: 10 }}>
+                       <QRCodeCanvas 
+                        value={JSON.stringify({ id: passData.passId, name: passData.name, expires: passData.validity })}
+                        size={180}
+                        level="H"
+                        includeMargin={true}
+                       />
+                    </Paper>
 
-                <div className="space-y-2">
-                  <h3 className="text-2xl font-black tracking-tight">{passData.name}</h3>
-                  <p className="text-[10px] font-black uppercase text-brand-400 tracking-widest">{passData.passId}</p>
-                </div>
+                    <Box>
+                      <Typography variant="h4" sx={{ fontWeight: 900, tracking: '-0.02em' }}>
+                        {passData.name}
+                      </Typography>
+                      <Typography variant="caption" sx={{ fontWeight: 900, color: 'primary.light', textTransform: 'uppercase', letterSpacing: 2 }}>
+                        {passData.passId}
+                      </Typography>
+                    </Box>
 
-                <div className="grid grid-cols-2 gap-4 border-t border-white/5 pt-8">
-                  <div className="text-left">
-                    <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest">{t('visitor_purpose')}</p>
-                    <p className="text-xs font-bold text-slate-200">{passData.purpose}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Expires In</p>
-                    <p className="text-xs font-bold text-slate-200">{passData.validity}</p>
-                  </div>
-                </div>
+                    <Grid container spacing={2} sx={{ pt: 4, borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+                      <Grid size={6} sx={{ textAlign: 'left' }}>
+                        <Typography variant="caption" sx={{ fontWeight: 900, color: 'text.disabled', textTransform: 'uppercase', letterSpacing: 1 }}>
+                          {t('visitor_purpose')}
+                        </Typography>
+                        <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                          {passData.purpose}
+                        </Typography>
+                      </Grid>
+                      <Grid size={6} sx={{ textAlign: 'right' }}>
+                        <Typography variant="caption" sx={{ fontWeight: 900, color: 'text.disabled', textTransform: 'uppercase', letterSpacing: 1 }}>
+                          Expires In
+                        </Typography>
+                        <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                          {passData.validity}
+                        </Typography>
+                      </Grid>
+                    </Grid>
 
-                <div className="flex gap-3">
-                  <button className="flex-1 py-4 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all flex items-center justify-center gap-2">
-                    <Share2 size={14} /> {t('visitor_share')}
-                  </button>
-                  <button className="flex-1 py-4 bg-brand-600 hover:bg-brand-700 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all flex items-center justify-center gap-2">
-                    <Download size={14} /> {t('visitor_download')}
-                  </button>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="text-center space-y-6 max-w-xs">
-               <div className="w-24 h-24 bg-slate-50 dark:bg-slate-800 rounded-[2.5rem] flex items-center justify-center text-slate-200 dark:text-slate-700 mx-auto border-4 border-dashed border-slate-100 dark:border-slate-800">
-                 <ShieldCheck size={48} />
-               </div>
-               <div>
-                 <h4 className="font-black text-slate-400 dark:text-slate-600 uppercase tracking-widest text-xs">Awaiting Authorization</h4>
-                 <p className="text-sm text-slate-400 mt-2 font-medium">Fill guest details to generate an encrypted digital entry key.</p>
-               </div>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
+                    <Stack direction="row" spacing={2}>
+                      <Button 
+                        fullWidth 
+                        variant="outlined" 
+                        onClick={shareToWhatsApp}
+                        startIcon={<Share2 size={14} />}
+                        sx={{ 
+                          py: 1.5, 
+                          borderRadius: 4, 
+                          fontWeight: 900, 
+                          textTransform: 'uppercase', 
+                          fontSize: '0.7rem',
+                          color: 'white',
+                          borderColor: 'rgba(255,255,255,0.1)',
+                          bgcolor: 'rgba(255,255,255,0.05)',
+                          '&:hover': { bgcolor: 'rgba(255,255,255,0.1)', borderColor: 'rgba(255,255,255,0.2)' }
+                        }}
+                      >
+                        {t('visitor_share')}
+                      </Button>
+                      <Button 
+                        fullWidth 
+                        variant="contained" 
+                        onClick={downloadPass}
+                        startIcon={<Download size={14} />}
+                        sx={{ py: 1.5, borderRadius: 4, fontWeight: 900, textTransform: 'uppercase', fontSize: '0.7rem' }}
+                      >
+                        {t('visitor_download')}
+                      </Button>
+                    </Stack>
+                  </Stack>
+                </Box>
+              ) : (
+                <Box sx={{ textAlign: 'center', maxWidth: 300 }}>
+                   <Avatar sx={{ 
+                     width: 96, height: 96, 
+                     bgcolor: 'action.hover', 
+                     color: 'text.disabled', 
+                     mx: 'auto', mb: 3, 
+                     borderRadius: 10,
+                     border: '4px dashed',
+                     borderColor: 'divider'
+                   }}>
+                     <ShieldCheck size={48} />
+                   </Avatar>
+                   <Typography variant="caption" sx={{ fontWeight: 900, color: 'text.disabled', textTransform: 'uppercase', letterSpacing: 2, display: 'block' }}>
+                     Awaiting Authorization
+                   </Typography>
+                   <Typography variant="body2" sx={{ color: 'text.secondary', mt: 1, fontWeight: 500 }}>
+                     Fill guest details to generate an encrypted digital entry key.
+                   </Typography>
+                </Box>
+              )}
+            </Grid>
+          </Grid>
+        </Box>
+      </Fade>
+    </Box>
   );
 };
 

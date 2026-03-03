@@ -1,6 +1,17 @@
 
 import React, { useState } from 'react';
-import { LifeBuoy, Plus, Clock, CheckCircle2, AlertCircle, Send, X, MessageSquare } from 'lucide-react';
+import { 
+  Box, Typography, Button, IconButton, TextField, 
+  Grid, Card, CardContent, Avatar, Chip, Stack, 
+  Paper, Divider, Dialog, DialogTitle, DialogContent, 
+  DialogActions, useTheme, Fade, Stepper, Step, 
+  StepLabel, StepIconProps, styled
+} from '@mui/material';
+import { 
+  LifeBuoy, Plus, Clock, CheckCircle2, AlertCircle, 
+  Send, X, MessageSquare, Wrench, Shield, Zap, 
+  Droplets, Construction, ChevronRight 
+} from 'lucide-react';
 import { useLanguage } from '../components/LanguageContext';
 
 interface Ticket {
@@ -8,92 +19,328 @@ interface Ticket {
   title: string;
   desc: string;
   status: 'Pending' | 'In Progress' | 'Resolved';
+  priority: 'Low' | 'Medium' | 'High';
+  category: 'Plumbing' | 'Electrical' | 'Security' | 'General';
   date: string;
 }
 
 const Helpdesk: React.FC = () => {
+  const theme = useTheme();
   const { t } = useLanguage();
   const [showModal, setShowModal] = useState(false);
   const [tickets, setTickets] = useState<Ticket[]>([
-    { id: 'T-1002', title: 'Water Leakage in Bathroom', desc: 'Slight seepage on the side wall.', status: 'In Progress', date: '2024-05-22' },
-    { id: 'T-1001', title: 'Lift Fan Not Working', desc: 'Fan in Wing A-3 lift is very slow.', status: 'Resolved', date: '2024-05-18' }
+    { id: 'T-1002', title: 'Water Leakage in Bathroom', desc: 'Slight seepage on the side wall.', status: 'In Progress', priority: 'High', category: 'Plumbing', date: '2024-05-22' },
+    { id: 'T-1001', title: 'Lift Fan Not Working', desc: 'Fan in Wing A-3 lift is very slow.', status: 'Resolved', priority: 'Medium', category: 'Electrical', date: '2024-05-18' }
   ]);
+
+  const [formData, setFormData] = useState({
+    title: '',
+    desc: '',
+    priority: 'Medium' as 'Low' | 'Medium' | 'High',
+    category: 'General' as any
+  });
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'Resolved': return 'bg-emerald-50 text-emerald-600 border-emerald-100';
-      case 'In Progress': return 'bg-blue-50 text-blue-600 border-blue-100';
-      default: return 'bg-amber-50 text-amber-600 border-amber-100';
+      case 'Resolved': return 'success';
+      case 'In Progress': return 'info';
+      default: return 'warning';
     }
   };
 
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case 'High': return 'error.main';
+      case 'Medium': return 'warning.main';
+      default: return 'text.secondary';
+    }
+  };
+
+  const getCategoryIcon = (category: string) => {
+    switch (category) {
+      case 'Plumbing': return Droplets;
+      case 'Electrical': return Zap;
+      case 'Security': return Shield;
+      default: return MessageSquare;
+    }
+  };
+
+  const handleRaiseTicket = (e: React.FormEvent) => {
+    e.preventDefault();
+    const newTicket: Ticket = {
+      id: `T-${1000 + tickets.length + 1}`,
+      title: formData.title,
+      desc: formData.desc,
+      status: 'Pending',
+      priority: formData.priority,
+      category: formData.category,
+      date: new Date().toISOString()
+    };
+    setTickets([newTicket, ...tickets]);
+    setShowModal(false);
+    setFormData({ title: '', desc: '', priority: 'Medium', category: 'General' });
+  };
+
   return (
-    <div className="max-w-4xl mx-auto space-y-12 animate-fade-up">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-8 border-b border-slate-100 dark:border-slate-800">
-        <div>
-          <h1 className="text-4xl font-extrabold text-slate-900 dark:text-white tracking-tighter">{t('helpdesk')}</h1>
-          <p className="text-slate-500 dark:text-slate-400 mt-2 font-medium">Report issues and track resolution status</p>
-        </div>
-        <button 
-          onClick={() => setShowModal(true)}
-          className="px-8 py-4 bg-brand-600 text-white rounded-[2rem] font-black uppercase tracking-widest text-xs flex items-center gap-2 shadow-xl shadow-brand-500/20"
-        >
-          <Plus size={18} strokeWidth={3} /> {t('raise_complaint')}
-        </button>
-      </div>
+    <Box sx={{ maxWidth: '1000px', mx: 'auto', p: { xs: 2, md: 4 } }}>
+      <Fade in timeout={800}>
+        <Box>
+          <Box sx={{ 
+            display: 'flex', 
+            flexDirection: { xs: 'column', md: 'row' }, 
+            justifyContent: 'space-between', 
+            alignItems: { xs: 'flex-start', md: 'flex-end' },
+            gap: 3,
+            mb: 8,
+            pb: 4,
+            borderBottom: '1px solid',
+            borderColor: 'divider'
+          }}>
+            <Box>
+              <Typography variant="h3" sx={{ fontWeight: 900, tracking: '-0.04em' }}>
+                {t('helpdesk')}
+              </Typography>
+              <Typography variant="body1" sx={{ color: 'text.secondary', mt: 1, fontWeight: 500 }}>
+                Report issues and track resolution status
+              </Typography>
+            </Box>
+            <Button 
+              variant="contained" 
+              size="large"
+              startIcon={<Plus size={18} strokeWidth={3} />}
+              onClick={() => setShowModal(true)}
+              sx={{ borderRadius: 6, px: 4, py: 1.5, fontWeight: 900, textTransform: 'uppercase', letterSpacing: 1, boxShadow: 10 }}
+            >
+              {t('raise_complaint')}
+            </Button>
+          </Box>
 
-      <div className="space-y-6 pb-20">
-        {tickets.map((ticket) => (
-          <div key={ticket.id} className="bg-white dark:bg-slate-900 p-8 rounded-[3rem] border border-slate-100 dark:border-slate-800 premium-shadow group">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-              <div className="flex gap-6">
-                <div className="w-14 h-14 bg-slate-50 dark:bg-slate-800 rounded-2xl flex items-center justify-center text-slate-400 group-hover:bg-brand-600 group-hover:text-white transition-all">
-                   <MessageSquare size={24} />
-                </div>
-                <div>
-                  <div className="flex items-center gap-3 mb-1">
-                    <h3 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">{ticket.title}</h3>
-                    <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest">#{ticket.id}</span>
-                  </div>
-                  <p className="text-sm text-slate-500 dark:text-slate-400 font-medium mb-4">{ticket.desc}</p>
-                  <div className="flex items-center gap-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                     <Clock size={14} /> {new Date(ticket.date).toLocaleDateString()}
-                  </div>
-                </div>
-              </div>
-              <div className={`px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border-2 ${getStatusColor(ticket.status)}`}>
-                 {t(`status_${ticket.status.toLowerCase().replace(' ', '_')}`)}
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
+          <Stack spacing={4} sx={{ pb: 10 }}>
+            {tickets.map((ticket) => {
+              const Icon = getCategoryIcon(ticket.category);
+              return (
+                <Card key={ticket.id} sx={{ 
+                  borderRadius: 10, 
+                  border: '1px solid', 
+                  borderColor: 'divider',
+                  transition: 'all 0.3s ease',
+                  '&:hover': { boxShadow: 12, transform: 'translateY(-4px)' },
+                  overflow: 'hidden'
+                }}>
+                  <CardContent sx={{ p: { xs: 4, md: 6 } }}>
+                    <Grid container spacing={4}>
+                      <Grid size={{ xs: 12, lg: 8 }}>
+                        <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 3, mb: 3 }}>
+                          <Avatar sx={{ width: 48, height: 48, borderRadius: 4, bgcolor: 'action.hover', color: 'text.secondary', transition: 'all 0.3s ease' }}>
+                            <Icon size={24} />
+                          </Avatar>
+                          <Box>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                              <Typography variant="h5" sx={{ fontWeight: 900, tracking: '-0.02em' }}>
+                                {ticket.title}
+                              </Typography>
+                              <Typography variant="caption" sx={{ fontWeight: 900, color: 'text.disabled', textTransform: 'uppercase', letterSpacing: 1 }}>
+                                #{ticket.id}
+                              </Typography>
+                            </Box>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 0.5 }}>
+                              <Typography variant="caption" sx={{ fontWeight: 900, color: getPriorityColor(ticket.priority), textTransform: 'uppercase', letterSpacing: 1 }}>
+                                {ticket.priority} Priority
+                              </Typography>
+                              <Box sx={{ width: 4, height: 4, borderRadius: '50%', bgcolor: 'divider' }} />
+                              <Typography variant="caption" sx={{ fontWeight: 900, color: 'text.secondary', textTransform: 'uppercase', letterSpacing: 1 }}>
+                                {ticket.category}
+                              </Typography>
+                            </Box>
+                          </Box>
+                        </Box>
+                        
+                        <Typography variant="body1" sx={{ color: 'text.secondary', fontWeight: 500, mb: 4, lineHeight: 1.6 }}>
+                          {ticket.desc}
+                        </Typography>
 
-      {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-6">
-          <div className="absolute inset-0 bg-slate-900/80 backdrop-blur-xl animate-in fade-in" onClick={() => setShowModal(false)} />
-          <div className="relative w-full max-w-xl bg-white dark:bg-slate-900 rounded-[3.5rem] p-10 shadow-2xl border border-slate-100 dark:border-slate-800">
-            <div className="flex justify-between items-center mb-8">
-               <h3 className="text-2xl font-black tracking-tight">{t('raise_complaint')}</h3>
-               <button onClick={() => setShowModal(false)} className="p-2 text-slate-400"><X size={24} /></button>
-            </div>
-            <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
-               <div className="space-y-2">
-                 <label className="text-[10px] font-black uppercase text-slate-400 ml-2">{t('complaint_title')}</label>
-                 <input type="text" placeholder="e.g. Broken streetlight" className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-800 rounded-2xl outline-none font-bold" />
-               </div>
-               <div className="space-y-2">
-                 <label className="text-[10px] font-black uppercase text-slate-400 ml-2">{t('complaint_desc')}</label>
-                 <textarea rows={4} className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-800 rounded-2xl outline-none font-bold resize-none" />
-               </div>
-               <button className="w-full py-5 bg-brand-600 text-white rounded-[2rem] font-black uppercase tracking-widest text-xs flex items-center justify-center gap-3">
-                  <Send size={18} /> Send Ticket
-               </button>
-            </form>
-          </div>
-        </div>
-      )}
-    </div>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                          <Typography variant="caption" sx={{ display: 'flex', alignItems: 'center', gap: 1, fontWeight: 900, color: 'text.disabled', textTransform: 'uppercase', letterSpacing: 1 }}>
+                            <Clock size={14} /> {new Date(ticket.date).toLocaleDateString()}
+                          </Typography>
+                          <Chip 
+                            label={ticket.status} 
+                            color={getStatusColor(ticket.status) as any}
+                            size="small"
+                            variant="outlined"
+                            sx={{ fontWeight: 900, textTransform: 'uppercase', fontSize: '0.65rem', borderRadius: 4, borderWeight: 2 }}
+                          />
+                        </Box>
+                      </Grid>
+
+                      <Grid size={{ xs: 12, lg: 4 }}>
+                        <Box sx={{ 
+                          height: '100%', 
+                          pl: { lg: 4 }, 
+                          borderLeft: { lg: '1px solid' }, 
+                          borderColor: 'divider',
+                          pt: { xs: 4, lg: 0 },
+                          borderTop: { xs: '1px solid', lg: 'none' }
+                        }}>
+                          <Typography variant="caption" sx={{ fontWeight: 900, color: 'text.secondary', textTransform: 'uppercase', letterSpacing: 2, mb: 3, display: 'block' }}>
+                            Resolution Progress
+                          </Typography>
+                          <Stepper orientation="vertical" activeStep={ticket.status === 'Resolved' ? 3 : (ticket.status === 'In Progress' ? 2 : 1)} sx={{ '& .MuiStepConnector-line': { minHeight: 20 } }}>
+                            {[
+                              { label: 'Reported', active: true },
+                              { label: 'Assigned', active: ticket.status !== 'Pending' },
+                              { label: 'Resolved', active: ticket.status === 'Resolved' }
+                            ].map((step, index) => (
+                              <Step key={index} active={step.active}>
+                                <StepLabel 
+                                  StepIconComponent={() => (
+                                    <Box sx={{ 
+                                      width: 24, height: 24, 
+                                      borderRadius: '50%', 
+                                      display: 'flex', 
+                                      alignItems: 'center', 
+                                      justifyContent: 'center',
+                                      bgcolor: step.active ? 'primary.main' : 'action.hover',
+                                      color: step.active ? 'white' : 'text.disabled',
+                                      border: '2px solid',
+                                      borderColor: step.active ? 'primary.main' : 'divider',
+                                      fontSize: 12
+                                    }}>
+                                      {step.active ? <CheckCircle2 size={12} /> : <Box sx={{ width: 4, height: 4, borderRadius: '50%', bgcolor: 'currentColor' }} />}
+                                    </Box>
+                                  )}
+                                >
+                                  <Typography variant="caption" sx={{ fontWeight: 900, textTransform: 'uppercase', color: step.active ? 'text.primary' : 'text.disabled' }}>
+                                    {step.label}
+                                  </Typography>
+                                </StepLabel>
+                              </Step>
+                            ))}
+                          </Stepper>
+                        </Box>
+                      </Grid>
+                    </Grid>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </Stack>
+        </Box>
+      </Fade>
+
+      <Dialog 
+        open={showModal} 
+        onClose={() => setShowModal(false)}
+        PaperProps={{ sx: { borderRadius: 10, p: 2, maxWidth: 600, width: '100%' } }}
+      >
+        <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Typography variant="h4" sx={{ fontWeight: 900, tracking: '-0.04em' }}>New Ticket</Typography>
+          <IconButton onClick={() => setShowModal(false)}>
+            <X size={28} />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent sx={{ mt: 2 }}>
+          <Stack spacing={4}>
+            <Box>
+              <Typography variant="caption" sx={{ fontWeight: 900, color: 'text.secondary', textTransform: 'uppercase', ml: 2, mb: 1, display: 'block' }}>
+                Issue Category
+              </Typography>
+              <Grid container spacing={2}>
+                {['Plumbing', 'Electrical', 'Security', 'General'].map(cat => (
+                  <Grid size={6} key={cat}>
+                    <Button 
+                      fullWidth 
+                      variant={formData.category === cat ? 'contained' : 'outlined'}
+                      onClick={() => setFormData({...formData, category: cat as any})}
+                      sx={{ 
+                        py: 2, 
+                        borderRadius: 4, 
+                        fontWeight: 900, 
+                        textTransform: 'uppercase', 
+                        fontSize: '0.7rem',
+                        bgcolor: formData.category === cat ? 'primary.main' : 'transparent',
+                        color: formData.category === cat ? 'white' : 'text.secondary',
+                        borderColor: formData.category === cat ? 'primary.main' : 'divider'
+                      }}
+                    >
+                      {cat}
+                    </Button>
+                  </Grid>
+                ))}
+              </Grid>
+            </Box>
+
+            <Box>
+              <Typography variant="caption" sx={{ fontWeight: 900, color: 'text.secondary', textTransform: 'uppercase', ml: 2, mb: 1, display: 'block' }}>
+                Priority Level
+              </Typography>
+              <Stack direction="row" spacing={2}>
+                {['Low', 'Medium', 'High'].map(p => (
+                  <Button 
+                    key={p} 
+                    fullWidth
+                    variant={formData.priority === p ? 'contained' : 'outlined'}
+                    onClick={() => setFormData({...formData, priority: p as any})}
+                    sx={{ 
+                      py: 2, 
+                      borderRadius: 4, 
+                      fontWeight: 900, 
+                      textTransform: 'uppercase', 
+                      fontSize: '0.7rem',
+                      bgcolor: formData.priority === p ? 'primary.main' : 'transparent',
+                      color: formData.priority === p ? 'white' : 'text.secondary',
+                      borderColor: formData.priority === p ? 'primary.main' : 'divider'
+                    }}
+                  >
+                    {p}
+                  </Button>
+                ))}
+              </Stack>
+            </Box>
+
+            <Box>
+              <Typography variant="caption" sx={{ fontWeight: 900, color: 'text.secondary', textTransform: 'uppercase', ml: 2, mb: 0.5, display: 'block' }}>
+                Subject
+              </Typography>
+              <TextField 
+                fullWidth
+                placeholder="Briefly describe the issue..."
+                value={formData.title}
+                onChange={e => setFormData({...formData, title: e.target.value})}
+                InputProps={{ sx: { borderRadius: 6, bgcolor: 'action.hover' } }}
+              />
+            </Box>
+
+            <Box>
+              <Typography variant="caption" sx={{ fontWeight: 900, color: 'text.secondary', textTransform: 'uppercase', ml: 2, mb: 0.5, display: 'block' }}>
+                Detailed Description
+              </Typography>
+              <TextField 
+                fullWidth
+                multiline
+                rows={4}
+                placeholder="Provide more details for the technician..."
+                value={formData.desc}
+                onChange={e => setFormData({...formData, desc: e.target.value})}
+                InputProps={{ sx: { borderRadius: 6, bgcolor: 'action.hover' } }}
+              />
+            </Box>
+          </Stack>
+        </DialogContent>
+        <DialogActions sx={{ p: 4 }}>
+          <Button 
+            fullWidth 
+            variant="contained" 
+            size="large"
+            onClick={handleRaiseTicket}
+            startIcon={<Send size={18} />}
+            sx={{ py: 2, borderRadius: 6, fontWeight: 900, boxShadow: 10 }}
+          >
+            Raise Support Ticket
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Box>
   );
 };
 

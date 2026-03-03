@@ -3,7 +3,9 @@ import express from 'express';
 import Maintenance from '../models/Maintenance';
 import Building from '../models/Building';
 import Notice from '../models/Notice';
+import Visitor from '../models/Visitor';
 import { protect, authorize } from '../middleware/authMiddleware';
+import { emitVisitorUpdate } from '../socket';
 
 const router = express.Router();
 
@@ -133,6 +135,137 @@ router.patch('/maintenance/:id', protect, async (req: any, res) => {
     res.json(record);
   } catch (error) {
     res.status(400).json({ message: 'Update failed' });
+  }
+});
+
+// Calculate Penalties (Admin/Committee)
+router.post('/maintenance/calculate-penalties', protect, authorize(['ADMIN', 'COMMITTEE']), async (req, res) => {
+  try {
+    const { month, year, penaltyRate = 100 } = req.body;
+    const overdueRecords = await Maintenance.find({ 
+      month, 
+      year, 
+      status: 'Pending' 
+    });
+
+    for (const record of overdueRecords) {
+      record.status = 'Overdue';
+      record.penaltyAmount = penaltyRate;
+      await record.save();
+    }
+
+    res.json({ message: `Calculated penalties for ${overdueRecords.length} records.` });
+  } catch (error) {
+    res.status(500).json({ message: 'Penalty calculation failed' });
+  }
+});
+
+// Get Receipt Data
+router.get('/maintenance/:id/receipt', protect, async (req: any, res) => {
+  try {
+    const record = await Maintenance.findById(req.params.id);
+    if (!record) return res.status(404).json({ message: 'Record not found' });
+    
+    // Authorization check
+    if (req.user.role === 'RESIDENT' && record.flatId !== req.user.flatId) {
+      return res.status(403).json({ message: 'Unauthorized' });
+    }
+
+    const receipt = {
+      receiptNo: `SR-${record._id.toString().substring(0, 8).toUpperCase()}`,
+      flatId: record.flatId,
+      period: `${record.month} ${record.year}`,
+      amount: record.amount,
+      penalty: record.penaltyAmount,
+      total: record.amount + record.penaltyAmount,
+      status: record.status,
+      paidDate: record.paidDate,
+      societyName: 'Saurashtra Residency',
+      address: 'Pasodara, Surat, Gujarat 395006'
+    };
+
+    res.json(receipt);
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to fetch receipt' });
+  }
+});
+
+// --- VISITOR MANAGEMENT ---
+
+// Generate Visitor Pass
+router.post('/visitors/generate', protect, async (req: any, res) => {
+  try {
+    const passId = Math.random().toString(36).substring(2, 10).toUpperCase();
+    const visitor = new Visitor({
+      ...req.body,
+      passId,
+      status: 'PENDING'
+    });
+    await visitor.save();
+    res.status(201).json(visitor);
+  } catch (error) {
+    res.status(400).json({ message: 'Failed to generate pass' });
+  }
+});
+
+// Verify Visitor Pass
+router.get('/visitors/verify/:passId', protect, async (req, res) => {
+  try {
+    const visitor = await Visitor.findOne({ passId: req.params.passId.toUpperCase() });
+    if (!visitor) return res.status(404).json({ message: 'Invalid Pass ID' });
+    res.json(visitor);
+  } catch (error) {
+    res.status(500).json({ message: 'Verification failed' });
+  }
+});
+
+// Check-In Visitor
+router.post('/visitors/check-in/:passId', protect, authorize(['ADMIN', 'COMMITTEE']), async (req, res) => {
+  try {
+    const visitor = await Visitor.findOne({ passId: req.params.passId.toUpperCase() });
+    if (!visitor) return res.status(404).json({ message: 'Invalid Pass ID' });
+    if (visitor.status === 'IN') return res.status(400).json({ message: 'Visitor already checked in' });
+
+    visitor.status = 'IN';
+    visitor.checkInTime = new Date();
+    await visitor.save();
+    
+    // Emit real-time update
+    emitVisitorUpdate({ type: 'CHECK_IN', visitor });
+    
+    res.json(visitor);
+  } catch (error) {
+    res.status(500).json({ message: 'Check-in failed' });
+  }
+});
+
+// Check-Out Visitor
+router.post('/visitors/check-out/:id', protect, authorize(['ADMIN', 'COMMITTEE']), async (req, res) => {
+  try {
+    const visitor = await Visitor.findById(req.params.id);
+    if (!visitor) return res.status(404).json({ message: 'Visitor not found' });
+    if (visitor.status === 'OUT') return res.status(400).json({ message: 'Visitor already checked out' });
+
+    visitor.status = 'OUT';
+    visitor.checkOutTime = new Date();
+    await visitor.save();
+    
+    // Emit real-time update
+    emitVisitorUpdate({ type: 'CHECK_OUT', visitor });
+    
+    res.json(visitor);
+  } catch (error) {
+    res.status(500).json({ message: 'Check-out failed' });
+  }
+});
+
+// Get Active Visitors
+router.get('/visitors/active', protect, authorize(['ADMIN', 'COMMITTEE']), async (req, res) => {
+  try {
+    const active = await Visitor.find({ status: 'IN' }).sort({ checkInTime: -1 });
+    res.json(active);
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to fetch active visitors' });
   }
 });
 

@@ -82,6 +82,7 @@ export interface MaintenanceRecord {
   month: string;
   year: number;
   amount: number;
+  penaltyAmount?: number;
   status: PaymentStatus;
   occupancyType: OccupancyType;
   paidDate?: string;
