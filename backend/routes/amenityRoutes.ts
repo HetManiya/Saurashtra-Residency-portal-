@@ -2,6 +2,7 @@ import express from 'express';
 import Amenity from '../models/Amenity';
 import AmenityBooking from '../models/AmenityBooking';
 import Notification from '../models/Notification';
+import User from '../models/User';
 import { protect, authorize } from '../middleware/authMiddleware';
 import AuditLog from '../models/AuditLog';
 
@@ -50,10 +51,15 @@ router.post('/bookings', protect, async (req: any, res) => {
       return res.status(400).json({ message: 'Amenity is already booked for this time slot.' });
     }
 
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
     const booking = new AmenityBooking({
       ...req.body,
       userId: req.user.id,
-      flatId: req.user.flatId
+      flatId: user.flatId || 'N/A'
     });
     await booking.save();
     
