@@ -152,48 +152,48 @@ const Buildings: React.FC = () => {
   if (loading) {
     return (
       <div className="h-[60vh] flex flex-col items-center justify-center">
-        <Loader2 className="animate-spin text-brand-600 mb-4" size={40} />
-        <p className="font-black uppercase tracking-widest text-xs text-slate-400">Auditing Society Assets...</p>
+        <Loader2 className="animate-spin text-magenta-500 mb-4" size={40} />
+        <p className="font-mono font-black uppercase tracking-widest text-xs text-cyan-500 glitch-text">Auditing Society Assets...</p>
       </div>
     );
   }
 
   return (
     <div className="space-y-10 animate-fade-up">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-8 border-b border-slate-200 dark:border-slate-800">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-8 border-b-4 border-magenta-500">
         <div>
-          <h1 className="text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">{t('residential_infra')}</h1>
-          <p className="text-slate-500 dark:text-slate-400 mt-2 font-medium">Real-time occupancy tracking for Pasodara portal</p>
+          <h1 className="text-5xl font-black text-cyan-400 tracking-tighter uppercase glitch-text">{t('residential_infra')}</h1>
+          <p className="text-cyan-500/70 mt-2 font-mono text-xs uppercase tracking-widest">Real-time occupancy tracking for Pasodara portal</p>
         </div>
 
         <div className="flex flex-col sm:flex-row gap-6 items-center">
           <div className="flex gap-4">
-            <div className="bg-emerald-50 dark:bg-emerald-900/10 border border-emerald-100 dark:border-emerald-800 px-6 py-3 rounded-2xl text-center">
-               <p className="text-[10px] font-black uppercase text-emerald-600 tracking-widest mb-1">Registered</p>
-               <p className="text-2xl font-black text-emerald-700 dark:text-emerald-400 leading-none">{occupiedCount}</p>
+            <div className="bg-black border-2 border-emerald-500 px-6 py-3 rounded-none text-center shadow-[4px_4px_0px_#10b981]">
+               <p className="text-[10px] font-mono font-black uppercase text-emerald-500 tracking-widest mb-1">Registered</p>
+               <p className="text-2xl font-black text-emerald-400 leading-none font-mono">{occupiedCount}</p>
             </div>
-            <div className="bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 px-6 py-3 rounded-2xl text-center">
-               <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-1">Vacant</p>
-               <p className="text-2xl font-black text-slate-900 dark:text-white leading-none">{vacantCount}</p>
+            <div className="bg-black border-2 border-cyan-500 px-6 py-3 rounded-none text-center shadow-[4px_4px_0px_#06b6d4]">
+               <p className="text-[10px] font-mono font-black uppercase text-cyan-500 tracking-widest mb-1">Vacant</p>
+               <p className="text-2xl font-black text-cyan-400 leading-none font-mono">{vacantCount}</p>
             </div>
           </div>
-          <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-xl">
+          <div className="flex bg-black border-2 border-magenta-500 p-1 rounded-none">
             <button
               onClick={() => setViewMode('list')}
-              className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all ${
+              className={`px-4 py-2 font-mono text-xs font-black uppercase tracking-widest transition-all ${
                 viewMode === 'list' 
-                  ? 'bg-white dark:bg-slate-700 text-brand-600 shadow-sm' 
-                  : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
+                  ? 'bg-cyan-500 text-black' 
+                  : 'text-cyan-500 hover:bg-cyan-500/10'
               }`}
             >
               List View
             </button>
             <button
               onClick={() => setViewMode('map')}
-              className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all ${
+              className={`px-4 py-2 font-mono text-xs font-black uppercase tracking-widest transition-all ${
                 viewMode === 'map' 
-                  ? 'bg-white dark:bg-slate-700 text-brand-600 shadow-sm' 
-                  : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
+                  ? 'bg-cyan-500 text-black' 
+                  : 'text-cyan-500 hover:bg-cyan-500/10'
               }`}
             >
               Site Map
@@ -202,7 +202,7 @@ const Buildings: React.FC = () => {
           {isAdmin && (
             <button 
               onClick={() => setShowAuditModal(true)}
-              className="px-6 py-4 bg-slate-900 dark:bg-slate-800 text-white rounded-3xl font-black text-xs uppercase tracking-widest flex items-center gap-2 hover:bg-brand-600 transition-all shadow-xl"
+              className="px-6 py-4 bg-magenta-500 text-black border-2 border-black font-black text-xs uppercase tracking-widest flex items-center gap-2 hover:bg-black hover:text-magenta-500 hover:border-magenta-500 transition-all shadow-[6px_6px_0px_#00ffff]"
             >
               <FileText size={18} /> Vacancy Report
             </button>
@@ -223,37 +223,37 @@ const Buildings: React.FC = () => {
             return (
               <div 
                 key={building.id || index} 
-                className="group bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 overflow-hidden shadow-sm premium-card flex flex-col cursor-pointer"
+                className="group bg-black border-4 border-magenta-500 overflow-hidden shadow-[8px_8px_0px_#00ffff] flex flex-col cursor-pointer crt-screen"
                 onClick={() => setSelectedBuilding(building)}
               >
-                <div className={`h-2.5 w-full transition-colors duration-500 ${building.type === '1BHK' ? 'bg-blue-500' : 'bg-indigo-600'}`} />
+                <div className={`h-2.5 w-full ${building.type === '1BHK' ? 'bg-cyan-500' : 'bg-magenta-500'}`} />
                 <div className="p-8 flex-1 flex flex-col">
                   <div className="flex items-center justify-between mb-8">
-                    <div className="p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl text-slate-400 group-hover:bg-brand-600 group-hover:text-white transition-all duration-300">
+                    <div className="p-4 border-2 border-cyan-500 text-cyan-500 group-hover:bg-cyan-500 group-hover:text-black transition-all duration-300 shadow-[4px_4px_0px_#ff00ff]">
                       <Building2 size={28} />
                     </div>
                     <div className="text-right">
-                      <div className="text-[10px] font-black px-3 py-1.5 rounded-full uppercase tracking-widest border border-slate-100 dark:border-slate-800 text-slate-500 mb-2">
+                      <div className="text-[10px] font-mono font-black px-3 py-1.5 border-2 border-magenta-500 text-magenta-500 mb-2 uppercase tracking-widest">
                         {building.type}
                       </div>
-                      <p className="text-[9px] font-black text-brand-600 uppercase tracking-widest">{wingOccupied}/20 Registered</p>
+                      <p className="text-[9px] font-mono font-black text-cyan-500 uppercase tracking-widest">{wingOccupied}/20 Registered</p>
                     </div>
                   </div>
                   
-                  <h3 className="text-3xl font-black text-slate-900 dark:text-white mb-6 group-hover:text-brand-600 transition-colors">Wing {building.name}</h3>
+                  <h3 className="text-3xl font-black text-cyan-400 mb-6 group-hover:text-magenta-500 transition-colors uppercase font-mono glitch-text">Wing {building.name}</h3>
                   
                   <div className="grid grid-cols-2 gap-4 mb-8">
-                    <div className="bg-slate-50/50 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-100 dark:border-slate-800/50">
-                      <p className="text-[10px] text-slate-400 uppercase font-black tracking-widest mb-1 flex items-center gap-1"><LayoutGrid size={10} /> Floors</p>
-                      <p className="text-xl font-black">5</p>
+                    <div className="bg-black border-2 border-cyan-500/30 p-4 shadow-[4px_4px_0px_#ff00ff33]">
+                      <p className="text-[10px] text-cyan-500/50 uppercase font-mono font-black tracking-widest mb-1 flex items-center gap-1"><LayoutGrid size={10} /> Floors</p>
+                      <p className="text-xl font-black text-cyan-400 font-mono">5</p>
                     </div>
-                    <div className="bg-slate-50/50 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-100 dark:border-slate-800/50">
-                      <p className="text-[10px] text-slate-400 uppercase font-black tracking-widest mb-1 flex items-center gap-1"><Home size={10} /> Parking</p>
-                      <p className="text-xl font-black">{building.parkingSpots || 20}</p>
+                    <div className="bg-black border-2 border-cyan-500/30 p-4 shadow-[4px_4px_0px_#ff00ff33]">
+                      <p className="text-[10px] text-cyan-500/50 uppercase font-mono font-black tracking-widest mb-1 flex items-center gap-1"><Home size={10} /> Parking</p>
+                      <p className="text-xl font-black text-cyan-400 font-mono">{building.parkingSpots || 20}</p>
                     </div>
                   </div>
 
-                  <button className="w-full flex items-center justify-between px-6 py-4 bg-slate-900 dark:bg-slate-800 text-white rounded-2xl font-black text-xs uppercase tracking-widest group-hover:bg-brand-600 transition-all duration-300">
+                  <button className="w-full flex items-center justify-between px-6 py-4 bg-cyan-500 text-black border-2 border-black font-black text-xs uppercase tracking-widest group-hover:bg-black group-hover:text-cyan-500 group-hover:border-cyan-500 transition-all duration-300 shadow-[4px_4px_0px_#ff00ff]">
                     {t('view_wing_mgmt')}
                     <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
                   </button>
@@ -266,59 +266,58 @@ const Buildings: React.FC = () => {
 
       {/* Vacancy Audit Modal */}
       {showAuditModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
-          <div className="absolute inset-0 bg-slate-900/80 backdrop-blur-xl animate-in fade-in duration-300" onClick={() => setShowAuditModal(false)} />
-          <div className="relative w-full max-w-4xl bg-white dark:bg-slate-900 rounded-[3.5rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 border border-slate-100 dark:border-slate-800 flex flex-col max-h-[85vh]">
-            <div className="p-10 border-b border-slate-100 dark:border-slate-800 flex flex-col md:flex-row justify-between items-center bg-white dark:bg-slate-900 sticky top-0 z-10 gap-6">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/80 backdrop-blur-sm">
+          <div className="absolute inset-0" onClick={() => setShowAuditModal(false)} />
+          <div className="relative w-full max-w-4xl bg-black border-4 border-magenta-500 shadow-[12px_12px_0px_#00ffff] overflow-hidden flex flex-col max-h-[85vh] crt-screen">
+            <div className="p-10 border-b-2 border-magenta-500 flex flex-col md:flex-row justify-between items-center bg-black sticky top-0 z-10 gap-6">
               <div className="flex items-center gap-5">
-                <div className="w-16 h-16 bg-slate-900 dark:bg-brand-600 rounded-3xl flex items-center justify-center text-white shadow-xl">
+                <div className="w-16 h-16 bg-cyan-500 text-black border-2 border-black flex items-center justify-center shadow-[4px_4px_0px_#ff00ff]">
                   <ClipboardCheck size={32} />
                 </div>
                 <div>
-                  <h3 className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter">Detailed Occupancy Audit</h3>
-                  <p className="text-[10px] font-black uppercase text-brand-600 tracking-widest">
+                  <h3 className="text-3xl font-black text-cyan-400 tracking-tighter uppercase glitch-text">Detailed Occupancy Audit</h3>
+                  <p className="text-[10px] font-mono font-black uppercase text-magenta-500 tracking-widest">
                     Listing {vacancyReport.totalVacant} Unregistered units across 24 wings
                   </p>
                 </div>
               </div>
               <div className="flex items-center gap-4">
                 <div className="relative">
-                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-cyan-500" size={16} />
                   <input 
                     type="text" 
                     placeholder="Search Wing..." 
-                    className="pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-xl text-xs font-bold outline-none"
+                    className="pl-10 pr-4 py-2 bg-black border-2 border-cyan-500 text-cyan-400 text-xs font-mono font-black outline-none shadow-[4px_4px_0px_#ff00ff]"
                     value={auditSearch}
                     onChange={(e) => setAuditSearch(e.target.value)}
                   />
                 </div>
-                <button onClick={() => setShowAuditModal(false)} className="p-3 text-slate-300 hover:text-slate-900 dark:hover:text-white transition-all"><X size={28} /></button>
+                <button onClick={() => setShowAuditModal(false)} className="p-3 text-cyan-500 hover:text-magenta-500 transition-all"><X size={28} /></button>
               </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-10 bg-slate-50/50 dark:bg-slate-900/50">
+            <div className="flex-1 overflow-y-auto p-10 bg-black">
                <div className="space-y-8">
-                  {/* Fixed TypeScript error by adding explicit type annotation for entries to avoid 'unknown' flats array */}
                   {Object.entries(vacancyReport.report)
                     .filter(([wing]) => wing.toLowerCase().includes(auditSearch.toLowerCase()))
                     .map(([wing, flats]: [string, string[]]) => (
-                    <div key={wing} className="bg-white dark:bg-slate-800 p-8 rounded-[2.5rem] border border-slate-100 dark:border-slate-700 shadow-sm">
+                    <div key={wing} className="bg-black p-8 border-2 border-cyan-500 shadow-[6px_6px_0px_#ff00ff33]">
                        <div className="flex items-center justify-between mb-6">
                           <div className="flex items-center gap-3">
-                            <span className="w-10 h-10 bg-slate-100 dark:bg-slate-900 rounded-xl flex items-center justify-center font-black text-slate-400">
+                            <span className="w-10 h-10 border-2 border-magenta-500 flex items-center justify-center font-mono font-black text-magenta-500">
                               {wing}
                             </span>
-                            <h4 className="text-xl font-black tracking-tight">Wing {wing} Vacancies</h4>
+                            <h4 className="text-xl font-black text-cyan-400 tracking-tight uppercase font-mono">Wing {wing} Vacancies</h4>
                           </div>
-                          <span className="text-[10px] font-black bg-rose-50 text-rose-600 px-3 py-1 rounded-lg uppercase tracking-widest">
+                          <span className="text-[10px] font-mono font-black bg-rose-500 text-black px-3 py-1 uppercase tracking-widest shadow-[2px_2px_0px_#00ffff]">
                             {flats.length} Missing Profiles
                           </span>
                        </div>
                        <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-3">
                           {flats.map((f: string) => (
-                            <div key={f} className="flex flex-col items-center p-3 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-transparent hover:border-brand-600/30 transition-all cursor-default">
-                               <span className="text-sm font-black text-slate-400">{f}</span>
-                               <Ghost size={12} className="text-slate-300 mt-1" />
+                            <div key={f} className="flex flex-col items-center p-3 border-2 border-cyan-500/30 hover:border-magenta-500 transition-all cursor-default">
+                               <span className="text-sm font-mono font-black text-cyan-500/50">{f}</span>
+                               <Ghost size={12} className="text-cyan-500/30 mt-1" />
                             </div>
                           ))}
                        </div>
@@ -327,20 +326,19 @@ const Buildings: React.FC = () => {
                </div>
             </div>
 
-            <div className="p-8 bg-slate-50 dark:bg-slate-800 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center">
-              <div className="flex items-center gap-3 text-slate-500 text-xs font-bold">
-                <AlertCircle size={16} className="text-amber-500" />
+            <div className="p-8 bg-black border-t-2 border-magenta-500 flex justify-between items-center">
+              <div className="flex items-center gap-3 text-cyan-500/50 text-xs font-mono font-black">
+                <AlertCircle size={16} className="text-magenta-500" />
                 <span>Units listed here have no entry in the digital profiles table.</span>
               </div>
               <button 
                 onClick={() => {
-                  {/* Fixed TypeScript error by adding explicit type annotation for entries */}
                   api.exportToCSV(
                     Object.entries(vacancyReport.report).flatMap(([wing, flats]: [string, string[]]) => flats.map((f: string) => ({ Wing: wing, Flat: f }))),
                     'Saurashtra_Vacancy_Report'
                   );
                 }}
-                className="px-6 py-3 bg-brand-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-lg flex items-center gap-2"
+                className="px-6 py-3 bg-cyan-500 text-black border-2 border-black font-black text-[10px] uppercase tracking-widest shadow-[4px_4px_0px_#ff00ff] flex items-center gap-2"
               >
                 <Download size={14} /> Download List
               </button>
@@ -351,53 +349,53 @@ const Buildings: React.FC = () => {
 
       {/* Wing Map Modal */}
       {selectedBuilding && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-6">
-          <div className="absolute inset-0 bg-slate-900/80 backdrop-blur-xl animate-in fade-in duration-300" onClick={() => setSelectedBuilding(null)} />
-          <div className="relative w-full max-w-6xl bg-white dark:bg-slate-900 rounded-[3.5rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 border border-slate-100 dark:border-slate-800 flex flex-col max-h-[90vh]">
-            <div className="p-10 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-white dark:bg-slate-900 sticky top-0 z-10">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/80 backdrop-blur-sm">
+          <div className="absolute inset-0" onClick={() => setSelectedBuilding(null)} />
+          <div className="relative w-full max-w-6xl bg-black border-4 border-magenta-500 shadow-[12px_12px_0px_#00ffff] overflow-hidden flex flex-col max-h-[90vh] crt-screen">
+            <div className="p-10 border-b-2 border-magenta-500 flex justify-between items-center bg-black sticky top-0 z-10">
               <div className="flex items-center gap-6">
-                <div className="w-16 h-16 bg-brand-600 rounded-3xl flex items-center justify-center text-white shadow-xl shadow-brand-500/20">
+                <div className="w-16 h-16 bg-cyan-500 text-black border-2 border-black flex items-center justify-center shadow-[4px_4px_0px_#ff00ff]">
                   <Building2 size={32} />
                 </div>
                 <div>
-                  <h3 className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter">Wing {selectedBuilding.name}</h3>
-                  <p className="text-xs font-black uppercase text-brand-600 tracking-widest">Real-Time Occupancy Map</p>
+                  <h3 className="text-3xl font-black text-cyan-400 tracking-tighter uppercase glitch-text">Wing {selectedBuilding.name}</h3>
+                  <p className="text-xs font-mono font-black uppercase text-magenta-500 tracking-widest">Real-Time Occupancy Map</p>
                 </div>
               </div>
-              <button onClick={() => setSelectedBuilding(null)} className="p-4 text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded-3xl transition-all"><X size={32} /></button>
+              <button onClick={() => setSelectedBuilding(null)} className="p-4 text-cyan-500 hover:text-magenta-500 transition-all"><X size={32} /></button>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-10 bg-slate-50/30 dark:bg-slate-900/30 space-y-12">
+            <div className="flex-1 overflow-y-auto p-10 bg-black space-y-12">
               <section className="space-y-10">
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-3">
-                    <LayoutGrid className="text-brand-600" size={24} />
-                    <h4 className="text-xl font-black text-slate-900 dark:text-white tracking-tight uppercase tracking-widest text-xs">{t('floor_map')}</h4>
+                    <LayoutGrid className="text-cyan-500" size={24} />
+                    <h4 className="text-xl font-black text-cyan-400 tracking-tight uppercase tracking-widest text-xs font-mono">Floor Map</h4>
                   </div>
                   <div className="flex items-center gap-6">
                     <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded bg-emerald-500 shadow-sm"></div>
-                      <span className="text-[9px] font-black uppercase text-slate-400 tracking-widest">Registered Owner</span>
+                      <div className="w-3 h-3 bg-emerald-500 shadow-[1px_1px_0px_#000]"></div>
+                      <span className="text-[9px] font-mono font-black uppercase text-cyan-500/50 tracking-widest">Registered Owner</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded bg-blue-500 shadow-sm"></div>
-                      <span className="text-[9px] font-black uppercase text-slate-400 tracking-widest">Registered Tenant</span>
+                      <div className="w-3 h-3 bg-cyan-500 shadow-[1px_1px_0px_#000]"></div>
+                      <span className="text-[9px] font-mono font-black uppercase text-cyan-500/50 tracking-widest">Registered Tenant</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded border-2 border-dashed border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800"></div>
-                      <span className="text-[9px] font-black uppercase text-slate-400 tracking-widest">Unregistered / Vacant</span>
+                      <div className="w-3 h-3 border-2 border-dashed border-cyan-900 bg-black"></div>
+                      <span className="text-[9px] font-mono font-black uppercase text-cyan-500/50 tracking-widest">Unregistered / Vacant</span>
                     </div>
                   </div>
                 </div>
 
-                <div className="bg-white dark:bg-slate-800/40 p-12 rounded-[3.5rem] border border-slate-100 dark:border-slate-800/60 shadow-inner">
+                <div className="bg-black border-2 border-cyan-500/30 p-12 shadow-inner">
                   <div className="flex flex-col gap-6 max-w-4xl mx-auto">
                     {renderFloorGrid(selectedBuilding)}
                     
                     <div className="mt-6 flex items-center gap-8">
                       <div className="w-20" />
-                      <div className="flex-1 h-3 bg-slate-100 dark:bg-slate-800 rounded-full relative">
-                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-6 py-1 rounded-full text-[8px] font-black uppercase tracking-widest shadow-xl">
+                      <div className="flex-1 h-3 bg-cyan-900/30 border border-cyan-500/30 relative">
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-magenta-500 text-black px-6 py-1 border border-black text-[8px] font-mono font-black uppercase tracking-widest shadow-[4px_4px_0px_#00ffff]">
                           Lobby Entrance
                         </div>
                       </div>
@@ -412,60 +410,60 @@ const Buildings: React.FC = () => {
 
       {/* Flat & Residents Details Modal */}
       {selectedFlat && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-6">
-          <div className="absolute inset-0 bg-slate-900/80 backdrop-blur-xl animate-in fade-in duration-300" onClick={() => setSelectedFlat(null)} />
-          <div className="relative w-full max-w-2xl bg-white dark:bg-slate-900 rounded-[3.5rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 border border-slate-100 dark:border-slate-800 flex flex-col max-h-[85vh]">
-            <div className="p-10 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-white dark:bg-slate-900 sticky top-0 z-10">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-6 bg-black/80 backdrop-blur-sm">
+          <div className="absolute inset-0" onClick={() => setSelectedFlat(null)} />
+          <div className="relative w-full max-w-2xl bg-black border-4 border-magenta-500 shadow-[12px_12px_0px_#00ffff] overflow-hidden flex flex-col max-h-[85vh] crt-screen">
+            <div className="p-10 border-b-2 border-magenta-500 flex justify-between items-center bg-black sticky top-0 z-10">
               <div className="flex items-center gap-5">
-                <div className="w-12 h-12 bg-slate-900 dark:bg-brand-600 rounded-2xl flex items-center justify-center text-white">
+                <div className="w-12 h-12 bg-cyan-500 text-black border-2 border-black flex items-center justify-center shadow-[4px_4px_0px_#ff00ff]">
                   <Home size={24} />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-black text-slate-900 dark:text-white tracking-tighter">{t('unit')} {selectedFlat.unitNumber}</h3>
-                  <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">
+                  <h3 className="text-2xl font-black text-cyan-400 tracking-tighter uppercase glitch-text">{t('unit')} {selectedFlat.unitNumber}</h3>
+                  <p className="text-[10px] font-mono font-black uppercase text-magenta-500 tracking-widest">
                     {selectedFlat.profile ? 'Registered Occupant' : 'Unregistered Profile'}
                   </p>
                 </div>
               </div>
-              <button onClick={() => setSelectedFlat(null)} className="p-3 text-slate-300 hover:text-slate-900 dark:hover:text-white transition-all"><X size={28} /></button>
+              <button onClick={() => setSelectedFlat(null)} className="p-3 text-cyan-500 hover:text-magenta-500 transition-all"><X size={28} /></button>
             </div>
 
-            <div className="p-10 space-y-12 overflow-y-auto flex-1 bg-slate-50/50 dark:bg-slate-900/50">
+            <div className="p-10 space-y-12 overflow-y-auto flex-1 bg-black">
               {selectedFlat.profile ? (
                 <div className="space-y-4">
-                  <div className="bg-white dark:bg-slate-800 p-8 rounded-3xl border border-slate-100 dark:border-slate-700 flex items-center justify-between group">
+                  <div className="bg-black p-8 border-2 border-cyan-500 flex items-center justify-between group shadow-[6px_6px_0px_#ff00ff33]">
                     <div className="flex items-center gap-6">
-                      <div className="w-20 h-20 bg-brand-50 dark:bg-brand-900/10 rounded-[2rem] overflow-hidden flex items-center justify-center">
+                      <div className="w-20 h-20 border-2 border-magenta-500 overflow-hidden flex items-center justify-center bg-black">
                         <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${selectedFlat.profile.name}`} alt="user" />
                       </div>
                       <div>
-                        <p className="font-black text-2xl text-slate-900 dark:text-white tracking-tight">{selectedFlat.profile.name}</p>
+                        <p className="font-black text-2xl text-cyan-400 tracking-tight uppercase font-mono glitch-text">{selectedFlat.profile.name}</p>
                         <div className="flex items-center gap-3 mt-1">
-                           <span className="px-3 py-1 bg-slate-50 dark:bg-slate-900 rounded-lg text-[9px] font-black uppercase text-slate-400 border border-slate-100 dark:border-slate-700">{selectedFlat.profile.occupancyType}</span>
-                           <span className="text-[10px] font-bold text-brand-600 uppercase tracking-widest">{selectedFlat.profile.status} Member</span>
+                           <span className="px-3 py-1 border border-magenta-500 text-[9px] font-mono font-black uppercase text-magenta-500">{selectedFlat.profile.occupancyType}</span>
+                           <span className="text-[10px] font-mono font-black text-cyan-500 uppercase tracking-widest">{selectedFlat.profile.status} Member</span>
                         </div>
                       </div>
                     </div>
                   </div>
                   
-                  <section className="bg-white dark:bg-slate-800 p-8 rounded-[2.5rem] border border-slate-100 dark:border-slate-700 shadow-sm relative overflow-hidden group">
+                  <section className="bg-black p-8 border-2 border-magenta-500 shadow-[8px_8px_0px_#00ffff33] relative overflow-hidden group">
                     <div className="flex items-center gap-4 mb-8">
-                      <div className="w-12 h-12 bg-brand-600 text-white rounded-2xl flex items-center justify-center">
+                      <div className="w-12 h-12 bg-cyan-500 text-black border-2 border-black flex items-center justify-center shadow-[4px_4px_0px_#ff00ff]">
                         <CreditCard size={24} />
                       </div>
                       <div>
-                        <h4 className="text-lg font-black tracking-tight">{t('maintenance')} Summary</h4>
-                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Society Dues</p>
+                        <h4 className="text-lg font-black text-cyan-400 tracking-tight uppercase font-mono">{t('maintenance')} Summary</h4>
+                        <p className="text-[10px] font-mono font-black uppercase tracking-widest text-magenta-500">Society Dues</p>
                       </div>
                     </div>
-                    <div className="pt-6 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                    <div className="pt-6 border-t-2 border-magenta-500/30 flex items-center justify-between">
                       <div>
-                        <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-1">Standard Maintenance</p>
-                        <p className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter">₹{totalMaintenance}</p>
+                        <p className="text-[10px] font-mono font-black uppercase text-cyan-500/50 tracking-widest mb-1">Standard Maintenance</p>
+                        <p className="text-3xl font-black text-cyan-400 tracking-tighter font-mono">₹{totalMaintenance}</p>
                       </div>
                       <button 
                         onClick={() => {}} 
-                        className="px-10 py-4 bg-brand-600 text-white rounded-[2rem] font-black text-xs uppercase tracking-widest shadow-2xl hover:bg-brand-700 transition-all flex items-center gap-3"
+                        className="px-10 py-4 bg-magenta-500 text-black border-2 border-black font-black text-xs uppercase tracking-widest shadow-[6px_6px_0px_#00ffff] hover:bg-black hover:text-magenta-500 hover:border-magenta-500 transition-all flex items-center gap-3"
                       >
                         {t('pay_now')}
                       </button>
@@ -474,14 +472,14 @@ const Buildings: React.FC = () => {
                 </div>
               ) : (
                 <div className="py-20 text-center space-y-6">
-                   <div className="w-32 h-32 bg-slate-100 dark:bg-slate-800 rounded-[3rem] flex items-center justify-center text-slate-300 dark:text-slate-600 mx-auto border-4 border-dashed border-slate-200 dark:border-slate-700">
+                   <div className="w-32 h-32 border-4 border-dashed border-cyan-900 flex items-center justify-center text-cyan-900 mx-auto">
                      <Ghost size={64} />
                    </div>
                    <div>
-                      <h4 className="text-2xl font-black text-slate-400 dark:text-slate-600 tracking-tight">No Active Registration</h4>
-                      <p className="text-slate-400 text-sm max-w-xs mx-auto mt-2">This unit has no registered users in the digital portal. Dues are tracked against the property.</p>
+                      <h4 className="text-2xl font-black text-cyan-900 tracking-tight uppercase font-mono">No Active Registration</h4>
+                      <p className="text-cyan-900/70 text-sm max-w-xs mx-auto mt-2 font-mono">This unit has no registered users in the digital portal. Dues are tracked against the property.</p>
                    </div>
-                   <button className="px-8 py-3.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all hover:scale-105">
+                   <button className="px-8 py-3.5 bg-magenta-500 text-black border-2 border-black font-black text-[10px] uppercase tracking-widest transition-all hover:scale-105 shadow-[4px_4px_0px_#00ffff]">
                      Initiate Offline Ledger
                    </button>
                 </div>

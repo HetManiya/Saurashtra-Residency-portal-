@@ -65,12 +65,36 @@ router.post('/login', async (req, res) => {
     res.json({ token, user: { 
       id: user._id, 
       name: user.name, 
+      email: user.email,
       role: user.role, 
       flatId: user.flatId,
-      occupancyType: (user as any).occupancyType
+      occupancyType: (user as any).occupancyType,
+      profilePictureUrl: (user as any).profilePictureUrl
     }});
   } catch (error) {
     res.status(500).json({ message: 'Login error' });
+  }
+});
+
+router.put('/profile', async (req, res) => {
+  try {
+    const { userId, profilePictureUrl } = req.body;
+    const user = await User.findByIdAndUpdate(userId, { profilePictureUrl }, { new: true });
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    res.json({ 
+      message: 'Profile updated successfully', 
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        flatId: user.flatId,
+        occupancyType: (user as any).occupancyType,
+        profilePictureUrl: (user as any).profilePictureUrl
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Error updating profile' });
   }
 });
 

@@ -99,6 +99,21 @@ export const api = {
     return handleResponse(response);
   },
 
+  updateProfile: async (userId: string, profilePictureUrl: string) => {
+    const response = await fetch('/api/auth/profile', {
+      method: 'PUT',
+      headers: { 
+        'Content-Type': 'application/json',
+        ...getAuthHeader()
+      },
+      body: JSON.stringify({ userId, profilePictureUrl })
+    });
+    const data = await handleResponse(response);
+    localStorage.setItem('sr_user', JSON.stringify(data.user));
+    window.dispatchEvent(new Event('storage'));
+    return data;
+  },
+
   getBuildings: async () => {
     try {
       const response = await fetch('/api/society/buildings', {

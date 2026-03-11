@@ -43,10 +43,10 @@ export const SOCIETY_INFO = {
   ],
 };
 
-export const FACILITY_BOOKINGS: AmenityBooking[] = [
-  { id: 'b1', facilityId: 1, userName: 'Rahul Sharma', unitNumber: 'A-1-101', date: '2026-03-15', startTime: '18:00', endTime: '22:00', purpose: 'Birthday Party', attendees: 40, isPublic: false, status: 'Confirmed' },
-  { id: 'b2', facilityId: 2, userName: 'Priya Patel', unitNumber: 'A-5-204', date: '2026-03-20', startTime: '19:00', endTime: '23:00', purpose: 'Pre-wedding Function', attendees: 150, isPublic: true, status: 'Pending' },
-  { id: 'b3', facilityId: 3, userName: 'Amit Kumar', unitNumber: 'A-12-302', date: '2026-03-12', startTime: '20:00', endTime: '23:00', purpose: 'Movie Night', attendees: 15, isPublic: false, status: 'Confirmed' }
+export const FACILITY_BOOKINGS: any[] = [
+  { id: 'b1', facilityId: 1, userName: 'Rahul Sharma', unitNumber: 'A-1-101', date: '2026-03-15', startTime: '18:00', endTime: '22:00', purpose: 'Birthday Party', attendees: 40, isPublic: false, status: 'APPROVED' },
+  { id: 'b2', facilityId: 2, userName: 'Priya Patel', unitNumber: 'A-5-204', date: '2026-03-20', startTime: '19:00', endTime: '23:00', purpose: 'Pre-wedding Function', attendees: 150, isPublic: true, status: 'PENDING' },
+  { id: 'b3', facilityId: 3, userName: 'Amit Kumar', unitNumber: 'A-12-302', date: '2026-03-12', startTime: '20:00', endTime: '23:00', purpose: 'Movie Night', attendees: 15, isPublic: false, status: 'APPROVED' }
 ];
 
 export const NOTICES: Notice[] = [

@@ -83,13 +83,17 @@ router.post('/bookings', protect, async (req: any, res) => {
   }
 });
 
-// Update booking status (Admin/Committee)
+// Update booking status and priority (Admin/Committee)
 router.patch('/bookings/:id', protect, authorize(['ADMIN', 'COMMITTEE']), async (req: any, res) => {
   try {
-    const { status } = req.body;
-    const booking = await AmenityBooking.findByIdAndUpdate(req.params.id, { status }, { new: true }).populate('amenityId');
+    const { status, priority } = req.body;
+    const updateData: any = {};
+    if (status) updateData.status = status;
+    if (priority) updateData.priority = priority;
+
+    const booking = await AmenityBooking.findByIdAndUpdate(req.params.id, updateData, { new: true }).populate('amenityId');
     
-    if (booking) {
+    if (booking && status) {
       // Create notification for user
       const amenityName = (booking.amenityId as any)?.name || 'Facility';
       await Notification.create({
@@ -112,6 +116,51 @@ router.patch('/bookings/:id', protect, authorize(['ADMIN', 'COMMITTEE']), async 
     res.json(booking);
   } catch (error) {
     res.status(400).json({ message: 'Error updating booking' });
+  }
+});
+
+// Bulk update bookings (Admin/Committee)
+router.post('/bookings/bulk-update', protect, authorize(['ADMIN', 'COMMITTEE']), async (req: any, res) => {
+  try {
+    const { bookingIds, status } = req.body;
+    
+    if (!bookingIds || !Array.isArray(bookingIds) || bookingIds.length === 0) {
+      return res.status(400).json({ message: 'No bookings selected' });
+    }
+
+    await AmenityBooking.updateMany(
+      { _id: { $in: bookingIds } },
+      { $set: { status } }
+    );
+
+    // Fetch updated bookings to return
+    const updatedBookings = await AmenityBooking.find({ _id: { $in: bookingIds } })
+      .populate('amenityId')
+      .populate('userId', 'name');
+
+    // Notify users
+    for (const booking of updatedBookings) {
+      const amenityName = (booking.amenityId as any)?.name || 'Facility';
+      await Notification.create({
+        userId: booking.userId,
+        title: `Booking ${status}`,
+        message: `Your booking for ${amenityName} on ${new Date(booking.date).toLocaleDateString()} has been ${status.toLowerCase()}.`,
+        type: 'AMENITY_BOOKING'
+      });
+    }
+
+    // Log action
+    await AuditLog.create({
+      userId: req.user.id,
+      userName: req.user.name,
+      action: 'Bulk Update Bookings',
+      entity: 'AmenityBooking',
+      details: `Bulk updated ${bookingIds.length} bookings to ${status}`
+    });
+
+    res.json(updatedBookings);
+  } catch (error) {
+    res.status(500).json({ message: 'Error performing bulk update' });
   }
 });
 

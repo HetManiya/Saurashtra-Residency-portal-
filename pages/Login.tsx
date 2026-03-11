@@ -58,45 +58,45 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950 relative overflow-hidden p-4">
+    <div className="min-h-screen flex items-center justify-center bg-black relative overflow-hidden p-4 crt-screen">
       {/* Decorative Background Elements */}
-      <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-brand-500/5 rounded-full blur-[120px] -mr-40 -mt-40" />
-      <div className="absolute bottom-0 left-0 w-[800px] h-[800px] bg-indigo-500/5 rounded-full blur-[120px] -ml-40 -mb-40" />
+      <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-magenta-500/5 rounded-full blur-[120px] -mr-40 -mt-40" />
+      <div className="absolute bottom-0 left-0 w-[800px] h-[800px] bg-cyan-500/5 rounded-full blur-[120px] -ml-40 -mb-40" />
 
       <div className="relative z-10 w-full max-w-md animate-fade-in">
-        <div className="bg-white dark:bg-slate-900 p-8 md:p-10 rounded-[2.5rem] shadow-2xl border border-slate-200 dark:border-slate-800">
+        <div className="bg-black p-8 md:p-10 border-4 border-cyan-500 shadow-[12px_12px_0px_#ff00ff]">
           <div className="text-center mb-8">
-            <div className="w-16 h-16 bg-brand-600 mx-auto mb-4 shadow-lg shadow-brand-600/30 rotate-[5deg] rounded-2xl flex items-center justify-center text-white">
+            <div className="w-16 h-16 bg-black mx-auto mb-4 shadow-[4px_4px_0px_#ff00ff] border-2 border-cyan-400 flex items-center justify-center text-cyan-400">
               <Shield size={32} />
             </div>
-            <h1 className="text-3xl font-black tracking-tighter text-slate-900 dark:text-white mb-1">
-              Saurashtra Residency <span className="text-brand-600">Portal</span>
+            <h1 className="text-3xl font-black tracking-tighter text-cyan-400 mb-1 glitch-text" data-text="Saurashtra Residency">
+              Saurashtra <span className="text-magenta-500">Residency</span>
             </h1>
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
-              Premium Community Access
+            <p className="text-[10px] font-black text-cyan-700 uppercase tracking-[0.2em] font-mono">
+              {`> SECURE_TERMINAL_ACCESS_v1.0`}
             </p>
           </div>
 
           {success && (
-            <div className="mb-6 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-2xl flex items-center gap-3 text-green-700 dark:text-green-400 font-bold text-sm">
+            <div className="mb-6 p-4 bg-cyan-900/20 border-2 border-cyan-500 flex items-center gap-3 text-cyan-400 font-bold text-sm">
               <CheckCircle size={20} />
               {success}
             </div>
           )}
           {error && (
-            <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl flex items-center gap-3 text-red-700 dark:text-red-400 font-bold text-sm">
+            <div className="mb-6 p-4 bg-magenta-900/20 border-2 border-magenta-500 flex items-center gap-3 text-magenta-500 font-bold text-sm">
               <AlertTriangle size={20} />
               {error}
             </div>
           )}
 
-          <form onSubmit={handleAuth} className="space-y-4">
+          <form onSubmit={handleAuth} className="space-y-6">
             <div>
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2 mb-1 block">
+              <label className="text-[10px] font-black text-cyan-700 uppercase tracking-widest ml-2 mb-1 block">
                 User ID
               </label>
               <div className="relative">
-                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-cyan-700">
                   <Mail size={18} />
                 </div>
                 <input 
@@ -105,17 +105,17 @@ const Login: React.FC = () => {
                   value={email}
                   onChange={e => setEmail(e.target.value)}
                   disabled={loading || !!success}
-                  className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-2xl pl-12 pr-4 py-3.5 text-slate-900 dark:text-white placeholder-slate-400 font-bold focus:ring-2 focus:ring-brand-500 outline-none transition-all"
+                  className="w-full bg-black border-2 border-cyan-500 pl-12 pr-4 py-3.5 text-cyan-400 placeholder:text-cyan-900 font-bold outline-none focus:border-magenta-500 transition-all"
                 />
               </div>
             </div>
 
             <div>
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2 mb-1 block">
+              <label className="text-[10px] font-black text-cyan-700 uppercase tracking-widest ml-2 mb-1 block">
                 Password
               </label>
               <div className="relative">
-                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-cyan-700">
                   <Lock size={18} />
                 </div>
                 <input 
@@ -124,7 +124,7 @@ const Login: React.FC = () => {
                   value={password}
                   onChange={e => setPassword(e.target.value)}
                   disabled={loading || !!success}
-                  className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-2xl pl-12 pr-4 py-3.5 text-slate-900 dark:text-white placeholder-slate-400 font-bold focus:ring-2 focus:ring-brand-500 outline-none transition-all"
+                  className="w-full bg-black border-2 border-cyan-500 pl-12 pr-4 py-3.5 text-cyan-400 placeholder:text-cyan-900 font-bold outline-none focus:border-magenta-500 transition-all"
                 />
               </div>
             </div>
@@ -132,44 +132,44 @@ const Login: React.FC = () => {
             <button 
               type="submit"
               disabled={loading || !!success}
-              className="w-full bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-200 text-white dark:text-slate-900 font-black text-lg py-3.5 rounded-2xl mt-2 transition-all shadow-lg shadow-slate-900/20 active:scale-95 flex items-center justify-center gap-2"
+              className="w-full bg-magenta-500 hover:bg-black hover:text-magenta-500 hover:border-magenta-500 border-2 border-black text-white font-black text-lg py-3.5 mt-2 transition-all shadow-[6px_6px_0px_#00ffff] active:scale-95 flex items-center justify-center gap-2 uppercase tracking-widest"
             >
-              {loading && !success ? <Loader2 size={24} className="animate-spin" /> : 'Login'}
+              {loading && !success ? <Loader2 size={24} className="animate-spin" /> : 'Enter Terminal'}
             </button>
           </form>
 
           {/* Demo Access Panel */}
-          <div className="mt-8 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-3xl border border-slate-100 dark:border-slate-800">
-            <div className="flex items-center justify-center gap-2 mb-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-              <ShieldCheck size={14} className="text-brand-600" /> Demo Suite Access
+          <div className="mt-8 p-6 bg-cyan-900/10 border-2 border-cyan-900/30">
+            <div className="flex items-center justify-center gap-2 mb-4 text-[10px] font-black text-cyan-700 uppercase tracking-widest">
+              <ShieldCheck size={14} className="text-magenta-500" /> Demo Suite Access
             </div>
-            <div className="flex gap-3">
+            <div className="flex flex-col sm:flex-row gap-3">
               <button 
                 onClick={() => quickDemoLogin('admin')}
-                className="flex-1 bg-amber-100 hover:bg-amber-200 text-amber-900 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider flex items-center justify-center gap-2 transition-colors"
+                className="flex-1 bg-black border-2 border-magenta-500 text-magenta-500 py-2.5 text-[10px] font-black uppercase tracking-wider flex items-center justify-center gap-2 hover:bg-magenta-500 hover:text-white transition-all shadow-[3px_3px_0px_#00ffff]"
               >
                 <ShieldAlert size={14} />
-                System Admin
+                Admin
               </button>
               <button 
                 onClick={() => quickDemoLogin('resident')}
-                className="flex-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider flex items-center justify-center gap-2 transition-colors"
+                className="flex-1 bg-black border-2 border-cyan-500 text-cyan-400 py-2.5 text-[10px] font-black uppercase tracking-wider flex items-center justify-center gap-2 hover:bg-cyan-400 hover:text-black transition-all shadow-[3px_3px_0px_#ff00ff]"
               >
                 <User size={14} />
-                Live Resident
+                Resident
               </button>
             </div>
-            <p className="text-center mt-3 text-[10px] text-slate-400 italic">
-              Note: Admin access is restricted to verified committee credentials in production.
+            <p className="text-center mt-4 text-[9px] text-cyan-900 font-bold font-mono uppercase">
+              {`> Note: Admin access is restricted to verified committee credentials.`}
             </p>
           </div>
 
           <div className="mt-6 text-center">
             <Link 
               to="/register" 
-              className="text-xs font-black uppercase tracking-widest text-slate-400 hover:text-brand-600 transition-colors"
+              className="text-xs font-black uppercase tracking-widest text-cyan-700 hover:text-magenta-500 transition-colors"
             >
-              New to residency? <span className="text-brand-600">Register Property</span>
+              New to residency? <span className="text-magenta-500 underline underline-offset-4">Register Property</span>
             </Link>
           </div>
         </div>

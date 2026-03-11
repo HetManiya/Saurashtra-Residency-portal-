@@ -53,17 +53,18 @@ export interface Building {
 
 export interface AmenityBooking {
   id: string;
-  facilityId: number;
-  userName: string;
-  unitNumber: string;
+  _id?: string;
+  amenityId: any;
+  userId: any;
+  flatId: string;
   date: string;
   startTime: string;
   endTime: string;
+  duration?: number;
   purpose: string;
-  attendees: number;
-  isPublic: boolean;
-  // Fixed: Added 'Rejected' to status to allow for full lifecycle management of bookings
-  status: 'Confirmed' | 'Pending' | 'Rejected';
+  status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'CANCELLED';
+  priority?: 'High' | 'Medium' | 'Low';
+  totalAmount?: number;
 }
 
 export interface Builder {

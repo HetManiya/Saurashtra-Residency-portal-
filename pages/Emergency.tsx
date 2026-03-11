@@ -83,27 +83,27 @@ const Emergency: React.FC = () => {
   };
 
   return (
-    <div className="pb-8 animate-fade-in">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-8 pb-6 border-b border-slate-200 dark:border-slate-800">
+    <div className="pb-8 animate-fade-in crt-screen">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-8 pb-6 border-b-4 border-cyan-500/30">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <div className="px-2 py-1 rounded-lg border border-red-200 bg-red-50 dark:bg-red-900/20 dark:border-red-800 flex items-center gap-2">
-              <ShieldAlert size={14} className="text-red-600 dark:text-red-400 animate-pulse" />
-              <span className="text-[10px] font-black uppercase tracking-widest text-red-600 dark:text-red-400">
+            <div className="px-2 py-1 border-2 border-magenta-500 bg-black flex items-center gap-2">
+              <ShieldAlert size={14} className="text-magenta-500 animate-pulse" />
+              <span className="text-[10px] font-black uppercase tracking-widest text-magenta-500">
                 Immediate Response Only
               </span>
             </div>
           </div>
-          <h3 className="text-4xl font-black tracking-tighter text-slate-900 dark:text-white">
-            Digital Intercom
+          <h3 className="text-4xl font-black tracking-tighter text-cyan-400 glitch-text" data-text="Digital Intercom">
+            Digital <span className="text-magenta-500">Intercom</span>
           </h3>
-          <p className="text-slate-500 dark:text-slate-400 mt-2 font-medium">
-            Quick access to emergency services and resident directory
+          <p className="text-cyan-700 font-bold font-mono uppercase text-xs mt-2">
+            {`> ACCESSING_EMERGENCY_PROTOCOLS_v2.4`}
           </p>
         </div>
         <button 
           onClick={handleSOS}
-          className="flex items-center gap-2 bg-red-600 text-white px-8 py-3 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-red-700 transition-colors shadow-lg shadow-red-600/20 active:scale-95 transform duration-100"
+          className="flex items-center gap-2 bg-magenta-500 text-white px-8 py-3 border-2 border-black font-black text-sm uppercase tracking-widest hover:bg-black hover:text-magenta-500 hover:border-magenta-500 transition-all shadow-[6px_6px_0px_#00ffff] active:scale-95 transform duration-100"
         >
           <AlertTriangle size={20} fill="currentColor" />
           Trigger SOS
@@ -111,15 +111,15 @@ const Emergency: React.FC = () => {
       </div>
 
       <div className="mb-8">
-        <div className="bg-slate-100 dark:bg-slate-800 p-1 rounded-2xl inline-flex">
+        <div className="bg-black border-2 border-cyan-900/30 p-1 inline-flex">
           {['Emergency', 'Resident Directory'].map((tab, idx) => (
             <button
               key={idx}
               onClick={() => setActiveTab(idx)}
-              className={`px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+              className={`px-6 py-2 text-[10px] font-black uppercase tracking-widest transition-all ${
                 activeTab === idx 
-                  ? 'bg-white dark:bg-slate-700 text-brand-600 dark:text-white shadow-sm' 
-                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+                  ? 'bg-cyan-400 text-black shadow-[2px_2px_0px_#ff00ff]' 
+                  : 'text-cyan-700 hover:text-cyan-400'
               }`}
             >
               {tab}
@@ -133,40 +133,40 @@ const Emergency: React.FC = () => {
           {emergencySections.map((section, sIdx) => (
             <div key={sIdx}>
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-1.5 h-6 bg-brand-600 rounded-full" />
-                <h4 className="text-xl font-black text-slate-900 dark:text-white">{section.title}</h4>
+                <div className="w-1.5 h-6 bg-magenta-500 shadow-[2px_0px_0px_#00ffff]" />
+                <h4 className="text-xl font-black text-cyan-400 uppercase tracking-tight">{section.title}</h4>
               </div>
               
               <div className="space-y-4">
                 {section.contacts.map((contact, cIdx) => (
                   <div 
                     key={cIdx} 
-                    className={`group bg-white dark:bg-slate-900 p-5 rounded-[2rem] border transition-all duration-300 hover:-translate-y-1 hover:shadow-lg flex items-center justify-between ${
+                    className={`group bg-black p-5 border-4 transition-all duration-300 hover:shadow-[8px_8px_0px_#00ffff] flex items-center justify-between ${
                       contact.critical 
-                        ? 'border-l-4 border-l-red-500 border-slate-200 dark:border-slate-800' 
-                        : 'border-slate-200 dark:border-slate-800'
+                        ? 'border-magenta-500' 
+                        : 'border-cyan-500/30 hover:border-cyan-500'
                     }`}
                   >
                     <div className="flex items-center gap-4">
-                      <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110 bg-slate-50 dark:bg-slate-800 ${contact.color}`}>
+                      <div className={`w-14 h-14 border-2 border-current bg-black flex items-center justify-center transition-transform group-hover:scale-110 ${contact.color}`}>
                         <contact.icon size={24} />
                       </div>
                       <div>
-                        <h5 className="text-base font-black text-slate-900 dark:text-white leading-tight mb-1">
+                        <h5 className="text-base font-black text-cyan-400 leading-tight mb-1 uppercase">
                           {contact.name}
                         </h5>
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                          {contact.desc}
+                        <p className="text-[10px] font-bold text-cyan-700 uppercase tracking-wider font-mono">
+                          {`> ${contact.desc}`}
                         </p>
                       </div>
                     </div>
                     
                     <a 
                       href={`tel:${contact.number.replace(/\s+/g, '')}`}
-                      className={`flex items-center gap-2 px-4 py-2 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-md transition-colors ${
+                      className={`flex items-center gap-2 px-4 py-2 border-2 border-black font-black text-[10px] uppercase tracking-widest shadow-[4px_4px_0px_#00ffff] transition-all active:scale-95 ${
                         contact.critical 
-                          ? 'bg-red-600 hover:bg-red-700 text-white' 
-                          : 'bg-brand-600 hover:bg-brand-700 text-white'
+                          ? 'bg-magenta-500 text-white hover:bg-black hover:text-magenta-500 hover:border-magenta-500' 
+                          : 'bg-cyan-400 text-black hover:bg-black hover:text-cyan-400 hover:border-cyan-400'
                       }`}
                     >
                       <Phone size={14} fill="currentColor" />
@@ -182,7 +182,7 @@ const Emergency: React.FC = () => {
         <div>
           <div className="max-w-xl mb-8">
             <div className="relative">
-              <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
+              <div className="absolute left-4 top-1/2 -translate-y-1/2 text-cyan-700">
                 <Search size={20} />
               </div>
               <input 
@@ -190,7 +190,7 @@ const Emergency: React.FC = () => {
                 placeholder="Search by name or unit number..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[2rem] pl-12 pr-4 py-4 text-slate-900 dark:text-white placeholder-slate-400 font-bold focus:ring-2 focus:ring-brand-500 outline-none transition-all shadow-sm"
+                className="w-full bg-black border-4 border-cyan-500 pl-12 pr-4 py-4 text-cyan-400 placeholder:text-cyan-900 font-bold outline-none focus:border-magenta-500 transition-all shadow-[6px_6px_0px_#ff00ff]"
               />
             </div>
           </div>
@@ -199,27 +199,27 @@ const Emergency: React.FC = () => {
             {filteredResidents.map(resident => (
               <div 
                 key={resident.id}
-                className="bg-white dark:bg-slate-900 p-6 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 transition-all duration-300 hover:border-brand-500 hover:shadow-lg group"
+                className="bg-black p-6 border-4 border-cyan-500/30 transition-all duration-300 hover:border-magenta-500 hover:shadow-[10px_10px_0px_#00ffff] group"
               >
                 <div className="flex justify-between items-start mb-6">
-                  <div className="w-14 h-14 bg-slate-50 dark:bg-slate-800 rounded-2xl flex items-center justify-center text-slate-400 group-hover:bg-brand-600 group-hover:text-white transition-colors">
+                  <div className="w-14 h-14 border-2 border-cyan-900/30 bg-black flex items-center justify-center text-cyan-700 group-hover:border-magenta-500 group-hover:text-magenta-500 transition-colors">
                     <User size={28} />
                   </div>
-                  <span className="bg-brand-50 dark:bg-brand-900/20 text-brand-600 dark:text-brand-400 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider">
+                  <span className="bg-cyan-900/20 border border-cyan-500 text-cyan-400 px-3 py-1 text-[10px] font-black uppercase tracking-wider">
                     {resident.unit}
                   </span>
                 </div>
                 
                 <div className="mb-6">
-                  <h5 className="text-lg font-black text-slate-900 dark:text-white mb-1">{resident.name}</h5>
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                    {resident.role}
+                  <h5 className="text-lg font-black text-cyan-400 mb-1 uppercase tracking-tight">{resident.name}</h5>
+                  <p className="text-[10px] font-black text-magenta-500 uppercase tracking-widest font-mono">
+                    {`// ${resident.role}`}
                   </p>
                 </div>
 
                 <a 
                   href={`tel:${resident.phone}`}
-                  className="w-full bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-brand-600 hover:text-white py-3 rounded-xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 transition-colors"
+                  className="w-full bg-black border-2 border-cyan-900/30 text-cyan-700 hover:bg-cyan-400 hover:text-black hover:border-black py-3 font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 transition-all shadow-[4px_4px_0px_#ff00ff] active:scale-95"
                 >
                   <Phone size={14} />
                   Call Resident

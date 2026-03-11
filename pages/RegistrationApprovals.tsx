@@ -78,39 +78,39 @@ const RegistrationApprovals: React.FC = () => {
 
   return (
     <div className="max-w-5xl mx-auto pb-12 animate-fade-in">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-8 pb-6 border-b border-slate-200 dark:border-slate-800">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-8 pb-6 border-b-2 border-magenta-500/30">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <div className="flex items-center gap-1.5 px-3 py-1 bg-amber-100 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 rounded-full">
+            <div className="flex items-center gap-1.5 px-3 py-1 bg-black border border-amber-500 text-amber-500 rounded-none shadow-[2px_2px_0px_#ff00ff]">
               <ShieldAlert size={14} />
-              <span className="text-[10px] font-black uppercase tracking-widest">Society Management Authority</span>
+              <span className="text-[10px] font-mono font-black uppercase tracking-widest">Society Management Authority</span>
             </div>
           </div>
-          <h1 className="text-4xl font-black tracking-tighter text-slate-900 dark:text-white mb-2">
-            Membership <span className="text-brand-600">Verification</span>
+          <h1 className="text-5xl font-black tracking-tighter text-cyan-400 uppercase glitch-text mb-2">
+            Membership <span className="text-magenta-500">Verification</span>
           </h1>
-          <p className="text-slate-500 dark:text-slate-400 font-medium">
+          <p className="text-cyan-500/70 font-mono text-xs uppercase tracking-widest">
             Approve or reject new resident requests for Saurashtra Residency
           </p>
         </div>
-        <div className="flex items-center gap-4 px-6 py-4 bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-200 dark:border-slate-800 shadow-sm">
-          <div className="w-12 h-12 rounded-2xl bg-amber-100 dark:bg-amber-900/20 flex items-center justify-center text-amber-600 dark:text-amber-400">
+        <div className="flex items-center gap-4 px-6 py-4 bg-black border-4 border-cyan-500 shadow-[8px_8px_0px_#ff00ff]">
+          <div className="w-12 h-12 border-2 border-magenta-500 flex items-center justify-center text-magenta-500 shadow-[4px_4px_0px_#00ffff]">
             <Clock size={24} />
           </div>
           <div>
-            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">Pending Requests</span>
-            <span className="text-2xl font-black text-slate-900 dark:text-white">{pendingUsers.length}</span>
+            <span className="text-[10px] font-mono font-black text-cyan-900 uppercase tracking-widest block">Pending Requests</span>
+            <span className="text-2xl font-black text-cyan-400 font-mono">{pendingUsers.length}</span>
           </div>
         </div>
       </div>
 
       {pendingUsers.length === 0 ? (
-        <div className="py-20 text-center flex flex-col items-center justify-center border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-[3rem]">
-          <div className="w-24 h-24 bg-green-100 dark:bg-green-900/20 rounded-[2.5rem] flex items-center justify-center text-green-600 dark:text-green-400 mb-6 shadow-xl shadow-green-600/10">
+        <div className="py-20 text-center flex flex-col items-center justify-center border-4 border-dashed border-cyan-500/30 bg-black shadow-[12px_12px_0px_#ff00ff33]">
+          <div className="w-24 h-24 border-4 border-green-500 bg-black flex items-center justify-center text-green-500 mb-6 shadow-[8px_8px_0px_#ff00ff]">
             <CheckCircle2 size={48} />
           </div>
-          <h3 className="text-2xl font-black text-slate-900 dark:text-white mb-2">Access Control Clear</h3>
-          <p className="text-slate-500 dark:text-slate-400 max-w-md mx-auto font-medium">
+          <h3 className="text-2xl font-black text-cyan-400 uppercase font-mono glitch-text mb-2">Access Control Clear</h3>
+          <p className="text-cyan-900 max-w-md mx-auto font-mono uppercase text-xs tracking-widest">
             All registration requests have been processed. Digital gateway is secure.
           </p>
         </div>
@@ -119,9 +119,9 @@ const RegistrationApprovals: React.FC = () => {
           {pendingUsers.map((pUser) => (
             <div 
               key={pUser.id} 
-              className="bg-white dark:bg-slate-900 p-6 md:p-8 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 relative overflow-hidden group hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+              className="bg-black p-6 md:p-8 border-4 border-magenta-500 relative overflow-hidden group shadow-[12px_12px_0px_#00ffff] transition-all duration-300 hover:translate-x-2 crt-screen"
             >
-              <div className="absolute -top-10 -right-10 w-40 h-40 bg-brand-500 opacity-5 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-700" />
+              <div className="absolute -top-10 -right-10 w-40 h-40 bg-cyan-500 opacity-5 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-700" />
               
               <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
                 <div className="lg:col-span-8">
@@ -130,46 +130,46 @@ const RegistrationApprovals: React.FC = () => {
                       <img 
                         src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${pUser.email}`} 
                         alt={pUser.name}
-                        className="w-28 h-28 rounded-[2rem] border-4 border-white dark:border-slate-800 shadow-xl bg-slate-100 dark:bg-slate-800"
+                        className="w-28 h-28 border-4 border-cyan-500 shadow-[4px_4px_0px_#ff00ff] bg-black"
                       />
-                      <div className="absolute -bottom-2 -right-2 w-10 h-10 bg-brand-600 rounded-xl border-4 border-white dark:border-slate-800 flex items-center justify-center text-white shadow-lg">
+                      <div className="absolute -bottom-2 -right-2 w-10 h-10 bg-magenta-500 border-2 border-black flex items-center justify-center text-black shadow-[2px_2px_0px_#00ffff]">
                         <Fingerprint size={18} />
                       </div>
                     </div>
 
                     <div className="flex-1 min-w-0">
                       <div className="flex flex-col sm:flex-row items-center gap-3 mb-2 justify-center md:justify-start">
-                        <h3 className="text-3xl font-black tracking-tight text-slate-900 dark:text-white">
+                        <h3 className="text-3xl font-black tracking-tight text-cyan-400 uppercase font-mono glitch-text">
                           {pUser.name}
                         </h3>
-                        <div className="flex items-center gap-1.5 px-2 py-1 bg-brand-50 dark:bg-brand-900/20 text-brand-700 dark:text-brand-400 rounded-lg border border-brand-100 dark:border-brand-900/30">
+                        <div className="flex items-center gap-1.5 px-2 py-1 border border-magenta-500 text-magenta-500 bg-black">
                           <ShieldCheck size={12} />
-                          <span className="text-[10px] font-black uppercase tracking-widest">{pUser.role}</span>
+                          <span className="text-[10px] font-mono font-black uppercase tracking-widest">{pUser.role}</span>
                         </div>
                       </div>
                       
-                      <div className="flex items-center gap-2 text-slate-400 mb-6 justify-center md:justify-start">
-                        <Mail size={14} className="text-brand-500" />
-                        <span className="text-xs font-black uppercase tracking-widest">{pUser.email}</span>
+                      <div className="flex items-center gap-2 text-cyan-900 mb-6 justify-center md:justify-start">
+                        <Mail size={14} className="text-cyan-500" />
+                        <span className="text-xs font-mono font-black uppercase tracking-widest">{pUser.email}</span>
                       </div>
 
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
-                        <div className="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-2xl border border-slate-100 dark:border-slate-800 flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-xl bg-brand-100 dark:bg-brand-900/30 flex items-center justify-center text-brand-600 dark:text-brand-400 shrink-0">
+                        <div className="bg-black border border-cyan-500/30 p-3 shadow-[2px_2px_0px_#ff00ff33] flex items-center gap-3">
+                          <div className="w-10 h-10 border border-cyan-500 flex items-center justify-center text-cyan-500 shrink-0">
                             <MapPin size={18} />
                           </div>
                           <div>
-                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">Mapping</span>
-                            <span className="text-sm font-black text-slate-900 dark:text-white">{pUser.flatId || 'N/A'}</span>
+                            <span className="text-[10px] font-mono font-black text-cyan-900 uppercase tracking-widest block">Mapping</span>
+                            <span className="text-sm font-mono font-black text-cyan-400 uppercase">{pUser.flatId || 'N/A'}</span>
                           </div>
                         </div>
-                        <div className="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-2xl border border-slate-100 dark:border-slate-800 flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-xl bg-brand-100 dark:bg-brand-900/30 flex items-center justify-center text-brand-600 dark:text-brand-400 shrink-0">
+                        <div className="bg-black border border-cyan-500/30 p-3 shadow-[2px_2px_0px_#ff00ff33] flex items-center gap-3">
+                          <div className="w-10 h-10 border border-cyan-500 flex items-center justify-center text-cyan-500 shrink-0">
                             <Home size={18} />
                           </div>
                           <div>
-                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">Tenure</span>
-                            <span className="text-sm font-black text-slate-900 dark:text-white">{pUser.occupancyType}</span>
+                            <span className="text-[10px] font-mono font-black text-cyan-900 uppercase tracking-widest block">Tenure</span>
+                            <span className="text-sm font-mono font-black text-cyan-400 uppercase">{pUser.occupancyType}</span>
                           </div>
                         </div>
                       </div>
@@ -182,7 +182,7 @@ const RegistrationApprovals: React.FC = () => {
                     <button 
                       disabled={processingId === pUser.id}
                       onClick={() => handleReject(pUser.id)}
-                      className="flex-1 py-4 rounded-2xl border-2 border-red-100 dark:border-red-900/30 text-red-600 dark:text-red-400 font-black text-xs uppercase tracking-widest hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+                      className="flex-1 py-4 border-2 border-red-500 text-red-500 font-mono font-black text-xs uppercase tracking-widest hover:bg-red-500 hover:text-black transition-colors flex items-center justify-center gap-2 disabled:opacity-50 shadow-[4px_4px_0px_#ff00ff33]"
                     >
                       {processingId === pUser.id ? <Loader2 size={18} className="animate-spin" /> : <UserX size={18} />}
                       Reject
@@ -190,7 +190,7 @@ const RegistrationApprovals: React.FC = () => {
                     <button 
                       disabled={processingId === pUser.id}
                       onClick={() => handleApprove(pUser.id)}
-                      className="flex-1 bg-brand-600 text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-brand-700 transition-colors shadow-lg shadow-brand-600/20 active:scale-95 transform duration-100 flex items-center justify-center gap-2 disabled:opacity-50"
+                      className="flex-1 bg-cyan-500 text-black py-4 border-2 border-black font-mono font-black text-xs uppercase tracking-widest hover:bg-black hover:text-cyan-500 hover:border-cyan-500 transition-colors shadow-[4px_4px_0px_#ff00ff] active:scale-95 transform duration-100 flex items-center justify-center gap-2 disabled:opacity-50"
                     >
                       {processingId === pUser.id ? <Loader2 size={18} className="animate-spin" /> : <UserCheck size={18} />}
                       Authorize
@@ -203,17 +203,17 @@ const RegistrationApprovals: React.FC = () => {
         </div>
       )}
 
-      <div className="mt-12 p-8 rounded-[3rem] bg-slate-900 text-white relative overflow-hidden shadow-2xl">
-        <div className="absolute -top-20 -right-20 w-80 h-80 bg-brand-500 opacity-20 rounded-full blur-3xl" />
+      <div className="mt-12 p-8 border-4 border-cyan-500 bg-black text-cyan-400 relative overflow-hidden shadow-[12px_12px_0px_#ff00ff] crt-screen">
+        <div className="absolute top-0 left-0 right-0 h-2 bg-magenta-500" />
         <div className="relative z-10 flex flex-col md:flex-row items-center gap-8 text-center md:text-left">
-          <div className="w-20 h-20 bg-white/5 backdrop-blur-md rounded-[1.5rem] border border-white/10 flex items-center justify-center text-amber-400 shrink-0">
+          <div className="w-20 h-20 border-2 border-magenta-500 bg-black flex items-center justify-center text-magenta-500 shrink-0 shadow-[4px_4px_0px_#00ffff]">
             <ShieldAlert size={40} />
           </div>
           <div>
-            <h3 className="text-2xl font-black mb-2 tracking-tight">Security Protocol Verification</h3>
-            <p className="text-slate-400 text-lg font-medium leading-relaxed max-w-2xl">
+            <h3 className="text-2xl font-black mb-2 tracking-tight uppercase font-mono glitch-text">Security Protocol Verification</h3>
+            <p className="text-cyan-500/70 text-lg font-mono uppercase text-xs leading-relaxed max-w-2xl">
               Approving a membership request grants access to internal society records and ledger details.
-              <span className="text-white font-black block mt-1">Always verify identities via physical registers before granting digital entry.</span>
+              <span className="text-cyan-400 font-black block mt-1">Always verify identities via physical registers before granting digital entry.</span>
             </p>
           </div>
         </div>

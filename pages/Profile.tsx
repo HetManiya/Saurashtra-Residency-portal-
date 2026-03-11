@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   User, Mail, Shield, Home, Key, Lock, CheckCircle2, 
   AlertCircle, Loader2, Save, CreditCard, History, 
-  Calendar, ArrowRight, ShieldCheck, BadgeCheck, Smartphone
+  Calendar, ArrowRight, ShieldCheck, BadgeCheck, Smartphone,
+  Camera, Upload, X, RefreshCw
 } from 'lucide-react';
 import { api } from '../services/api';
 import { useLanguage } from '../components/LanguageContext';
@@ -17,6 +18,11 @@ const Profile: React.FC = () => {
   const [isUpdating, setIsUpdating] = useState(false);
   const [passForm, setPassForm] = useState({ current: '', new: '', confirm: '' });
   const [statusMsg, setStatusMsg] = useState({ type: '', text: '' });
+  const [showCamera, setShowCamera] = useState(false);
+  const [cameraLoading, setCameraLoading] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
 
   useEffect(() => {
     const stored = localStorage.getItem('sr_user');
@@ -60,6 +66,64 @@ const Profile: React.FC = () => {
     }
   };
 
+  const startCamera = async () => {
+    setShowCamera(true);
+    setCameraLoading(true);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        video: { facingMode: 'user', width: { ideal: 400 }, height: { ideal: 400 } } 
+      });
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        streamRef.current = stream;
+      }
+    } catch (err) {
+      console.error("Error accessing camera:", err);
+      setStatusMsg({ type: 'error', text: 'Could not access camera' });
+      setShowCamera(false);
+    } finally {
+      setCameraLoading(false);
+    }
+  };
+
+  const stopCamera = () => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
+    }
+    setShowCamera(false);
+  };
+
+  const capturePhoto = async () => {
+    if (!videoRef.current || !canvasRef.current) return;
+
+    const canvas = canvasRef.current;
+    const video = videoRef.current;
+    const context = canvas.getContext('2d');
+
+    if (context) {
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+      
+      const imageData = canvas.toDataURL('image/jpeg', 0.8);
+      
+      setIsUpdating(true);
+      try {
+        const response = await api.updateProfile(user.id || user._id, imageData);
+        setUser(response.user);
+        setStatusMsg({ type: 'success', text: 'Profile picture updated!' });
+        stopCamera();
+      } catch (err) {
+        console.error("Error uploading photo:", err);
+        setStatusMsg({ type: 'error', text: 'Failed to save photo' });
+      } finally {
+        setIsUpdating(false);
+        setTimeout(() => setStatusMsg({ type: '', text: '' }), 3000);
+      }
+    }
+  };
+
   if (!user) return null;
 
   const unpaidCount = maintenance.filter(m => m.status !== PaymentStatus.PAID).length;
@@ -86,16 +150,71 @@ const Profile: React.FC = () => {
         {/* Sidebar: Personal Info & Security */}
         <div className="lg:col-span-4 space-y-6">
           <div className="bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 text-center relative overflow-hidden shadow-sm">
-            <div className="relative inline-block mb-6">
+            <div className="relative inline-block mb-6 group">
               <img 
-                src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user.email}`} 
+                src={user.profilePictureUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.profilePictureUrl || user.email}`} 
                 alt={user.name}
-                className="w-32 h-32 rounded-[2rem] border-4 border-slate-100 dark:border-slate-800 shadow-xl bg-slate-50 dark:bg-slate-800"
+                className="w-32 h-32 rounded-[2rem] border-4 border-slate-100 dark:border-slate-800 shadow-xl bg-slate-50 dark:bg-slate-800 object-cover"
               />
+              <button 
+                onClick={startCamera}
+                className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-[2rem] text-white"
+              >
+                <Camera size={24} />
+              </button>
               <div className="absolute -bottom-2 -right-2 w-10 h-10 bg-brand-600 rounded-xl border-4 border-white dark:border-slate-900 flex items-center justify-center text-white shadow-lg">
                 <ShieldCheck size={18} />
               </div>
             </div>
+
+            {showCamera && (
+              <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-md">
+                <motion.div 
+                  initial={{ scale: 0.9, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  className="bg-white dark:bg-slate-900 rounded-[2.5rem] p-8 max-w-md w-full border border-slate-200 dark:border-slate-800 shadow-2xl"
+                >
+                  <div className="flex justify-between items-center mb-6">
+                    <h3 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tight">Capture Identity</h3>
+                    <button onClick={stopCamera} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
+                      <X size={20} className="text-slate-500" />
+                    </button>
+                  </div>
+
+                  <div className="relative aspect-square rounded-[2rem] overflow-hidden bg-slate-100 dark:bg-slate-800 mb-6 border-4 border-slate-50 dark:border-slate-800 shadow-inner">
+                    {cameraLoading && (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <Loader2 className="animate-spin text-brand-600" size={32} />
+                      </div>
+                    )}
+                    <video 
+                      ref={videoRef} 
+                      autoPlay 
+                      playsInline 
+                      className="w-full h-full object-cover"
+                    />
+                    <canvas ref={canvasRef} className="hidden" />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <button 
+                      onClick={stopCamera}
+                      className="py-3 rounded-xl font-black text-xs uppercase tracking-widest border border-slate-200 dark:border-slate-800 text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button 
+                      onClick={capturePhoto}
+                      disabled={isUpdating}
+                      className="py-3 bg-brand-600 text-white rounded-xl font-black text-xs uppercase tracking-widest hover:bg-brand-700 transition-all flex items-center justify-center gap-2 shadow-lg shadow-brand-600/20"
+                    >
+                      {isUpdating ? <Loader2 size={14} className="animate-spin" /> : <Camera size={14} />}
+                      {isUpdating ? 'Saving...' : 'Capture'}
+                    </button>
+                  </div>
+                </motion.div>
+              </div>
+            )}
             
             <h2 className="text-2xl font-black text-slate-900 dark:text-white mb-1 tracking-tight">
               {user.name}
