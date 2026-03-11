@@ -91,10 +91,13 @@ export interface MaintenanceRecord {
 
 export interface FundRecord {
   id: string;
-  purpose: string;
+  title: string;
   date: string;
-  totalCollected: number;
-  targetAmount: number;
+  amount: number;
+  status: PaymentStatus;
+  purpose?: string;
+  totalCollected?: number;
+  targetAmount?: number;
 }
 
 export interface Notice {

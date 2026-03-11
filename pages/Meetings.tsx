@@ -1,13 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  Box, Typography, Grid, Card, Button, IconButton, 
-  Avatar, Chip, CircularProgress, Paper, useTheme, 
-  Fade, Stack, Divider, TextField, InputAdornment,
-  Dialog, DialogTitle, DialogContent, DialogActions,
-  List, ListItem, ListItemText, ListItemAvatar,
-  useMediaQuery, Tooltip
-} from '@mui/material';
-import { 
   CalendarDays, MapPin, Clock, Plus, Users, ChevronRight, Info, CheckCircle, X, BellRing, Calendar, Loader2
 } from 'lucide-react';
 import { useLanguage } from '../components/LanguageContext';
@@ -16,8 +8,6 @@ import { Meeting } from '../types';
 
 const Meetings: React.FC = () => {
   const { t } = useLanguage();
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [meetings, setMeetings] = useState<Meeting[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -95,335 +85,277 @@ const Meetings: React.FC = () => {
 
   if (loading) {
     return (
-      <Box sx={{ height: '60vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-        <CircularProgress size={40} sx={{ mb: 2 }} />
-        <Typography variant="caption" sx={{ fontWeight: 900, textTransform: 'uppercase', color: 'text.secondary', letterSpacing: 2 }}>
+      <div className="h-[60vh] flex flex-col items-center justify-center">
+        <Loader2 size={40} className="animate-spin mb-4 text-brand-600" />
+        <span className="text-xs font-black text-slate-400 uppercase tracking-widest">
           Loading Assemblies...
-        </Typography>
-      </Box>
+        </span>
+      </div>
     );
   }
 
   return (
-    <Fade in={true}>
-      <Box sx={{ pb: 8 }}>
-        <Box sx={{ 
-          display: 'flex', 
-          flexDirection: { xs: 'column', md: 'row' }, 
-          justifyContent: 'space-between', 
-          alignItems: { md: 'flex-end' }, 
-          gap: 3, 
-          mb: 6,
-          pb: 4,
-          borderBottom: '1px solid',
-          borderColor: 'divider'
-        }}>
-          <Box>
-            <Typography variant="h4" sx={{ fontWeight: 900, tracking: '-0.04em' }}>
-              {t('meetings_title')}
-            </Typography>
-            <Typography variant="body1" sx={{ color: 'text.secondary', mt: 1, fontWeight: 500 }}>
-              Coordinate community gatherings and festive planning
-            </Typography>
-          </Box>
-          {isAdmin && (
-            <Button 
-              variant="contained" 
-              startIcon={<Plus size={18} />}
-              onClick={() => setShowModal(true)}
-              sx={{ 
-                borderRadius: 6, px: 4, py: 1.5, 
-                fontWeight: 900, textTransform: 'uppercase', fontSize: '0.7rem',
-                boxShadow: 10,
-                '&:active': { transform: 'scale(0.95)' }
-              }}
-            >
-              New Schedule
-            </Button>
+    <div className="pb-8 animate-fade-in">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-8 pb-6 border-b border-slate-200 dark:border-slate-800">
+        <div>
+          <h3 className="text-4xl font-black tracking-tighter text-slate-900 dark:text-white">
+            {t('meetings_title')}
+          </h3>
+          <p className="text-slate-500 dark:text-slate-400 mt-2 font-medium">
+            Coordinate community gatherings and festive planning
+          </p>
+        </div>
+        {isAdmin && (
+          <button 
+            onClick={() => setShowModal(true)}
+            className="flex items-center gap-2 bg-brand-600 text-white px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-brand-700 transition-colors shadow-lg shadow-brand-600/20 active:scale-95 transform duration-100"
+          >
+            <Plus size={18} />
+            New Schedule
+          </button>
+        )}
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2 space-y-6">
+          {upcomingMeetings.length === 0 ? (
+            <div className="py-16 text-center rounded-[2rem] border-2 border-dashed border-slate-200 dark:border-slate-800">
+              <CalendarDays size={48} className="mx-auto mb-4 text-slate-200 dark:text-slate-700" />
+              <h6 className="text-lg font-black text-slate-400">Clear Calendar</h6>
+              <p className="text-slate-400 text-sm mt-1">No society assemblies are currently scheduled.</p>
+            </div>
+          ) : (
+            upcomingMeetings.map((meeting: Meeting, index: number) => {
+              const userRsvp = meeting.rsvps?.find((r: any) => r.userId === userId);
+              const isAttending = userRsvp?.status === 'YES';
+              
+              return (
+                <div 
+                  key={meeting.id || index} 
+                  className="group bg-white dark:bg-slate-900 p-6 md:p-8 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 transition-all duration-300 hover:border-brand-500 hover:shadow-xl"
+                >
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div className="md:col-span-2">
+                      <div className="flex items-center gap-3 mb-4">
+                        <span className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider border ${
+                          meeting.category === 'Urgent' 
+                            ? 'text-red-600 bg-red-50 border-red-200 dark:bg-red-900/20 dark:border-red-800' 
+                            : 'text-brand-600 bg-brand-50 border-brand-200 dark:bg-brand-900/20 dark:border-brand-800'
+                        }`}>
+                          {meeting.category}
+                        </span>
+                        <span className="px-3 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-[10px] font-black uppercase tracking-wider border border-slate-200 dark:border-slate-700">
+                          {new Date(meeting.date).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}
+                        </span>
+                      </div>
+                      
+                      <h4 className="text-2xl font-black mb-3 text-slate-900 dark:text-white group-hover:text-brand-600 transition-colors">
+                        {meeting.title}
+                      </h4>
+                      <p className="text-slate-500 dark:text-slate-400 leading-relaxed mb-6 font-medium">
+                        {meeting.description}
+                      </p>
+                      
+                      <div className="flex items-center gap-6 text-slate-400 text-xs font-bold uppercase tracking-wider">
+                        <div className="flex items-center gap-2">
+                          <Clock size={16} className="text-brand-500" />
+                          <span>{new Date(meeting.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <MapPin size={16} className="text-brand-500" />
+                          <span>{meeting.location}</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="md:border-l border-slate-100 dark:border-slate-800 md:pl-8 flex flex-col justify-center items-center md:items-start">
+                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">
+                        {isAdmin ? 'Total RSVPs' : 'Your Attendance'}
+                      </span>
+                      
+                      {isAdmin ? (
+                        <div className="text-center md:text-left">
+                          <h3 className="text-4xl font-black text-brand-600 mb-1">
+                            {meeting.rsvps?.filter((r: any) => r.status === 'YES').length || 0}
+                          </h3>
+                          <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Confirmations</span>
+                        </div>
+                      ) : (
+                        <button 
+                          onClick={() => handleRSVP(meeting.id, userRsvp?.status || 'NO')}
+                          className={`w-full py-3 rounded-xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 transition-all ${
+                            isAttending 
+                              ? 'bg-green-50 text-green-600 border-2 border-green-500 hover:bg-green-100' 
+                              : 'bg-slate-900 text-white hover:bg-black shadow-lg shadow-slate-900/20'
+                          }`}
+                        >
+                          {isAttending && <CheckCircle size={14} />}
+                          {isAttending ? 'Attending' : 'Confirm RSVP'}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })
           )}
-        </Box>
 
-        <Grid container spacing={4}>
-          <Grid item xs={12} lg={8}>
-            <Stack spacing={4}>
-              {upcomingMeetings.length === 0 ? (
-                <Paper sx={{ py: 12, textAlign: 'center', borderRadius: 10, border: '1px solid', borderColor: 'divider', boxShadow: 0 }}>
-                  <CalendarDays size={48} style={{ opacity: 0.1, marginBottom: 16 }} />
-                  <Typography variant="h6" sx={{ fontWeight: 900 }}>Clear Calendar</Typography>
-                  <Typography variant="body2" sx={{ color: 'text.disabled' }}>No society assemblies are currently scheduled.</Typography>
-                </Paper>
-              ) : (
-                upcomingMeetings.map((meeting: Meeting, index: number) => {
-                  const userRsvp = meeting.rsvps?.find((r: any) => r.userId === userId);
-                  const isAttending = userRsvp?.status === 'YES';
-                  
-                  return (
-                    <Card 
-                      key={meeting.id || index} 
-                      sx={{ 
-                        p: 4, 
-                        borderRadius: 10, 
-                        border: '1px solid', 
-                        borderColor: 'divider', 
-                        boxShadow: 0,
-                        transition: 'all 0.3s ease',
-                        '&:hover': {
-                          borderColor: 'primary.main',
-                          boxShadow: 6
-                        }
-                      }}
-                    >
-                      <Grid container spacing={4}>
-                        <Grid item xs={12} md={8}>
-                          <Stack direction="row" spacing={2} sx={{ mb: 3 }}>
-                            <Chip 
-                              label={meeting.category} 
-                              size="small"
-                              color={meeting.category === 'Urgent' ? 'error' : 'primary'}
-                              variant="outlined"
-                              sx={{ fontWeight: 900, textTransform: 'uppercase', fontSize: '0.6rem', borderRadius: 2 }} 
-                            />
-                            <Chip 
-                              label={new Date(meeting.date).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })} 
-                              size="small"
-                              variant="outlined"
-                              sx={{ fontWeight: 900, textTransform: 'uppercase', fontSize: '0.6rem', borderRadius: 2, color: 'text.disabled' }} 
-                            />
-                          </Stack>
-                          
-                          <Typography variant="h5" sx={{ fontWeight: 900, mb: 1.5 }}>{meeting.title}</Typography>
-                          <Typography variant="body2" sx={{ color: 'text.secondary', mb: 4, lineHeight: 1.6 }}>{meeting.description}</Typography>
-                          
-                          <Stack direction="row" spacing={4} alignItems="center">
-                            <Stack direction="row" spacing={1} alignItems="center" sx={{ color: 'text.disabled' }}>
-                              <Clock size={16} color={theme.palette.primary.main} />
-                              <Typography variant="caption" sx={{ fontWeight: 700 }}>
-                                {new Date(meeting.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                              </Typography>
-                            </Stack>
-                            <Stack direction="row" spacing={1} alignItems="center" sx={{ color: 'text.disabled' }}>
-                              <MapPin size={16} color={theme.palette.primary.main} />
-                              <Typography variant="caption" sx={{ fontWeight: 700 }}>{meeting.location}</Typography>
-                            </Stack>
-                          </Stack>
-                        </Grid>
-                        
-                        <Grid item xs={12} md={4}>
-                          <Box sx={{ 
-                            height: '100%', 
-                            display: 'flex', 
-                            flexDirection: 'column', 
-                            justifyContent: 'center', 
-                            alignItems: { xs: 'center', md: 'flex-start' },
-                            pl: { md: 4 },
-                            borderLeft: { md: '1px solid' },
-                            borderColor: 'divider'
-                          }}>
-                            <Typography variant="caption" sx={{ fontWeight: 900, textTransform: 'uppercase', color: 'text.disabled', mb: 1 }}>
-                              {isAdmin ? 'Total RVSPs' : 'Your Attendance'}
-                            </Typography>
-                            
-                            {isAdmin ? (
-                              <Box>
-                                <Typography variant="h3" sx={{ fontWeight: 900, color: 'primary.main' }}>
-                                  {meeting.rsvps?.filter((r: any) => r.status === 'YES').length || 0}
-                                </Typography>
-                                <Typography variant="caption" sx={{ fontWeight: 900, color: 'text.disabled', textTransform: 'uppercase', letterSpacing: 1 }}>
-                                  Confimations
-                                </Typography>
-                              </Box>
-                            ) : (
-                              <Button 
-                                fullWidth 
-                                variant={isAttending ? "outlined" : "contained"}
-                                color={isAttending ? "success" : "inherit"}
-                                onClick={() => handleRSVP(meeting.id, userRsvp?.status || 'NO')}
-                                startIcon={isAttending && <CheckCircle size={14} />}
-                                sx={{ 
-                                  borderRadius: 4, py: 1.5, 
-                                  fontWeight: 900, textTransform: 'uppercase', fontSize: '0.7rem',
-                                  bgcolor: isAttending ? 'transparent' : 'text.primary',
-                                  color: isAttending ? 'success.main' : 'background.paper',
-                                  '&:hover': { bgcolor: isAttending ? 'success.light' : 'primary.main' }
-                                }}
-                              >
-                                {isAttending ? 'Attending' : 'Confirm RSVP'}
-                              </Button>
-                            )}
-                          </Box>
-                        </Grid>
-                      </Grid>
-                    </Card>
-                  );
-                })
-              )}
+          {pastMeetings.length > 0 && (
+            <div className="pt-8">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="h-px bg-slate-200 dark:bg-slate-800 flex-grow" />
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Past Assemblies</span>
+                <div className="h-px bg-slate-200 dark:bg-slate-800 flex-grow" />
+              </div>
+              
+              <div className="space-y-4 opacity-60 hover:opacity-100 transition-opacity duration-300">
+                {pastMeetings.map((meeting: Meeting, index: number) => (
+                  <div key={meeting.id || index} className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-3xl border border-slate-200 dark:border-slate-800">
+                    <div className="flex flex-col md:flex-row justify-between gap-4">
+                      <div>
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-[10px] font-black uppercase text-slate-500 dark:text-slate-300">Concluded</span>
+                          <span className="text-[10px] font-black uppercase text-slate-400">{new Date(meeting.date).toLocaleDateString()}</span>
+                        </div>
+                        <h6 className="text-lg font-black text-slate-700 dark:text-slate-300">{meeting.title}</h6>
+                        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">{meeting.description}</p>
+                      </div>
+                      <div className="flex items-center gap-4 text-slate-400 text-xs font-bold uppercase">
+                        <div className="flex items-center gap-1">
+                          <Clock size={12} />
+                          <span>{new Date(meeting.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <MapPin size={12} />
+                          <span>{meeting.location}</span>
+                        </div>
+                        <div className="flex items-center gap-1 ml-2 pl-4 border-l border-slate-200 dark:border-slate-700">
+                          <Users size={12} />
+                          <span>{meeting.rsvps?.filter((r: any) => r.status === 'YES').length || 0} Attended</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
 
-              {pastMeetings.length > 0 && (
-                <Box sx={{ pt: 8 }}>
-                  <Divider sx={{ mb: 6 }}>
-                    <Typography variant="caption" sx={{ fontWeight: 900, textTransform: 'uppercase', color: 'text.disabled', letterSpacing: 4 }}>
-                      Past Assemblies
-                    </Typography>
-                  </Divider>
-                  
-                  <Stack spacing={3} sx={{ opacity: 0.6, transition: 'opacity 0.3s ease', '&:hover': { opacity: 1 } }}>
-                    {pastMeetings.map((meeting: Meeting, index: number) => (
-                      <Paper key={meeting.id || index} sx={{ p: 4, borderRadius: 8, border: '1px solid', borderColor: 'divider', bgcolor: 'action.hover' }}>
-                        <Grid container spacing={4}>
-                          <Grid item xs={12} md={9}>
-                            <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
-                              <Chip label="Concluded" size="small" sx={{ fontWeight: 900, textTransform: 'uppercase', fontSize: '0.6rem', borderRadius: 1.5 }} />
-                              <Chip label={new Date(meeting.date).toLocaleDateString()} size="small" sx={{ fontWeight: 900, textTransform: 'uppercase', fontSize: '0.6rem', borderRadius: 1.5 }} />
-                            </Stack>
-                            <Typography variant="h6" sx={{ fontWeight: 900, mb: 1 }}>{meeting.title}</Typography>
-                            <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mb: 2 }}>{meeting.description}</Typography>
-                            <Stack direction="row" spacing={3}>
-                              <Stack direction="row" spacing={1} alignItems="center" sx={{ color: 'text.disabled' }}>
-                                <Clock size={14} />
-                                <Typography variant="caption" sx={{ fontWeight: 700 }}>
-                                  {new Date(meeting.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                </Typography>
-                              </Stack>
-                              <Stack direction="row" spacing={1} alignItems="center" sx={{ color: 'text.disabled' }}>
-                                <MapPin size={14} />
-                                <Typography variant="caption" sx={{ fontWeight: 700 }}>{meeting.location}</Typography>
-                              </Stack>
-                            </Stack>
-                          </Grid>
-                          <Grid item xs={12} md={3}>
-                            <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', borderLeft: { md: '1px solid' }, borderColor: 'divider' }}>
-                              <Typography variant="h4" sx={{ fontWeight: 900, color: 'text.disabled' }}>
-                                {meeting.rsvps?.filter((r: any) => r.status === 'YES').length || 0}
-                              </Typography>
-                              <Typography variant="caption" sx={{ fontWeight: 900, color: 'text.disabled', textTransform: 'uppercase', fontSize: '0.55rem' }}>Attended</Typography>
-                            </Box>
-                          </Grid>
-                        </Grid>
-                      </Paper>
-                    ))}
-                  </Stack>
-                </Box>
-              )}
-            </Stack>
-          </Grid>
+        <div>
+          <div className="bg-brand-600 text-white p-8 rounded-[2.5rem] relative overflow-hidden shadow-xl sticky top-8">
+            <div className="absolute -bottom-8 -right-8 w-32 h-32 bg-white opacity-10 rounded-full blur-2xl" />
+            <div className="relative z-10">
+              <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mb-6 backdrop-blur-sm">
+                <BellRing size={24} className="text-white" />
+              </div>
+              <h5 className="text-2xl font-black mb-2">Stay Informed</h5>
+              <p className="text-brand-100 leading-relaxed text-sm font-medium">
+                All community meetings are broadcasted via WhatsApp and Email to ensure maximum participation.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
 
-          <Grid item xs={12} lg={4}>
-            <Paper sx={{ p: 5, borderRadius: 12, bgcolor: 'primary.main', color: 'white', position: 'relative', overflow: 'hidden', boxShadow: 10 }}>
-              <Box sx={{ position: 'absolute', bottom: -32, right: -32, width: 128, height: 128, bgcolor: 'white', opacity: 0.1, borderRadius: '50%', filter: 'blur(32px)' }} />
-              <Box sx={{ position: 'relative', zIndex: 1 }}>
-                <Avatar sx={{ bgcolor: 'rgba(255,255,255,0.2)', color: 'white', borderRadius: 3, mb: 3 }}>
-                  <BellRing size={24} />
-                </Avatar>
-                <Typography variant="h5" sx={{ fontWeight: 900, mb: 1 }}>Stay Informed</Typography>
-                <Typography variant="body2" sx={{ opacity: 0.8, lineHeight: 1.6 }}>
-                  All community meetings are broadcasted via WhatsApp and Email to ensure maximum participation.
-                </Typography>
-              </Box>
-            </Paper>
-          </Grid>
-        </Grid>
-
-        {/* Schedule Meeting Modal */}
-        <Dialog 
-          open={showModal} 
-          onClose={() => setShowModal(false)}
-          maxWidth="sm"
-          fullWidth
-          PaperProps={{ sx: { borderRadius: 10, p: 0, overflow: 'hidden' } }}
-        >
-          <DialogTitle sx={{ p: 4, borderBottom: '1px solid', borderColor: 'divider', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Typography variant="h4" sx={{ fontWeight: 900, tracking: '-0.04em' }}>New Assembly</Typography>
-            <IconButton onClick={() => setShowModal(false)}>
-              <X size={28} />
-            </IconButton>
-          </DialogTitle>
-          <DialogContent sx={{ p: 4 }}>
-            <Stack spacing={3} component="form" onSubmit={handleSchedule} sx={{ mt: 1 }}>
-              <Box>
-                <Typography variant="caption" sx={{ fontWeight: 900, color: 'text.disabled', textTransform: 'uppercase', ml: 1, mb: 1, display: 'block' }}>Meeting Title</Typography>
-                <TextField 
-                  fullWidth 
-                  placeholder="e.g. Navratri Event Planning" 
-                  required
-                  value={formData.title}
-                  onChange={(e) => setFormData({...formData, title: e.target.value})}
-                  InputProps={{ sx: { borderRadius: 6, bgcolor: 'action.hover' } }}
-                />
-              </Box>
-
-              <Grid container spacing={2}>
-                <Grid item xs={6}>
-                  <Typography variant="caption" sx={{ fontWeight: 900, color: 'text.disabled', textTransform: 'uppercase', ml: 1, mb: 1, display: 'block' }}>Date</Typography>
-                  <TextField 
-                    fullWidth 
-                    type="date"
-                    required
-                    value={formData.date}
-                    onChange={(e) => setFormData({...formData, date: e.target.value})}
-                    InputProps={{ sx: { borderRadius: 6, bgcolor: 'action.hover' } }}
-                  />
-                </Grid>
-                <Grid item xs={6}>
-                  <Typography variant="caption" sx={{ fontWeight: 900, color: 'text.disabled', textTransform: 'uppercase', ml: 1, mb: 1, display: 'block' }}>Time</Typography>
-                  <TextField 
-                    fullWidth 
-                    type="time"
-                    required
-                    value={formData.time}
-                    onChange={(e) => setFormData({...formData, time: e.target.value})}
-                    InputProps={{ sx: { borderRadius: 6, bgcolor: 'action.hover' } }}
-                  />
-                </Grid>
-              </Grid>
-
-              <Box>
-                <Typography variant="caption" sx={{ fontWeight: 900, color: 'text.disabled', textTransform: 'uppercase', ml: 1, mb: 1, display: 'block' }}>Location</Typography>
-                <TextField 
-                  fullWidth 
-                  placeholder="Club House / Main Garden" 
-                  required
-                  value={formData.location}
-                  onChange={(e) => setFormData({...formData, location: e.target.value})}
-                  InputProps={{ sx: { borderRadius: 6, bgcolor: 'action.hover' } }}
-                />
-              </Box>
-
-              <Box>
-                <Typography variant="caption" sx={{ fontWeight: 900, color: 'text.disabled', textTransform: 'uppercase', ml: 1, mb: 1, display: 'block' }}>Agenda Description</Typography>
-                <TextField 
-                  fullWidth 
-                  multiline
-                  rows={3}
-                  placeholder="Briefly describe the purpose..."
-                  required
-                  value={formData.description}
-                  onChange={(e) => setFormData({...formData, description: e.target.value})}
-                  InputProps={{ sx: { borderRadius: 6, bgcolor: 'action.hover' } }}
-                />
-              </Box>
-
-              <Button 
-                fullWidth 
-                variant="contained" 
-                size="large"
-                disabled={submitting}
-                type="submit"
-                startIcon={submitting ? <CircularProgress size={20} color="inherit" /> : <Calendar size={18} />}
-                sx={{ 
-                  borderRadius: 8, py: 2, 
-                  fontWeight: 900, textTransform: 'uppercase', 
-                  letterSpacing: 1.5,
-                  boxShadow: 10,
-                  '&:active': { transform: 'scale(0.95)' }
-                }}
+      {/* Schedule Meeting Modal */}
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white dark:bg-slate-900 w-full max-w-lg rounded-[2rem] shadow-2xl overflow-hidden animate-scale-in">
+            <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
+              <h4 className="text-2xl font-black text-slate-900 dark:text-white">New Assembly</h4>
+              <button 
+                onClick={() => setShowModal(false)}
+                className="w-10 h-10 rounded-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
               >
-                {submitting ? 'Scheduling...' : 'Broadcast to Residents'}
-              </Button>
-            </Stack>
-          </DialogContent>
-        </Dialog>
-      </Box>
-    </Fade>
+                <X size={20} />
+              </button>
+            </div>
+            
+            <div className="p-6">
+              <form onSubmit={handleSchedule} className="space-y-5">
+                <div>
+                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Meeting Title</span>
+                  <input 
+                    type="text"
+                    placeholder="e.g. Navratri Event Planning" 
+                    required
+                    value={formData.title}
+                    onChange={(e) => setFormData({...formData, title: e.target.value})}
+                    className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl px-4 py-3 text-slate-900 dark:text-white placeholder-slate-400 font-bold focus:ring-2 focus:ring-brand-500 outline-none transition-all"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Date</span>
+                    <input 
+                      type="date"
+                      required
+                      value={formData.date}
+                      onChange={(e) => setFormData({...formData, date: e.target.value})}
+                      className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl px-4 py-3 text-slate-900 dark:text-white font-bold focus:ring-2 focus:ring-brand-500 outline-none transition-all"
+                    />
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Time</span>
+                    <input 
+                      type="time"
+                      required
+                      value={formData.time}
+                      onChange={(e) => setFormData({...formData, time: e.target.value})}
+                      className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl px-4 py-3 text-slate-900 dark:text-white font-bold focus:ring-2 focus:ring-brand-500 outline-none transition-all"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Location</span>
+                  <input 
+                    type="text"
+                    placeholder="Club House / Main Garden" 
+                    required
+                    value={formData.location}
+                    onChange={(e) => setFormData({...formData, location: e.target.value})}
+                    className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl px-4 py-3 text-slate-900 dark:text-white placeholder-slate-400 font-bold focus:ring-2 focus:ring-brand-500 outline-none transition-all"
+                  />
+                </div>
+
+                <div>
+                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Agenda Description</span>
+                  <textarea 
+                    rows={3}
+                    placeholder="Briefly describe the purpose..."
+                    required
+                    value={formData.description}
+                    onChange={(e) => setFormData({...formData, description: e.target.value})}
+                    className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl px-4 py-3 text-slate-900 dark:text-white placeholder-slate-400 font-medium focus:ring-2 focus:ring-brand-500 outline-none transition-all resize-none"
+                  />
+                </div>
+
+                <button 
+                  type="submit"
+                  disabled={submitting}
+                  className="w-full bg-brand-600 hover:bg-brand-700 text-white font-black uppercase tracking-widest py-4 rounded-xl transition-all shadow-lg shadow-brand-600/20 active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {submitting ? (
+                    <>
+                      <Loader2 size={20} className="animate-spin" />
+                      Scheduling...
+                    </>
+                  ) : (
+                    <>
+                      <Calendar size={18} />
+                      Broadcast to Residents
+                    </>
+                  )}
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   );
 };
 

@@ -8,7 +8,7 @@ const router = express.Router();
 
 router.post('/register', async (req, res) => {
   try {
-    const { name, email, password, role, flatId, occupancyType, position } = req.body;
+    const { name, email, password, role, flatId, occupancyType, position, phone } = req.body;
     
     const existingUser = await User.findOne({ email });
     if (existingUser) return res.status(400).json({ message: 'User already exists' });
@@ -21,7 +21,7 @@ router.post('/register', async (req, res) => {
       role: role || 'RESIDENT', 
       flatId,
       occupancyType,
-      phone: '' // Add default or handle from body
+      phone: phone || '' 
     });
     
     // In a real app, position might be a separate field or mapped from role

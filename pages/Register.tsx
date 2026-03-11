@@ -1,14 +1,5 @@
-
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { 
-  Box, Container, Paper, Typography, TextField, 
-  Button, IconButton, InputAdornment, Alert, 
-  CircularProgress, Link as MuiLink, Stack, Chip,
-  Fade, useTheme, Stepper, Step, StepLabel,
-  FormControl, InputLabel, Select, MenuItem,
-  Grid, Avatar, CardActionArea, Card
-} from '@mui/material';
 import { 
   UserPlus, Mail, Lock, User, Shield, Home, ArrowRight, 
   Loader2, CheckCircle, ChevronLeft, MapPin, Users,
@@ -18,7 +9,6 @@ import { api } from '../services/api';
 import { BUILDINGS } from '../constants';
 
 const Register: React.FC = () => {
-  const theme = useTheme();
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -86,329 +76,262 @@ const Register: React.FC = () => {
   ];
 
   return (
-    <Box sx={{ 
-      minHeight: '100vh', 
-      display: 'flex', 
-      alignItems: 'center', 
-      justifyContent: 'center', 
-      bgcolor: 'background.default',
-      position: 'relative',
-      overflow: 'hidden',
-      p: 3
-    }}>
+    <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950 relative overflow-hidden p-4">
       {/* Decorative Background Elements */}
-      <Box sx={{ 
-        position: 'absolute', top: 0, left: 0, 
-        width: 600, height: 600, 
-        bgcolor: 'primary.main', opacity: 0.05, 
-        borderRadius: '50%', filter: 'blur(120px)',
-        ml: -24, mt: -24
-      }} />
-      <Box sx={{ 
-        position: 'absolute', bottom: 0, right: 0, 
-        width: 600, height: 600, 
-        bgcolor: 'secondary.main', opacity: 0.05, 
-        borderRadius: '50%', filter: 'blur(120px)',
-        mr: -24, mb: -24
-      }} />
+      <div className="absolute top-0 left-0 w-[600px] h-[600px] bg-brand-500/5 rounded-full blur-[120px] -ml-24 -mt-24" />
+      <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-indigo-500/5 rounded-full blur-[120px] -mr-24 -mb-24" />
 
-      <Container maxWidth="sm" sx={{ position: 'relative', zIndex: 1 }}>
-        <Fade in timeout={800}>
-          <Paper sx={{ 
-            p: { xs: 5, md: 8 }, 
-            borderRadius: 10, 
-            boxShadow: 24,
-            border: '1px solid',
-            borderColor: 'divider',
-            position: 'relative',
-            overflow: 'hidden'
-          }}>
-            
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 6 }}>
-              <IconButton 
-                onClick={() => step > 1 ? setStep(step - 1) : navigate('/login')}
-                sx={{ 
-                  bgcolor: 'action.hover', 
-                  borderRadius: 4,
-                  '&:hover': { bgcolor: 'primary.light', color: 'white' }
-                }}
-              >
-                <ChevronLeft size={24} />
-              </IconButton>
-              <Box sx={{ display: 'flex', gap: 1 }}>
-                {[1, 2, 3].map(s => (
-                  <Box 
-                    key={s} 
-                    sx={{ 
-                      height: 6, 
-                      width: 48, 
-                      borderRadius: 3, 
-                      bgcolor: step >= s ? 'primary.main' : 'action.hover',
-                      transition: 'all 0.5s ease'
-                    }} 
-                  />
-                ))}
-              </Box>
-            </Box>
+      <div className="relative z-10 w-full max-w-lg animate-fade-in">
+        <div className="bg-white dark:bg-slate-900 p-8 md:p-10 rounded-[2.5rem] shadow-2xl border border-slate-200 dark:border-slate-800">
+          
+          <div className="flex items-center justify-between mb-8">
+            <button 
+              onClick={() => step > 1 ? setStep(step - 1) : navigate('/login')}
+              className="w-10 h-10 rounded-xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+            >
+              <ChevronLeft size={20} />
+            </button>
+            <div className="flex gap-1">
+              {[1, 2, 3].map(s => (
+                <div 
+                  key={s} 
+                  className={`h-1.5 w-12 rounded-full transition-all duration-500 ${
+                    step >= s ? 'bg-brand-500' : 'bg-slate-100 dark:bg-slate-800'
+                  }`} 
+                />
+              ))}
+            </div>
+          </div>
 
-            <Box sx={{ textAlign: 'center', mb: 6 }}>
-              <Typography variant="h4" sx={{ fontWeight: 900, tracking: '-0.02em' }}>
-                Saurashtra Membership
-              </Typography>
-              <Typography variant="body2" sx={{ color: 'text.secondary', mt: 1, fontWeight: 500 }}>
-                Digital access registration for residents
-              </Typography>
-            </Box>
+          <div className="text-center mb-8">
+            <h1 className="text-3xl font-black tracking-tighter text-slate-900 dark:text-white mb-1">
+              Saurashtra Membership
+            </h1>
+            <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
+              Digital access registration for residents
+            </p>
+          </div>
 
-            {error && (
-              <Alert severity="error" icon={<AlertTriangle size={20} />} sx={{ mb: 4, borderRadius: 4, fontWeight: 700 }}>
-                {error}
-              </Alert>
-            )}
+          {error && (
+            <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl flex items-center gap-3 text-red-700 dark:text-red-400 font-bold text-sm">
+              <AlertTriangle size={20} />
+              {error}
+            </div>
+          )}
 
-            <form onSubmit={handleRegister}>
-              {step === 1 && (
-                <Stack spacing={3} sx={{ animation: 'fadeInRight 0.5s ease' }}>
-                  <Box>
-                    <Typography variant="caption" sx={{ fontWeight: 900, color: 'text.secondary', textTransform: 'uppercase', ml: 2, mb: 0.5, display: 'block' }}>
-                      Full Name
-                    </Typography>
-                    <TextField 
-                      fullWidth
+          <form onSubmit={handleRegister}>
+            {step === 1 && (
+              <div className="space-y-4 animate-fade-in-right">
+                <div>
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2 mb-1 block">
+                    Full Name
+                  </label>
+                  <div className="relative">
+                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
+                      <User size={18} />
+                    </div>
+                    <input 
+                      type="text"
                       placeholder="Full Name"
                       value={formData.name}
                       onChange={e => setFormData({...formData, name: e.target.value})}
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            <User size={20} color={theme.palette.text.secondary} />
-                          </InputAdornment>
-                        ),
-                        sx: { borderRadius: 6, bgcolor: 'action.hover' }
-                      }}
+                      className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-2xl pl-12 pr-4 py-3.5 text-slate-900 dark:text-white placeholder-slate-400 font-bold focus:ring-2 focus:ring-brand-500 outline-none transition-all"
                     />
-                  </Box>
-                  <Box>
-                    <Typography variant="caption" sx={{ fontWeight: 900, color: 'text.secondary', textTransform: 'uppercase', ml: 2, mb: 0.5, display: 'block' }}>
-                      Email Address
-                    </Typography>
-                    <TextField 
-                      fullWidth
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2 mb-1 block">
+                    Email Address
+                  </label>
+                  <div className="relative">
+                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
+                      <Mail size={18} />
+                    </div>
+                    <input 
                       type="email"
                       placeholder="Email Address"
                       value={formData.email}
                       onChange={e => setFormData({...formData, email: e.target.value})}
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            <Mail size={20} color={theme.palette.text.secondary} />
-                          </InputAdornment>
-                        ),
-                        sx: { borderRadius: 6, bgcolor: 'action.hover' }
-                      }}
+                      className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-2xl pl-12 pr-4 py-3.5 text-slate-900 dark:text-white placeholder-slate-400 font-bold focus:ring-2 focus:ring-brand-500 outline-none transition-all"
                     />
-                  </Box>
-                  <Box>
-                    <Typography variant="caption" sx={{ fontWeight: 900, color: 'text.secondary', textTransform: 'uppercase', ml: 2, mb: 0.5, display: 'block' }}>
-                      Password
-                    </Typography>
-                    <TextField 
-                      fullWidth
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2 mb-1 block">
+                    Password
+                  </label>
+                  <div className="relative">
+                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
+                      <Lock size={18} />
+                    </div>
+                    <input 
                       type="password"
                       placeholder="••••••••"
                       value={formData.password}
                       onChange={e => setFormData({...formData, password: e.target.value})}
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            <Lock size={20} color={theme.palette.text.secondary} />
-                          </InputAdornment>
-                        ),
-                        sx: { borderRadius: 6, bgcolor: 'action.hover' }
-                      }}
+                      className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-2xl pl-12 pr-4 py-3.5 text-slate-900 dark:text-white placeholder-slate-400 font-bold focus:ring-2 focus:ring-brand-500 outline-none transition-all"
                     />
-                  </Box>
-                  <Button 
-                    fullWidth 
-                    variant="contained" 
-                    size="large"
-                    onClick={() => setStep(2)}
-                    endIcon={<ArrowRight size={18} />}
-                    sx={{ py: 2, mt: 2, borderRadius: 6, bgcolor: 'grey.900', '&:hover': { bgcolor: 'grey.800' } }}
-                  >
-                    Continue to Role Selection
-                  </Button>
-                </Stack>
-              )}
+                  </div>
+                </div>
 
-              {step === 2 && (
-                <Stack spacing={4} sx={{ animation: 'fadeInRight 0.5s ease' }}>
-                  <Box>
-                    {roleCategories.map((cat) => (
-                      <Box key={cat.id} sx={{ mb: 4 }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                          <cat.icon size={16} color={theme.palette.primary.main} />
-                          <Typography variant="caption" sx={{ fontWeight: 900, color: 'text.secondary', textTransform: 'uppercase', letterSpacing: 1 }}>
-                            {cat.label}
-                          </Typography>
-                        </Box>
-                        <Stack spacing={2}>
-                          {cat.positions.map(pos => (
-                            <Card 
-                              key={pos} 
-                              variant="outlined"
-                              sx={{ 
-                                borderRadius: 6, 
-                                borderColor: formData.position === pos ? 'primary.main' : 'divider',
-                                bgcolor: formData.position === pos ? 'primary.light' : 'background.paper',
-                                transition: 'all 0.3s ease',
-                                '&:hover': { borderColor: 'primary.main' }
-                              }}
-                            >
-                              <CardActionArea 
-                                onClick={() => setFormData({...formData, position: pos, role: cat.id})}
-                                sx={{ p: 3 }}
-                              >
-                                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-                                    <Avatar sx={{ 
-                                      width: 48, height: 48, 
-                                      bgcolor: formData.position === pos ? 'primary.main' : 'action.hover',
-                                      color: formData.position === pos ? 'white' : 'text.secondary',
-                                      borderRadius: 4
-                                    }}>
-                                      {pos === 'Resident' ? <Home size={24} /> : <Shield size={24} />}
-                                    </Avatar>
-                                    <Box>
-                                      <Typography variant="subtitle2" sx={{ fontWeight: 900, color: formData.position === pos ? 'primary.main' : 'text.primary' }}>
-                                        {pos}
-                                      </Typography>
-                                      <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 700, textTransform: 'uppercase', fontSize: '0.6rem' }}>
-                                        {cat.desc}
-                                      </Typography>
-                                    </Box>
-                                  </Box>
-                                  {formData.position === pos && <CheckCircle size={22} color={theme.palette.primary.main} />}
-                                </Box>
-                              </CardActionArea>
-                            </Card>
-                          ))}
-                        </Stack>
-                      </Box>
-                    ))}
-                  </Box>
-                  <Button 
-                    fullWidth 
-                    variant="contained" 
-                    size="large"
-                    onClick={() => setStep(3)}
-                    endIcon={<ArrowRight size={18} />}
-                    sx={{ py: 2, borderRadius: 6, bgcolor: 'grey.900', '&:hover': { bgcolor: 'grey.800' } }}
-                  >
-                    Configure Property Mapping
-                  </Button>
-                </Stack>
-              )}
+                <button 
+                  type="button"
+                  onClick={() => setStep(2)}
+                  className="w-full bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-200 text-white dark:text-slate-900 font-black text-lg py-3.5 rounded-2xl mt-4 transition-all shadow-lg shadow-slate-900/20 active:scale-95 flex items-center justify-center gap-2"
+                >
+                  Continue to Role Selection <ArrowRight size={18} />
+                </button>
+              </div>
+            )}
 
-              {step === 3 && (
-                <Stack spacing={4} sx={{ animation: 'fadeInRight 0.5s ease' }}>
-                  <Paper elevation={0} sx={{ p: 3, bgcolor: 'primary.light', borderRadius: 6, border: '1px solid', borderColor: 'primary.main', display: 'flex', alignItems: 'center', gap: 3 }}>
-                    <Avatar sx={{ width: 56, height: 56, bgcolor: 'primary.main', borderRadius: 4, boxShadow: 6 }}>
-                      {formData.position === 'Resident' ? <Home size={28} /> : <Shield size={28} />}
-                    </Avatar>
-                    <Box>
-                      <Typography variant="caption" sx={{ fontWeight: 900, color: 'primary.main', textTransform: 'uppercase', letterSpacing: 1 }}>
-                        Identity Profile
-                      </Typography>
-                      <Typography variant="h6" sx={{ fontWeight: 900 }}>
-                        {formData.position}
-                      </Typography>
-                    </Box>
-                  </Paper>
-
-                  <Grid container spacing={2}>
-                    <Grid size={6}>
-                      <Typography variant="caption" sx={{ fontWeight: 900, color: 'text.secondary', textTransform: 'uppercase', ml: 2, mb: 0.5, display: 'block' }}>
-                        Building Wing
-                      </Typography>
-                      <FormControl fullWidth>
-                        <Select
-                          value={formData.wing}
-                          onChange={e => setFormData({...formData, wing: e.target.value as string})}
-                          sx={{ borderRadius: 6, bgcolor: 'action.hover' }}
+            {step === 2 && (
+              <div className="space-y-6 animate-fade-in-right">
+                {roleCategories.map((cat) => (
+                  <div key={cat.id} className="mb-6">
+                    <div className="flex items-center gap-2 mb-3 ml-1">
+                      <cat.icon size={16} className="text-brand-600" />
+                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                        {cat.label}
+                      </span>
+                    </div>
+                    <div className="space-y-3">
+                      {cat.positions.map(pos => (
+                        <div 
+                          key={pos} 
+                          onClick={() => setFormData({...formData, position: pos, role: cat.id})}
+                          className={`group p-4 rounded-3xl border-2 cursor-pointer transition-all duration-300 ${
+                            formData.position === pos 
+                              ? 'border-brand-500 bg-brand-50 dark:bg-brand-900/20' 
+                              : 'border-slate-100 dark:border-slate-800 hover:border-brand-200 dark:hover:border-brand-800'
+                          }`}
                         >
-                          {wings.map(w => <MenuItem key={w} value={w}>Wing {w}</MenuItem>)}
-                        </Select>
-                      </FormControl>
-                    </Grid>
-                    <Grid size={6}>
-                      <Typography variant="caption" sx={{ fontWeight: 900, color: 'text.secondary', textTransform: 'uppercase', ml: 2, mb: 0.5, display: 'block' }}>
-                        Flat Number
-                      </Typography>
-                      <FormControl fullWidth>
-                        <Select
-                          value={formData.flatNo}
-                          onChange={e => setFormData({...formData, flatNo: e.target.value as string})}
-                          sx={{ borderRadius: 6, bgcolor: 'action.hover' }}
-                        >
-                          {flats.map(f => <MenuItem key={f} value={f}>Flat {f}</MenuItem>)}
-                        </Select>
-                      </FormControl>
-                    </Grid>
-                  </Grid>
-
-                  <Box>
-                    <Typography variant="caption" sx={{ fontWeight: 900, color: 'text.secondary', textTransform: 'uppercase', ml: 2, mb: 1, display: 'block' }}>
-                      Occupancy Status
-                    </Typography>
-                    <Stack direction="row" spacing={2}>
-                      {['Owner', 'Tenant'].map(type => (
-                        <Button 
-                          key={type} 
-                          fullWidth
-                          variant={formData.occupancyType === type ? 'contained' : 'outlined'}
-                          onClick={() => setFormData({...formData, occupancyType: type})}
-                          sx={{ 
-                            py: 2, 
-                            borderRadius: 6, 
-                            fontWeight: 900, 
-                            fontSize: '0.75rem',
-                            bgcolor: formData.occupancyType === type ? 'primary.main' : 'transparent',
-                            color: formData.occupancyType === type ? 'white' : 'text.secondary',
-                            borderColor: formData.occupancyType === type ? 'primary.main' : 'divider'
-                          }}
-                        >
-                          {type}
-                        </Button>
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                              <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-colors ${
+                                formData.position === pos 
+                                  ? 'bg-brand-600 text-white shadow-lg shadow-brand-600/30' 
+                                  : 'bg-slate-100 dark:bg-slate-800 text-slate-400'
+                              }`}>
+                                {pos === 'Resident' ? <Home size={20} /> : <Shield size={20} />}
+                              </div>
+                              <div>
+                                <h4 className={`font-black text-sm ${
+                                  formData.position === pos ? 'text-brand-700 dark:text-brand-400' : 'text-slate-900 dark:text-white'
+                                }`}>
+                                  {pos}
+                                </h4>
+                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">
+                                  {cat.desc}
+                                </p>
+                              </div>
+                            </div>
+                            {formData.position === pos && (
+                              <CheckCircle size={20} className="text-brand-600" />
+                            )}
+                          </div>
+                        </div>
                       ))}
-                    </Stack>
-                  </Box>
+                    </div>
+                  </div>
+                ))}
 
-                  <Button 
-                    fullWidth 
-                    variant="contained" 
-                    size="large"
-                    type="submit"
-                    disabled={loading}
-                    endIcon={!loading && <CheckCircle size={18} />}
-                    sx={{ py: 2, borderRadius: 6, boxShadow: 10 }}
-                  >
-                    {loading ? <CircularProgress size={24} color="inherit" /> : 'Submit Registration'}
-                  </Button>
-                </Stack>
-              )}
-            </form>
-          </Paper>
-        </Fade>
-      </Container>
-      
-      <style>{`
-        @keyframes fadeInRight {
-          from { opacity: 0; transform: translateX(20px); }
-          to { opacity: 1; transform: translateX(0); }
-        }
-      `}</style>
-    </Box>
+                <button 
+                  type="button"
+                  onClick={() => setStep(3)}
+                  className="w-full bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-200 text-white dark:text-slate-900 font-black text-lg py-3.5 rounded-2xl mt-4 transition-all shadow-lg shadow-slate-900/20 active:scale-95 flex items-center justify-center gap-2"
+                >
+                  Configure Property Mapping <ArrowRight size={18} />
+                </button>
+              </div>
+            )}
+
+            {step === 3 && (
+              <div className="space-y-6 animate-fade-in-right">
+                <div className="p-4 bg-brand-50 dark:bg-brand-900/20 border border-brand-100 dark:border-brand-800 rounded-3xl flex items-center gap-4">
+                  <div className="w-12 h-12 bg-brand-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-brand-600/20">
+                    {formData.position === 'Resident' ? <Home size={24} /> : <Shield size={24} />}
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-black text-brand-600 uppercase tracking-widest block mb-0.5">
+                      Identity Profile
+                    </span>
+                    <h4 className="text-lg font-black text-slate-900 dark:text-white">
+                      {formData.position}
+                    </h4>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2 mb-1 block">
+                      Building Wing
+                    </label>
+                    <div className="relative">
+                      <select
+                        value={formData.wing}
+                        onChange={e => setFormData({...formData, wing: e.target.value})}
+                        className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-2xl px-4 py-3.5 text-slate-900 dark:text-white font-bold focus:ring-2 focus:ring-brand-500 outline-none appearance-none transition-all"
+                      >
+                        {wings.map(w => <option key={w} value={w}>Wing {w}</option>)}
+                      </select>
+                      <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2 mb-1 block">
+                      Flat Number
+                    </label>
+                    <div className="relative">
+                      <select
+                        value={formData.flatNo}
+                        onChange={e => setFormData({...formData, flatNo: e.target.value})}
+                        className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-2xl px-4 py-3.5 text-slate-900 dark:text-white font-bold focus:ring-2 focus:ring-brand-500 outline-none appearance-none transition-all"
+                      >
+                        {flats.map(f => <option key={f} value={f}>Flat {f}</option>)}
+                      </select>
+                      <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2 mb-2 block">
+                    Occupancy Status
+                  </label>
+                  <div className="flex gap-3">
+                    {['Owner', 'Tenant'].map(type => (
+                      <button 
+                        key={type} 
+                        type="button"
+                        onClick={() => setFormData({...formData, occupancyType: type})}
+                        className={`flex-1 py-3 rounded-2xl text-xs font-black uppercase tracking-wider border-2 transition-all ${
+                          formData.occupancyType === type
+                            ? 'border-brand-500 bg-brand-600 text-white shadow-lg shadow-brand-600/20'
+                            : 'border-slate-100 dark:border-slate-800 text-slate-400 hover:border-brand-200'
+                        }`}
+                      >
+                        {type}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <button 
+                  type="submit"
+                  disabled={loading}
+                  className="w-full bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-200 text-white dark:text-slate-900 font-black text-lg py-3.5 rounded-2xl mt-4 transition-all shadow-lg shadow-slate-900/20 active:scale-95 flex items-center justify-center gap-2"
+                >
+                  {loading ? <Loader2 size={24} className="animate-spin" /> : 'Submit Registration'}
+                  {!loading && <CheckCircle size={20} />}
+                </button>
+              </div>
+            )}
+          </form>
+        </div>
+      </div>
+    </div>
   );
 };
 

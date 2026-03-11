@@ -24,9 +24,6 @@ import Profile from './pages/Profile';
 import Polls from './pages/Polls';
 import SecurityGate from './pages/SecurityGate';
 import Deliveries from './pages/Deliveries';
-import { ThemeProvider } from '@mui/material/styles';
-import CssBaseline from '@mui/material/CssBaseline';
-import theme from './src/theme';
 
 const App: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('sr_token'));
@@ -44,48 +41,45 @@ const App: React.FC = () => {
   }, []);
 
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <HashRouter>
-        <Routes>
-          <Route path="/login" element={!isAuthenticated ? <Login /> : <Navigate to="/" replace />} />
-          <Route path="/register" element={!isAuthenticated ? <Register /> : <Navigate to="/" replace />} />
-          
-          <Route path="/*" element={
-            <ProtectedRoute>
-              <Layout>
-                <Routes>
-                  <Route path="/" element={<Dashboard />} />
-                  <Route path="/emergency" element={<Emergency />} />
-                  <Route path="/profile" element={<Profile />} />
-                  
-                  {/* Admin & Committee */}
-                  <Route path="/audit-logs" element={<ProtectedRoute allowedRoles={['ADMIN', 'COMMITTEE']}><AuditLogs /></ProtectedRoute>} />
-                  <Route path="/approvals" element={<ProtectedRoute allowedRoles={['ADMIN', 'COMMITTEE']}><RegistrationApprovals /></ProtectedRoute>} />
-                  <Route path="/expenses" element={<ProtectedRoute allowedRoles={['ADMIN', 'COMMITTEE']}><Expenses /></ProtectedRoute>} />
-                  <Route path="/security-gate" element={<ProtectedRoute allowedRoles={['ADMIN', 'COMMITTEE']}><SecurityGate /></ProtectedRoute>} />
-                  
-                  {/* General Protected Routes */}
-                  <Route path="/meetings" element={<Meetings />} />
-                  <Route path="/visitor-pass" element={<VisitorPass />} />
-                  <Route path="/buildings" element={<Buildings />} />
-                  <Route path="/deliveries" element={<Deliveries />} />
-                  <Route path="/maintenance" element={<Maintenance />} />
-                  <Route path="/funds" element={<Funds />} />
-                  <Route path="/notices" element={<Notices />} />
-                  <Route path="/committee" element={<Committee />} />
-                  <Route path="/location" element={<Location />} />
-                  <Route path="/facilities" element={<Facilities />} />
-                  <Route path="/helpdesk" element={<Helpdesk />} />
-                  <Route path="/polls" element={<Polls />} />
-                  <Route path="*" element={<Navigate to="/" replace />} />
-                </Routes>
-              </Layout>
-            </ProtectedRoute>
-          } />
-        </Routes>
-      </HashRouter>
-    </ThemeProvider>
+    <HashRouter>
+      <Routes>
+        <Route path="/login" element={!isAuthenticated ? <Login /> : <Navigate to="/" replace />} />
+        <Route path="/register" element={!isAuthenticated ? <Register /> : <Navigate to="/" replace />} />
+        
+        <Route path="/*" element={
+          <ProtectedRoute>
+            <Layout>
+              <Routes>
+                <Route path="/" element={<Dashboard />} />
+                <Route path="/emergency" element={<Emergency />} />
+                <Route path="/profile" element={<Profile />} />
+                
+                {/* Admin & Committee */}
+                <Route path="/audit-logs" element={<ProtectedRoute allowedRoles={['ADMIN', 'COMMITTEE']}><AuditLogs /></ProtectedRoute>} />
+                <Route path="/approvals" element={<ProtectedRoute allowedRoles={['ADMIN', 'COMMITTEE']}><RegistrationApprovals /></ProtectedRoute>} />
+                <Route path="/expenses" element={<ProtectedRoute allowedRoles={['ADMIN', 'COMMITTEE']}><Expenses /></ProtectedRoute>} />
+                <Route path="/security-gate" element={<ProtectedRoute allowedRoles={['ADMIN', 'COMMITTEE']}><SecurityGate /></ProtectedRoute>} />
+                
+                {/* General Protected Routes */}
+                <Route path="/meetings" element={<Meetings />} />
+                <Route path="/visitor-pass" element={<VisitorPass />} />
+                <Route path="/buildings" element={<Buildings />} />
+                <Route path="/deliveries" element={<Deliveries />} />
+                <Route path="/maintenance" element={<Maintenance />} />
+                <Route path="/funds" element={<Funds />} />
+                <Route path="/notices" element={<Notices />} />
+                <Route path="/committee" element={<Committee />} />
+                <Route path="/location" element={<Location />} />
+                <Route path="/facilities" element={<Facilities />} />
+                <Route path="/helpdesk" element={<Helpdesk />} />
+                <Route path="/polls" element={<Polls />} />
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
+            </Layout>
+          </ProtectedRoute>
+        } />
+      </Routes>
+    </HashRouter>
   );
 };
 

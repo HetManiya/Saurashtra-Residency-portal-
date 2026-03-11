@@ -1,12 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  Box, Typography, Grid, Card, Button, IconButton, 
-  Avatar, Chip, CircularProgress, Paper, useTheme, 
-  Fade, Stack, Divider, TextField, InputAdornment,
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  useMediaQuery, Tooltip
-} from '@mui/material';
-import { 
   User, Mail, Shield, Home, Key, Lock, CheckCircle2, 
   AlertCircle, Loader2, Save, CreditCard, History, 
   Calendar, ArrowRight, ShieldCheck, BadgeCheck, Smartphone
@@ -14,11 +7,10 @@ import {
 import { api } from '../services/api';
 import { useLanguage } from '../components/LanguageContext';
 import { MaintenanceRecord, PaymentStatus } from '../types';
+import { motion, AnimatePresence } from 'motion/react';
 
 const Profile: React.FC = () => {
   const { t } = useLanguage();
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [user, setUser] = useState<any>(null);
   const [maintenance, setMaintenance] = useState<MaintenanceRecord[]>([]);
   const [loading, setLoading] = useState(true);
@@ -74,322 +66,284 @@ const Profile: React.FC = () => {
   const totalPaid = maintenance.filter(m => m.status === PaymentStatus.PAID).reduce((sum, m) => sum + m.amount, 0);
 
   return (
-    <Fade in={true}>
-      <Box sx={{ pb: 8 }}>
-        <Box sx={{ 
-          display: 'flex', 
-          flexDirection: { xs: 'column', md: 'row' }, 
-          justifyContent: 'space-between', 
-          alignItems: { md: 'flex-end' }, 
-          gap: 3, 
-          mb: 6,
-          pb: 4,
-          borderBottom: '1px solid',
-          borderColor: 'divider'
-        }}>
-          <Box>
-            <Typography variant="h3" sx={{ fontWeight: 900, tracking: '-0.04em' }}>
-              My <Box component="span" sx={{ color: 'primary.main' }}>Identity</Box>
-            </Typography>
-            <Typography variant="body1" sx={{ color: 'text.secondary', mt: 1, fontWeight: 500 }}>
-              Manage your residency credentials and payment history
-            </Typography>
-          </Box>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Chip 
-              icon={<BadgeCheck size={14} />} 
-              label="Verified Member" 
-              color="success" 
-              variant="outlined"
-              sx={{ fontWeight: 900, textTransform: 'uppercase', fontSize: '0.65rem', borderRadius: 3, bgcolor: 'success.light', opacity: 0.8 }} 
-            />
-          </Box>
-        </Box>
+    <div className="max-w-7xl mx-auto pb-12 animate-fade-in">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-8 pb-6 border-b border-slate-200 dark:border-slate-800">
+        <div>
+          <h1 className="text-4xl font-black tracking-tighter text-slate-900 dark:text-white mb-2">
+            My <span className="text-brand-600">Identity</span>
+          </h1>
+          <p className="text-slate-500 dark:text-slate-400 font-medium">
+            Manage your residency credentials and payment history
+          </p>
+        </div>
+        <div className="flex items-center gap-2 px-3 py-1 bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-400 rounded-full">
+          <BadgeCheck size={14} />
+          <span className="text-[10px] font-black uppercase tracking-widest">Verified Member</span>
+        </div>
+      </div>
 
-        <Grid container spacing={4}>
-          {/* Sidebar: Personal Info & Security */}
-          <Grid item xs={12} lg={4}>
-            <Stack spacing={4}>
-              <Card sx={{ p: 5, borderRadius: 12, border: '1px solid', borderColor: 'divider', boxShadow: 0, textAlign: 'center' }}>
-                <Box sx={{ position: 'relative', display: 'inline-block', mb: 4 }}>
-                  <Avatar 
-                    src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user.email}`} 
-                    sx={{ width: 128, height: 128, borderRadius: 10, border: '4px solid', borderColor: 'background.paper', boxShadow: 10 }} 
-                  />
-                  <Avatar sx={{ position: 'absolute', bottom: -8, right: -8, width: 40, height: 40, bgcolor: 'primary.main', border: '4px solid', borderColor: 'background.paper', boxShadow: 4 }}>
-                    <ShieldCheck size={20} color="white" />
-                  </Avatar>
-                </Box>
-                <Typography variant="h5" sx={{ fontWeight: 900, mb: 0.5 }}>{user.name}</Typography>
-                <Typography variant="caption" sx={{ fontWeight: 900, color: 'primary.main', textTransform: 'uppercase', letterSpacing: 2 }}>{user.role}</Typography>
-                
-                <Divider sx={{ my: 4 }} />
-                
-                <Stack spacing={2}>
-                  <Paper sx={{ p: 2, borderRadius: 4, bgcolor: 'action.hover', display: 'flex', alignItems: 'center', gap: 2, boxShadow: 0 }}>
-                    <Avatar sx={{ bgcolor: 'primary.light', color: 'primary.main', borderRadius: 2 }}>
-                      <Mail size={18} />
-                    </Avatar>
-                    <Box sx={{ textAlign: 'left' }}>
-                      <Typography variant="caption" sx={{ fontWeight: 900, color: 'text.disabled', textTransform: 'uppercase', fontSize: '0.55rem' }}>Email Address</Typography>
-                      <Typography variant="body2" sx={{ fontWeight: 700, noWrap: true, maxWidth: 180 }}>{user.email}</Typography>
-                    </Box>
-                  </Paper>
-                  <Paper sx={{ p: 2, borderRadius: 4, bgcolor: 'action.hover', display: 'flex', alignItems: 'center', gap: 2, boxShadow: 0 }}>
-                    <Avatar sx={{ bgcolor: 'primary.light', color: 'primary.main', borderRadius: 2 }}>
-                      <Home size={18} />
-                    </Avatar>
-                    <Box sx={{ textAlign: 'left' }}>
-                      <Typography variant="caption" sx={{ fontWeight: 900, color: 'text.disabled', textTransform: 'uppercase', fontSize: '0.55rem' }}>Property Unit</Typography>
-                      <Typography variant="body2" sx={{ fontWeight: 700 }}>{user.flatId}</Typography>
-                    </Box>
-                  </Paper>
-                </Stack>
-              </Card>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        {/* Sidebar: Personal Info & Security */}
+        <div className="lg:col-span-4 space-y-6">
+          <div className="bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 text-center relative overflow-hidden shadow-sm">
+            <div className="relative inline-block mb-6">
+              <img 
+                src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user.email}`} 
+                alt={user.name}
+                className="w-32 h-32 rounded-[2rem] border-4 border-slate-100 dark:border-slate-800 shadow-xl bg-slate-50 dark:bg-slate-800"
+              />
+              <div className="absolute -bottom-2 -right-2 w-10 h-10 bg-brand-600 rounded-xl border-4 border-white dark:border-slate-900 flex items-center justify-center text-white shadow-lg">
+                <ShieldCheck size={18} />
+              </div>
+            </div>
+            
+            <h2 className="text-2xl font-black text-slate-900 dark:text-white mb-1 tracking-tight">
+              {user.name}
+            </h2>
+            <span className="text-[10px] font-black text-brand-600 dark:text-brand-400 uppercase tracking-widest block mb-6">
+              {user.role}
+            </span>
+            
+            <div className="h-px bg-slate-100 dark:bg-slate-800 w-full mb-6" />
+            
+            <div className="space-y-3 text-left">
+              <div className="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-2xl flex items-center gap-3 border border-slate-100 dark:border-slate-800">
+                <div className="w-10 h-10 rounded-xl bg-brand-100 dark:bg-brand-900/30 flex items-center justify-center text-brand-600 dark:text-brand-400 shrink-0">
+                  <Mail size={18} />
+                </div>
+                <div className="min-w-0">
+                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">Email Address</span>
+                  <span className="text-sm font-bold text-slate-900 dark:text-white truncate block">{user.email}</span>
+                </div>
+              </div>
+              
+              <div className="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-2xl flex items-center gap-3 border border-slate-100 dark:border-slate-800">
+                <div className="w-10 h-10 rounded-xl bg-brand-100 dark:bg-brand-900/30 flex items-center justify-center text-brand-600 dark:text-brand-400 shrink-0">
+                  <Home size={18} />
+                </div>
+                <div>
+                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">Property Unit</span>
+                  <span className="text-sm font-bold text-slate-900 dark:text-white">{user.flatId}</span>
+                </div>
+              </div>
+            </div>
+          </div>
 
-              <Card sx={{ p: 5, borderRadius: 12, bgcolor: 'text.primary', color: 'background.paper', position: 'relative', overflow: 'hidden', boxShadow: 10 }}>
-                <Box sx={{ position: 'absolute', top: -40, right: -40, width: 160, height: 160, bgcolor: 'primary.main', opacity: 0.1, borderRadius: '50%', filter: 'blur(40px)' }} />
-                <Box sx={{ position: 'relative', zIndex: 1 }}>
-                  <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 4 }}>
-                    <Avatar sx={{ bgcolor: 'primary.main', color: 'white', borderRadius: 4, width: 48, height: 48 }}>
-                      <Lock size={24} />
-                    </Avatar>
-                    <Box>
-                      <Typography variant="h6" sx={{ fontWeight: 900 }}>Security Center</Typography>
-                      <Typography variant="caption" sx={{ fontWeight: 900, color: 'primary.main', textTransform: 'uppercase', fontSize: '0.55rem' }}>Update Credentials</Typography>
-                    </Box>
-                  </Stack>
+          <div className="bg-slate-900 dark:bg-slate-950 p-8 rounded-[2.5rem] text-white relative overflow-hidden shadow-xl">
+            <div className="absolute -top-10 -right-10 w-40 h-40 bg-brand-500 opacity-20 rounded-full blur-3xl" />
+            
+            <div className="relative z-10">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="w-12 h-12 rounded-2xl bg-brand-600 flex items-center justify-center text-white shadow-lg shadow-brand-600/20">
+                  <Lock size={24} />
+                </div>
+                <div>
+                  <h3 className="text-lg font-black leading-tight">Security Center</h3>
+                  <span className="text-[10px] font-black text-brand-400 uppercase tracking-widest">Update Credentials</span>
+                </div>
+              </div>
 
-                  {statusMsg.text && (
-                    <Fade in={true}>
-                      <Box sx={{ 
-                        p: 2, mb: 3, borderRadius: 4, 
-                        bgcolor: statusMsg.type === 'success' ? 'rgba(76, 175, 80, 0.1)' : 'rgba(244, 67, 54, 0.1)',
-                        color: statusMsg.type === 'success' ? 'success.light' : 'error.light',
-                        display: 'flex', alignItems: 'center', gap: 1.5,
-                        border: '1px solid', borderColor: statusMsg.type === 'success' ? 'success.main' : 'error.main'
-                      }}>
-                        {statusMsg.type === 'success' ? <CheckCircle2 size={16} /> : <AlertCircle size={16} />}
-                        <Typography variant="caption" sx={{ fontWeight: 900, textTransform: 'uppercase' }}>{statusMsg.text}</Typography>
-                      </Box>
-                    </Fade>
-                  )}
+              <AnimatePresence>
+                {statusMsg.text && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className={`p-3 mb-4 rounded-xl flex items-center gap-2 text-xs font-bold border ${
+                      statusMsg.type === 'success' 
+                        ? 'bg-green-500/10 border-green-500/20 text-green-400' 
+                        : 'bg-red-500/10 border-red-500/20 text-red-400'
+                    }`}
+                  >
+                    {statusMsg.type === 'success' ? <CheckCircle2 size={14} /> : <AlertCircle size={14} />}
+                    {statusMsg.text}
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
-                  <Stack spacing={3} component="form" onSubmit={handlePasswordChange}>
-                    <Box>
-                      <Typography variant="caption" sx={{ fontWeight: 900, color: 'text.disabled', textTransform: 'uppercase', ml: 1, mb: 1, display: 'block' }}>Current Password</Typography>
-                      <TextField 
-                        fullWidth 
-                        type="password"
-                        placeholder="••••••••"
-                        required
-                        value={passForm.current}
-                        onChange={(e) => setPassForm({...passForm, current: e.target.value})}
-                        sx={{ 
-                          '& .MuiOutlinedInput-root': { 
-                            borderRadius: 4, 
-                            bgcolor: 'rgba(255,255,255,0.05)',
-                            color: 'white',
-                            '& fieldset': { borderColor: 'rgba(255,255,255,0.1)' },
-                            '&:hover fieldset': { borderColor: 'primary.main' }
-                          }
-                        }}
-                      />
-                    </Box>
-                    <Box>
-                      <Typography variant="caption" sx={{ fontWeight: 900, color: 'text.disabled', textTransform: 'uppercase', ml: 1, mb: 1, display: 'block' }}>New Password</Typography>
-                      <TextField 
-                        fullWidth 
-                        type="password"
-                        placeholder="New Password"
-                        required
-                        value={passForm.new}
-                        onChange={(e) => setPassForm({...passForm, new: e.target.value})}
-                        sx={{ 
-                          '& .MuiOutlinedInput-root': { 
-                            borderRadius: 4, 
-                            bgcolor: 'rgba(255,255,255,0.05)',
-                            color: 'white',
-                            '& fieldset': { borderColor: 'rgba(255,255,255,0.1)' },
-                            '&:hover fieldset': { borderColor: 'primary.main' }
-                          }
-                        }}
-                      />
-                    </Box>
-                    <Box>
-                      <Typography variant="caption" sx={{ fontWeight: 900, color: 'text.disabled', textTransform: 'uppercase', ml: 1, mb: 1, display: 'block' }}>Confirm New Password</Typography>
-                      <TextField 
-                        fullWidth 
-                        type="password"
-                        placeholder="Confirm New Password"
-                        required
-                        value={passForm.confirm}
-                        onChange={(e) => setPassForm({...passForm, confirm: e.target.value})}
-                        sx={{ 
-                          '& .MuiOutlinedInput-root': { 
-                            borderRadius: 4, 
-                            bgcolor: 'rgba(255,255,255,0.05)',
-                            color: 'white',
-                            '& fieldset': { borderColor: 'rgba(255,255,255,0.1)' },
-                            '&:hover fieldset': { borderColor: 'primary.main' }
-                          }
-                        }}
-                      />
-                    </Box>
-                    <Button 
-                      fullWidth 
-                      variant="contained" 
-                      type="submit"
-                      disabled={isUpdating}
-                      startIcon={isUpdating ? <CircularProgress size={16} color="inherit" /> : <Save size={16} />}
-                      sx={{ 
-                        borderRadius: 6, py: 1.5, 
-                        fontWeight: 900, textTransform: 'uppercase', fontSize: '0.7rem',
-                        bgcolor: 'background.paper', color: 'text.primary',
-                        '&:hover': { bgcolor: 'primary.main', color: 'white' }
-                      }}
-                    >
-                      {isUpdating ? 'Updating...' : 'Update Password'}
-                    </Button>
-                  </Stack>
-                </Box>
-              </Card>
-            </Stack>
-          </Grid>
+              <form onSubmit={handlePasswordChange} className="space-y-4">
+                <div>
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block ml-1">Current Password</label>
+                  <div className="relative">
+                    <input 
+                      type="password"
+                      placeholder="••••••••"
+                      required
+                      value={passForm.current}
+                      onChange={(e) => setPassForm({...passForm, current: e.target.value})}
+                      className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-brand-500 outline-none text-white placeholder-slate-500 transition-colors hover:border-white/20"
+                    />
+                  </div>
+                </div>
 
-          {/* Main: Payment History & Stats */}
-          <Grid item xs={12} lg={8}>
-            <Stack spacing={4}>
-              <Grid container spacing={3}>
-                <Grid item xs={12} md={6}>
-                  <Card sx={{ p: 4, borderRadius: 10, border: '1px solid', borderColor: 'divider', boxShadow: 0, height: 180, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <Avatar sx={{ bgcolor: 'primary.light', color: 'primary.main', borderRadius: 3 }}>
-                        <CreditCard size={24} />
-                      </Avatar>
-                      <Typography variant="caption" sx={{ fontWeight: 900, color: 'text.disabled', textTransform: 'uppercase', letterSpacing: 1 }}>Lifetime Contributed</Typography>
-                    </Box>
-                    <Box>
-                      <Typography variant="h3" sx={{ fontWeight: 900, tracking: '-0.04em' }}>₹{totalPaid.toLocaleString()}</Typography>
-                      <Typography variant="caption" sx={{ fontWeight: 900, color: 'success.main', textTransform: 'uppercase', mt: 1, display: 'block' }}>Status: Regular Payer</Typography>
-                    </Box>
-                  </Card>
-                </Grid>
-                <Grid item xs={12} md={6}>
-                  <Card sx={{ p: 4, borderRadius: 10, border: '1px solid', borderColor: 'divider', boxShadow: 0, height: 180, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <Avatar sx={{ bgcolor: 'error.light', color: 'error.main', borderRadius: 3 }}>
-                        <AlertCircle size={24} />
-                      </Avatar>
-                      <Typography variant="caption" sx={{ fontWeight: 900, color: 'text.disabled', textTransform: 'uppercase', letterSpacing: 1 }}>Pending Records</Typography>
-                    </Box>
-                    <Box>
-                      <Typography variant="h3" sx={{ fontWeight: 900, tracking: '-0.04em' }}>{unpaidCount}</Typography>
-                      <Typography variant="caption" sx={{ fontWeight: 900, color: 'text.disabled', textTransform: 'uppercase', mt: 1, display: 'block' }}>Current Maintenance Cycle</Typography>
-                    </Box>
-                  </Card>
-                </Grid>
-              </Grid>
+                <div>
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block ml-1">New Password</label>
+                  <div className="relative">
+                    <input 
+                      type="password"
+                      placeholder="New Password"
+                      required
+                      value={passForm.new}
+                      onChange={(e) => setPassForm({...passForm, new: e.target.value})}
+                      className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-brand-500 outline-none text-white placeholder-slate-500 transition-colors hover:border-white/20"
+                    />
+                  </div>
+                </div>
 
-              <Card sx={{ borderRadius: 12, border: '1px solid', borderColor: 'divider', boxShadow: 0, overflow: 'hidden' }}>
-                <Box sx={{ p: 4, borderBottom: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center', gap: 3 }}>
-                  <Avatar sx={{ bgcolor: 'text.primary', color: 'background.paper', borderRadius: 3 }}>
-                    <History size={24} />
-                  </Avatar>
-                  <Box>
-                    <Typography variant="h5" sx={{ fontWeight: 900, tracking: '-0.02em' }}>Maintenance Ledger</Typography>
-                    <Typography variant="caption" sx={{ fontWeight: 900, color: 'text.disabled', textTransform: 'uppercase', fontSize: '0.55rem' }}>Historical Payment Tracking</Typography>
-                  </Box>
-                </Box>
+                <div>
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block ml-1">Confirm New Password</label>
+                  <div className="relative">
+                    <input 
+                      type="password"
+                      placeholder="Confirm New Password"
+                      required
+                      value={passForm.confirm}
+                      onChange={(e) => setPassForm({...passForm, confirm: e.target.value})}
+                      className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-brand-500 outline-none text-white placeholder-slate-500 transition-colors hover:border-white/20"
+                    />
+                  </div>
+                </div>
 
-                <TableContainer>
-                  <Table>
-                    <TableHead sx={{ bgcolor: 'action.hover' }}>
-                      <TableRow>
-                        <TableCell sx={{ fontWeight: 900, textTransform: 'uppercase', fontSize: '0.65rem', color: 'text.disabled', borderBottom: 'none', px: 4 }}>Period</TableCell>
-                        <TableCell sx={{ fontWeight: 900, textTransform: 'uppercase', fontSize: '0.65rem', color: 'text.disabled', borderBottom: 'none', px: 4 }}>Amount</TableCell>
-                        <TableCell sx={{ fontWeight: 900, textTransform: 'uppercase', fontSize: '0.65rem', color: 'text.disabled', borderBottom: 'none', px: 4 }}>Status</TableCell>
-                        <TableCell align="right" sx={{ fontWeight: 900, textTransform: 'uppercase', fontSize: '0.65rem', color: 'text.disabled', borderBottom: 'none', px: 4 }}>Action</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {loading ? (
-                        <TableRow>
-                          <TableCell colSpan={4} align="center" sx={{ py: 10 }}>
-                            <CircularProgress size={24} sx={{ mb: 1 }} />
-                            <Typography variant="caption" sx={{ display: 'block', fontWeight: 900, textTransform: 'uppercase', color: 'text.disabled' }}>Fetching Ledger...</Typography>
-                          </TableCell>
-                        </TableRow>
-                      ) : maintenance.length === 0 ? (
-                        <TableRow>
-                          <TableCell colSpan={4} align="center" sx={{ py: 10 }}>
-                            <Avatar sx={{ width: 64, height: 64, bgcolor: 'action.hover', color: 'text.disabled', mx: 'auto', mb: 2 }}>
-                              <CreditCard size={32} />
-                            </Avatar>
-                            <Typography variant="body2" sx={{ fontWeight: 700, color: 'text.disabled' }}>No payment records found for this unit.</Typography>
-                          </TableCell>
-                        </TableRow>
-                      ) : (
-                        maintenance.map((record) => (
-                          <TableRow key={record.id} hover sx={{ '&:last-child td': { borderBottom: 'none' } }}>
-                            <TableCell sx={{ px: 4, py: 3 }}>
-                              <Stack direction="row" spacing={2} alignItems="center">
-                                <Avatar sx={{ width: 40, height: 40, borderRadius: 2, bgcolor: 'primary.light', color: 'primary.main' }}>
-                                  <Calendar size={18} />
-                                </Avatar>
-                                <Box>
-                                  <Typography variant="subtitle2" sx={{ fontWeight: 900 }}>{record.month} {record.year}</Typography>
-                                  {record.paidDate && (
-                                    <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.disabled', textTransform: 'uppercase', fontSize: '0.55rem' }}>
-                                      Paid on {new Date(record.paidDate).toLocaleDateString()}
-                                    </Typography>
-                                  )}
-                                </Box>
-                              </Stack>
-                            </TableCell>
-                            <TableCell sx={{ px: 4 }}>
-                              <Typography variant="subtitle2" sx={{ fontWeight: 900 }}>₹{record.amount}</Typography>
-                            </TableCell>
-                            <TableCell sx={{ px: 4 }}>
-                              <Chip 
-                                label={record.status} 
-                                size="small"
-                                color={record.status === PaymentStatus.PAID ? 'success' : 'error'}
-                                variant="outlined"
-                                sx={{ fontWeight: 900, textTransform: 'uppercase', fontSize: '0.6rem', borderRadius: 2 }} 
-                              />
-                            </TableCell>
-                            <TableCell align="right" sx={{ px: 4 }}>
-                              {record.status === PaymentStatus.PAID ? (
-                                <IconButton size="small" sx={{ bgcolor: 'action.hover', borderRadius: 2 }}>
-                                  <ArrowRight size={18} />
-                                </IconButton>
-                              ) : (
-                                <Button 
-                                  variant="contained" 
-                                  size="small"
-                                  sx={{ 
-                                    borderRadius: 3, px: 3, 
-                                    fontWeight: 900, textTransform: 'uppercase', fontSize: '0.65rem',
-                                    boxShadow: 4
-                                  }}
-                                >
-                                  Pay Now
-                                </Button>
+                <button 
+                  type="submit"
+                  disabled={isUpdating}
+                  className="w-full bg-white text-slate-900 py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-brand-50 transition-colors flex items-center justify-center gap-2 mt-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                >
+                  {isUpdating ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
+                  {isUpdating ? 'Updating...' : 'Update Password'}
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        {/* Main: Payment History & Stats */}
+        <div className="lg:col-span-8 space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-white dark:bg-slate-900 p-6 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 flex flex-col justify-between h-48 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+              <div className="flex justify-between items-start">
+                <div className="w-12 h-12 rounded-2xl bg-brand-100 dark:bg-brand-900/30 flex items-center justify-center text-brand-600 dark:text-brand-400">
+                  <CreditCard size={24} />
+                </div>
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Lifetime Contributed</span>
+              </div>
+              <div>
+                <h3 className="text-4xl font-black tracking-tighter text-slate-900 dark:text-white mb-1">
+                  ₹{totalPaid.toLocaleString()}
+                </h3>
+                <span className="text-[10px] font-black text-green-500 uppercase tracking-widest">
+                  Status: Regular Payer
+                </span>
+              </div>
+            </div>
+
+            <div className="bg-white dark:bg-slate-900 p-6 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 flex flex-col justify-between h-48 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+              <div className="flex justify-between items-start">
+                <div className="w-12 h-12 rounded-2xl bg-red-100 dark:bg-red-900/30 flex items-center justify-center text-red-600 dark:text-red-400">
+                  <AlertCircle size={24} />
+                </div>
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Pending Records</span>
+              </div>
+              <div>
+                <h3 className="text-4xl font-black tracking-tighter text-slate-900 dark:text-white mb-1">
+                  {unpaidCount}
+                </h3>
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                  Current Maintenance Cycle
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
+            <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center gap-4 bg-slate-50 dark:bg-slate-800/50">
+              <div className="w-10 h-10 rounded-xl bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-500 dark:text-slate-400">
+                <History size={20} />
+              </div>
+              <div>
+                <h3 className="text-lg font-black text-slate-900 dark:text-white leading-tight">Maintenance Ledger</h3>
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Historical Payment Tracking</span>
+              </div>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800">
+                  <tr>
+                    <th className="px-6 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Period</th>
+                    <th className="px-6 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Amount</th>
+                    <th className="px-6 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</th>
+                    <th className="px-6 py-4 text-right text-[10px] font-black text-slate-400 uppercase tracking-widest">Action</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                  {loading ? (
+                    <tr>
+                      <td colSpan={4} className="py-12 text-center">
+                        <Loader2 size={24} className="animate-spin text-brand-600 mx-auto mb-2" />
+                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Fetching Ledger...</span>
+                      </td>
+                    </tr>
+                  ) : maintenance.length === 0 ? (
+                    <tr>
+                      <td colSpan={4} className="py-12 text-center">
+                        <div className="w-16 h-16 bg-slate-50 dark:bg-slate-800 rounded-2xl flex items-center justify-center text-slate-300 dark:text-slate-600 mx-auto mb-4">
+                          <CreditCard size={32} />
+                        </div>
+                        <span className="text-xs font-bold text-slate-400">No payment records found for this unit.</span>
+                      </td>
+                    </tr>
+                  ) : (
+                    maintenance.map((record) => (
+                      <tr key={record.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-lg bg-brand-50 dark:bg-brand-900/20 flex items-center justify-center text-brand-600 dark:text-brand-400 shrink-0">
+                              <Calendar size={14} />
+                            </div>
+                            <div>
+                              <div className="text-sm font-black text-slate-900 dark:text-white">{record.month} {record.year}</div>
+                              {record.paidDate && (
+                                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                                  Paid on {new Date(record.paidDate).toLocaleDateString()}
+                                </div>
                               )}
-                            </TableCell>
-                          </TableRow>
-                        ))
-                      )}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-              </Card>
-            </Stack>
-          </Grid>
-        </Grid>
-      </Box>
-    </Fade>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className="text-sm font-black text-slate-900 dark:text-white">₹{record.amount}</span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className={`px-2 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest ${
+                            record.status === PaymentStatus.PAID 
+                              ? 'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400' 
+                              : 'bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400'
+                          }`}>
+                            {record.status}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                          {record.status === PaymentStatus.PAID ? (
+                            <button className="p-2 bg-slate-100 dark:bg-slate-800 text-slate-400 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+                              <ArrowRight size={16} />
+                            </button>
+                          ) : (
+                            <button className="px-4 py-2 bg-brand-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-brand-700 transition-colors shadow-lg shadow-brand-600/20 active:scale-95 transform duration-100">
+                              Pay Now
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 

@@ -53,8 +53,8 @@ router.get('/maintenance', protect, async (req: any, res) => {
     const { flatId, month, year } = req.query;
     let query: any = {};
     
-    // If user is resident, restrict to their flatId unless they are admin
-    if (req.user.role === 'RESIDENT' && !flatId) {
+    // If user is resident, strictly restrict to their flatId
+    if (req.user.role === 'RESIDENT') {
       query.flatId = req.user.flatId;
     } else if (flatId) {
       query.flatId = flatId;
@@ -115,11 +115,10 @@ router.patch('/maintenance/:id', protect, async (req: any, res) => {
     
     if (!record) return res.status(404).json({ message: 'Record not found' });
 
-    // Authorization: Admin/Committee can update any record. Residents can only update their own.
+    // Authorization: Admin/Committee can update any record.
     const isAdmin = ['ADMIN', 'COMMITTEE'].includes(req.user.role);
-    const isOwner = record.flatId === req.user.flatId;
 
-    if (!isAdmin && !isOwner) {
+    if (!isAdmin) {
       return res.status(403).json({ message: 'You are not authorized to update this record.' });
     }
 
@@ -196,8 +195,13 @@ router.get('/maintenance/:id/receipt', protect, async (req: any, res) => {
 router.post('/visitors/generate', protect, async (req: any, res) => {
   try {
     const passId = Math.random().toString(36).substring(2, 10).toUpperCase();
+    
+    // Ensure residents can only generate passes for their own flat
+    const flatId = req.user.role === 'RESIDENT' ? req.user.flatId : (req.body.flatId || req.user.flatId);
+
     const visitor = new Visitor({
       ...req.body,
+      flatId,
       passId,
       status: 'PENDING'
     });
@@ -220,7 +224,7 @@ router.get('/visitors/verify/:passId', protect, async (req, res) => {
 });
 
 // Check-In Visitor
-router.post('/visitors/check-in/:passId', protect, authorize(['ADMIN', 'COMMITTEE']), async (req, res) => {
+router.post('/visitors/check-in/:passId', protect, authorize(['ADMIN', 'COMMITTEE', 'SECURITY']), async (req, res) => {
   try {
     const visitor = await Visitor.findOne({ passId: req.params.passId.toUpperCase() });
     if (!visitor) return res.status(404).json({ message: 'Invalid Pass ID' });
@@ -240,7 +244,7 @@ router.post('/visitors/check-in/:passId', protect, authorize(['ADMIN', 'COMMITTE
 });
 
 // Check-Out Visitor
-router.post('/visitors/check-out/:id', protect, authorize(['ADMIN', 'COMMITTEE']), async (req, res) => {
+router.post('/visitors/check-out/:id', protect, authorize(['ADMIN', 'COMMITTEE', 'SECURITY']), async (req, res) => {
   try {
     const visitor = await Visitor.findById(req.params.id);
     if (!visitor) return res.status(404).json({ message: 'Visitor not found' });
@@ -260,12 +264,90 @@ router.post('/visitors/check-out/:id', protect, authorize(['ADMIN', 'COMMITTEE']
 });
 
 // Get Active Visitors
-router.get('/visitors/active', protect, authorize(['ADMIN', 'COMMITTEE']), async (req, res) => {
+router.get('/visitors/active', protect, authorize(['ADMIN', 'COMMITTEE', 'SECURITY']), async (req, res) => {
   try {
     const active = await Visitor.find({ status: 'IN' }).sort({ checkInTime: -1 });
     res.json(active);
   } catch (error) {
     res.status(500).json({ message: 'Failed to fetch active visitors' });
+  }
+});
+
+// Get Visitor History
+router.get('/visitors/history', protect, async (req: any, res) => {
+  try {
+    const { startDate, endDate, search } = req.query;
+    let query: any = {};
+
+    // If user is resident, restrict to their flatId unless they are admin/security
+    if (req.user.role === 'RESIDENT') {
+      query.flatId = req.user.flatId;
+    }
+
+    if (startDate && endDate) {
+      query.createdAt = {
+        $gte: new Date(startDate as string),
+        $lte: new Date(endDate as string)
+      };
+    }
+
+    if (search) {
+      const searchRegex = new RegExp(search as string, 'i');
+      query.$or = [
+        { name: searchRegex },
+        { phone: searchRegex },
+        { flatId: searchRegex }
+      ];
+    }
+
+    const history = await Visitor.find(query).sort({ createdAt: -1 });
+    res.json(history);
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to fetch visitor history' });
+  }
+});
+
+// Get Visitor Analytics
+router.get('/visitors/analytics', protect, authorize(['ADMIN', 'COMMITTEE', 'SECURITY']), async (req, res) => {
+  try {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const dailyVisitors = await Visitor.countDocuments({
+      checkInTime: { $gte: today }
+    });
+
+    const frequentVisitors = await Visitor.aggregate([
+      { $match: { status: { $in: ['IN', 'OUT'] } } },
+      { $group: { _id: "$phone", name: { $first: "$name" }, count: { $sum: 1 } } },
+      { $sort: { count: -1 } },
+      { $limit: 5 }
+    ]);
+
+    // Calculate average stay duration for today
+    const todayVisitors = await Visitor.find({
+      checkInTime: { $gte: today },
+      status: 'OUT'
+    });
+
+    let totalDuration = 0;
+    let avgStayDuration = 0;
+    if (todayVisitors.length > 0) {
+      todayVisitors.forEach(v => {
+        if (v.checkInTime && v.checkOutTime) {
+          totalDuration += (v.checkOutTime.getTime() - v.checkInTime.getTime());
+        }
+      });
+      avgStayDuration = Math.round(totalDuration / todayVisitors.length / 60000); // in minutes
+    }
+
+    res.json({
+      dailyVisitors,
+      frequentVisitors,
+      avgStayDuration
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to fetch analytics' });
   }
 });
 

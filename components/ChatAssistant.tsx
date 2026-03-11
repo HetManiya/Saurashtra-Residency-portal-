@@ -43,7 +43,11 @@ const ChatAssistant: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
+      const apiKey = (import.meta as any).env.VITE_GEMINI_API_KEY;
+      if (!apiKey) {
+        throw new Error("Gemini API Key not found");
+      }
+      const ai = new GoogleGenAI({ apiKey });
       const response = await ai.models.generateContent({
         model: "gemini-3-flash-preview",
         contents: [...messages, userMessage].map(m => ({
@@ -70,7 +74,7 @@ const ChatAssistant: React.FC = () => {
       {/* Floating Button */}
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 w-14 h-14 bg-brand-600 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-brand-700 transition-all z-50"
+        className="fixed bottom-6 right-6 w-14 h-14 bg-indigo-600 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-indigo-700 transition-all z-50"
       >
         <Bot size={28} />
       </button>
@@ -85,7 +89,7 @@ const ChatAssistant: React.FC = () => {
             className="fixed bottom-24 right-6 w-96 h-[500px] bg-white rounded-2xl shadow-2xl flex flex-col z-50 border border-slate-200 overflow-hidden"
           >
             {/* Header */}
-            <div className="bg-brand-600 p-4 text-white flex justify-between items-center">
+            <div className="bg-indigo-600 p-4 text-white flex justify-between items-center">
               <div className="flex items-center gap-2">
                 <Bot size={24} />
                 <div>
@@ -93,7 +97,7 @@ const ChatAssistant: React.FC = () => {
                   <p className="text-[10px] opacity-80">Smart Society Assistant</p>
                 </div>
               </div>
-              <button onClick={() => setIsOpen(false)} className="hover:bg-brand-500 p-1 rounded">
+              <button onClick={() => setIsOpen(false)} className="hover:bg-indigo-500 p-1 rounded">
                 <X size={20} />
               </button>
             </div>
@@ -110,7 +114,7 @@ const ChatAssistant: React.FC = () => {
                 <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                   <div className={`max-w-[80%] p-3 rounded-2xl text-sm ${
                     msg.role === 'user' 
-                      ? 'bg-brand-600 text-white rounded-tr-none' 
+                      ? 'bg-indigo-600 text-white rounded-tr-none' 
                       : 'bg-white text-slate-800 shadow-sm border border-slate-200 rounded-tl-none'
                   }`}>
                     {msg.text}
@@ -136,12 +140,12 @@ const ChatAssistant: React.FC = () => {
                   onChange={(e) => setInput(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && handleSend()}
                   placeholder="Ask about rules, dues..."
-                  className="flex-1 bg-slate-100 border-none rounded-full px-4 py-2 text-sm focus:ring-2 focus:ring-brand-500 outline-none"
+                  className="flex-1 bg-slate-100 border-none rounded-full px-4 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
                 />
                 <button
                   onClick={handleSend}
                   disabled={!input.trim() || isLoading}
-                  className="bg-brand-600 text-white p-2 rounded-full hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="bg-indigo-600 text-white p-2 rounded-full hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   <Send size={18} />
                 </button>

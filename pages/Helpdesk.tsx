@@ -1,18 +1,11 @@
-
 import React, { useState } from 'react';
-import { 
-  Box, Typography, Button, IconButton, TextField, 
-  Grid, Card, CardContent, Avatar, Chip, Stack, 
-  Paper, Divider, Dialog, DialogTitle, DialogContent, 
-  DialogActions, useTheme, Fade, Stepper, Step, 
-  StepLabel, StepIconProps, styled
-} from '@mui/material';
 import { 
   LifeBuoy, Plus, Clock, CheckCircle2, AlertCircle, 
   Send, X, MessageSquare, Wrench, Shield, Zap, 
   Droplets, Construction, ChevronRight 
 } from 'lucide-react';
 import { useLanguage } from '../components/LanguageContext';
+import { motion, AnimatePresence } from 'motion/react';
 
 interface Ticket {
   id: string;
@@ -25,7 +18,6 @@ interface Ticket {
 }
 
 const Helpdesk: React.FC = () => {
-  const theme = useTheme();
   const { t } = useLanguage();
   const [showModal, setShowModal] = useState(false);
   const [tickets, setTickets] = useState<Ticket[]>([
@@ -42,17 +34,17 @@ const Helpdesk: React.FC = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'Resolved': return 'success';
-      case 'In Progress': return 'info';
-      default: return 'warning';
+      case 'Resolved': return 'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400';
+      case 'In Progress': return 'bg-blue-100 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400';
+      default: return 'bg-amber-100 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400';
     }
   };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'High': return 'error.main';
-      case 'Medium': return 'warning.main';
-      default: return 'text.secondary';
+      case 'High': return 'text-red-600 dark:text-red-400';
+      case 'Medium': return 'text-amber-600 dark:text-amber-400';
+      default: return 'text-slate-500 dark:text-slate-400';
     }
   };
 
@@ -82,265 +74,208 @@ const Helpdesk: React.FC = () => {
   };
 
   return (
-    <Box sx={{ maxWidth: '1000px', mx: 'auto', p: { xs: 2, md: 4 } }}>
-      <Fade in timeout={800}>
-        <Box>
-          <Box sx={{ 
-            display: 'flex', 
-            flexDirection: { xs: 'column', md: 'row' }, 
-            justifyContent: 'space-between', 
-            alignItems: { xs: 'flex-start', md: 'flex-end' },
-            gap: 3,
-            mb: 8,
-            pb: 4,
-            borderBottom: '1px solid',
-            borderColor: 'divider'
-          }}>
-            <Box>
-              <Typography variant="h3" sx={{ fontWeight: 900, tracking: '-0.04em' }}>
-                {t('helpdesk')}
-              </Typography>
-              <Typography variant="body1" sx={{ color: 'text.secondary', mt: 1, fontWeight: 500 }}>
-                Report issues and track resolution status
-              </Typography>
-            </Box>
-            <Button 
-              variant="contained" 
-              size="large"
-              startIcon={<Plus size={18} strokeWidth={3} />}
-              onClick={() => setShowModal(true)}
-              sx={{ borderRadius: 6, px: 4, py: 1.5, fontWeight: 900, textTransform: 'uppercase', letterSpacing: 1, boxShadow: 10 }}
+    <div className="max-w-5xl mx-auto pb-12 animate-fade-in">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-8 pb-6 border-b border-slate-200 dark:border-slate-800">
+        <div>
+          <h1 className="text-4xl font-black tracking-tighter text-slate-900 dark:text-white mb-2">
+            {t('helpdesk')}
+          </h1>
+          <p className="text-slate-500 dark:text-slate-400 font-medium">
+            Report issues and track resolution status
+          </p>
+        </div>
+        <button 
+          onClick={() => setShowModal(true)}
+          className="flex items-center gap-2 bg-brand-600 text-white px-6 py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-brand-700 transition-colors shadow-lg shadow-brand-600/20 active:scale-95 transform duration-100"
+        >
+          <Plus size={18} strokeWidth={3} />
+          {t('raise_complaint')}
+        </button>
+      </div>
+
+      <div className="space-y-6 pb-12">
+        {tickets.map((ticket) => {
+          const Icon = getCategoryIcon(ticket.category);
+          return (
+            <div 
+              key={ticket.id} 
+              className="bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
             >
-              {t('raise_complaint')}
-            </Button>
-          </Box>
+              <div className="p-6 md:p-8">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                  <div className="lg:col-span-8">
+                    <div className="flex flex-wrap items-center gap-4 mb-4">
+                      <div className="w-12 h-12 rounded-2xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-400 transition-colors">
+                        <Icon size={24} />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-3">
+                          <h3 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">
+                            {ticket.title}
+                          </h3>
+                          <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                            #{ticket.id}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-3 mt-1">
+                          <span className={`text-[10px] font-black uppercase tracking-widest ${getPriorityColor(ticket.priority)}`}>
+                            {ticket.priority} Priority
+                          </span>
+                          <div className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-700" />
+                          <span className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">
+                            {ticket.category}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <p className="text-slate-500 dark:text-slate-400 font-medium leading-relaxed mb-6">
+                      {ticket.desc}
+                    </p>
 
-          <Stack spacing={4} sx={{ pb: 10 }}>
-            {tickets.map((ticket) => {
-              const Icon = getCategoryIcon(ticket.category);
-              return (
-                <Card key={ticket.id} sx={{ 
-                  borderRadius: 10, 
-                  border: '1px solid', 
-                  borderColor: 'divider',
-                  transition: 'all 0.3s ease',
-                  '&:hover': { boxShadow: 12, transform: 'translateY(-4px)' },
-                  overflow: 'hidden'
-                }}>
-                  <CardContent sx={{ p: { xs: 4, md: 6 } }}>
-                    <Grid container spacing={4}>
-                      <Grid size={{ xs: 12, lg: 8 }}>
-                        <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 3, mb: 3 }}>
-                          <Avatar sx={{ width: 48, height: 48, borderRadius: 4, bgcolor: 'action.hover', color: 'text.secondary', transition: 'all 0.3s ease' }}>
-                            <Icon size={24} />
-                          </Avatar>
-                          <Box>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                              <Typography variant="h5" sx={{ fontWeight: 900, tracking: '-0.02em' }}>
-                                {ticket.title}
-                              </Typography>
-                              <Typography variant="caption" sx={{ fontWeight: 900, color: 'text.disabled', textTransform: 'uppercase', letterSpacing: 1 }}>
-                                #{ticket.id}
-                              </Typography>
-                            </Box>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 0.5 }}>
-                              <Typography variant="caption" sx={{ fontWeight: 900, color: getPriorityColor(ticket.priority), textTransform: 'uppercase', letterSpacing: 1 }}>
-                                {ticket.priority} Priority
-                              </Typography>
-                              <Box sx={{ width: 4, height: 4, borderRadius: '50%', bgcolor: 'divider' }} />
-                              <Typography variant="caption" sx={{ fontWeight: 900, color: 'text.secondary', textTransform: 'uppercase', letterSpacing: 1 }}>
-                                {ticket.category}
-                              </Typography>
-                            </Box>
-                          </Box>
-                        </Box>
-                        
-                        <Typography variant="body1" sx={{ color: 'text.secondary', fontWeight: 500, mb: 4, lineHeight: 1.6 }}>
-                          {ticket.desc}
-                        </Typography>
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                        <Clock size={14} /> {new Date(ticket.date).toLocaleDateString()}
+                      </div>
+                      <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${getStatusColor(ticket.status)}`}>
+                        {ticket.status}
+                      </span>
+                    </div>
+                  </div>
 
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                          <Typography variant="caption" sx={{ display: 'flex', alignItems: 'center', gap: 1, fontWeight: 900, color: 'text.disabled', textTransform: 'uppercase', letterSpacing: 1 }}>
-                            <Clock size={14} /> {new Date(ticket.date).toLocaleDateString()}
-                          </Typography>
-                          <Chip 
-                            label={ticket.status} 
-                            color={getStatusColor(ticket.status) as any}
-                            size="small"
-                            variant="outlined"
-                            sx={{ fontWeight: 900, textTransform: 'uppercase', fontSize: '0.65rem', borderRadius: 4, borderWeight: 2 }}
-                          />
-                        </Box>
-                      </Grid>
+                  <div className="lg:col-span-4 lg:pl-8 lg:border-l border-slate-100 dark:border-slate-800 pt-6 lg:pt-0 border-t lg:border-t-0">
+                    <span className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-4 block">
+                      Resolution Progress
+                    </span>
+                    <div className="space-y-6 relative">
+                      <div className="absolute left-[11px] top-2 bottom-2 w-0.5 bg-slate-100 dark:bg-slate-800" />
+                      {[
+                        { label: 'Reported', active: true },
+                        { label: 'Assigned', active: ticket.status !== 'Pending' },
+                        { label: 'Resolved', active: ticket.status === 'Resolved' }
+                      ].map((step, index) => (
+                        <div key={index} className="relative flex items-center gap-3">
+                          <div className={`w-6 h-6 rounded-full flex items-center justify-center border-2 z-10 transition-colors ${
+                            step.active 
+                              ? 'bg-brand-600 border-brand-600 text-white' 
+                              : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-300 dark:text-slate-600'
+                          }`}>
+                            {step.active ? <CheckCircle2 size={12} /> : <div className="w-1.5 h-1.5 rounded-full bg-current" />}
+                          </div>
+                          <span className={`text-[10px] font-black uppercase tracking-widest transition-colors ${
+                            step.active ? 'text-slate-900 dark:text-white' : 'text-slate-400 dark:text-slate-600'
+                          }`}>
+                            {step.label}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
 
-                      <Grid size={{ xs: 12, lg: 4 }}>
-                        <Box sx={{ 
-                          height: '100%', 
-                          pl: { lg: 4 }, 
-                          borderLeft: { lg: '1px solid' }, 
-                          borderColor: 'divider',
-                          pt: { xs: 4, lg: 0 },
-                          borderTop: { xs: '1px solid', lg: 'none' }
-                        }}>
-                          <Typography variant="caption" sx={{ fontWeight: 900, color: 'text.secondary', textTransform: 'uppercase', letterSpacing: 2, mb: 3, display: 'block' }}>
-                            Resolution Progress
-                          </Typography>
-                          <Stepper orientation="vertical" activeStep={ticket.status === 'Resolved' ? 3 : (ticket.status === 'In Progress' ? 2 : 1)} sx={{ '& .MuiStepConnector-line': { minHeight: 20 } }}>
-                            {[
-                              { label: 'Reported', active: true },
-                              { label: 'Assigned', active: ticket.status !== 'Pending' },
-                              { label: 'Resolved', active: ticket.status === 'Resolved' }
-                            ].map((step, index) => (
-                              <Step key={index} active={step.active}>
-                                <StepLabel 
-                                  StepIconComponent={() => (
-                                    <Box sx={{ 
-                                      width: 24, height: 24, 
-                                      borderRadius: '50%', 
-                                      display: 'flex', 
-                                      alignItems: 'center', 
-                                      justifyContent: 'center',
-                                      bgcolor: step.active ? 'primary.main' : 'action.hover',
-                                      color: step.active ? 'white' : 'text.disabled',
-                                      border: '2px solid',
-                                      borderColor: step.active ? 'primary.main' : 'divider',
-                                      fontSize: 12
-                                    }}>
-                                      {step.active ? <CheckCircle2 size={12} /> : <Box sx={{ width: 4, height: 4, borderRadius: '50%', bgcolor: 'currentColor' }} />}
-                                    </Box>
-                                  )}
-                                >
-                                  <Typography variant="caption" sx={{ fontWeight: 900, textTransform: 'uppercase', color: step.active ? 'text.primary' : 'text.disabled' }}>
-                                    {step.label}
-                                  </Typography>
-                                </StepLabel>
-                              </Step>
-                            ))}
-                          </Stepper>
-                        </Box>
-                      </Grid>
-                    </Grid>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </Stack>
-        </Box>
-      </Fade>
+      <AnimatePresence>
+        {showModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 20 }}
+              className="bg-white dark:bg-slate-900 w-full max-w-lg rounded-[2.5rem] shadow-2xl overflow-hidden"
+            >
+              <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-800/50">
+                <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">New Ticket</h2>
+                <button onClick={() => setShowModal(false)} className="p-2 text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl transition-colors">
+                  <X size={24} />
+                </button>
+              </div>
+              
+              <div className="p-8 space-y-6">
+                <div>
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block ml-1">
+                    Issue Category
+                  </label>
+                  <div className="grid grid-cols-2 gap-3">
+                    {['Plumbing', 'Electrical', 'Security', 'General'].map(cat => (
+                      <button 
+                        key={cat}
+                        onClick={() => setFormData({...formData, category: cat as any})}
+                        className={`py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all ${
+                          formData.category === cat 
+                            ? 'bg-brand-600 text-white shadow-lg shadow-brand-600/20' 
+                            : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:border-brand-500 dark:hover:border-brand-500'
+                        }`}
+                      >
+                        {cat}
+                      </button>
+                    ))}
+                  </div>
+                </div>
 
-      <Dialog 
-        open={showModal} 
-        onClose={() => setShowModal(false)}
-        PaperProps={{ sx: { borderRadius: 10, p: 2, maxWidth: 600, width: '100%' } }}
-      >
-        <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Typography variant="h4" sx={{ fontWeight: 900, tracking: '-0.04em' }}>New Ticket</Typography>
-          <IconButton onClick={() => setShowModal(false)}>
-            <X size={28} />
-          </IconButton>
-        </DialogTitle>
-        <DialogContent sx={{ mt: 2 }}>
-          <Stack spacing={4}>
-            <Box>
-              <Typography variant="caption" sx={{ fontWeight: 900, color: 'text.secondary', textTransform: 'uppercase', ml: 2, mb: 1, display: 'block' }}>
-                Issue Category
-              </Typography>
-              <Grid container spacing={2}>
-                {['Plumbing', 'Electrical', 'Security', 'General'].map(cat => (
-                  <Grid size={6} key={cat}>
-                    <Button 
-                      fullWidth 
-                      variant={formData.category === cat ? 'contained' : 'outlined'}
-                      onClick={() => setFormData({...formData, category: cat as any})}
-                      sx={{ 
-                        py: 2, 
-                        borderRadius: 4, 
-                        fontWeight: 900, 
-                        textTransform: 'uppercase', 
-                        fontSize: '0.7rem',
-                        bgcolor: formData.category === cat ? 'primary.main' : 'transparent',
-                        color: formData.category === cat ? 'white' : 'text.secondary',
-                        borderColor: formData.category === cat ? 'primary.main' : 'divider'
-                      }}
-                    >
-                      {cat}
-                    </Button>
-                  </Grid>
-                ))}
-              </Grid>
-            </Box>
+                <div>
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block ml-1">
+                    Priority Level
+                  </label>
+                  <div className="flex gap-3">
+                    {['Low', 'Medium', 'High'].map(p => (
+                      <button 
+                        key={p} 
+                        onClick={() => setFormData({...formData, priority: p as any})}
+                        className={`flex-1 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all ${
+                          formData.priority === p 
+                            ? 'bg-brand-600 text-white shadow-lg shadow-brand-600/20' 
+                            : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:border-brand-500 dark:hover:border-brand-500'
+                        }`}
+                      >
+                        {p}
+                      </button>
+                    ))}
+                  </div>
+                </div>
 
-            <Box>
-              <Typography variant="caption" sx={{ fontWeight: 900, color: 'text.secondary', textTransform: 'uppercase', ml: 2, mb: 1, display: 'block' }}>
-                Priority Level
-              </Typography>
-              <Stack direction="row" spacing={2}>
-                {['Low', 'Medium', 'High'].map(p => (
-                  <Button 
-                    key={p} 
-                    fullWidth
-                    variant={formData.priority === p ? 'contained' : 'outlined'}
-                    onClick={() => setFormData({...formData, priority: p as any})}
-                    sx={{ 
-                      py: 2, 
-                      borderRadius: 4, 
-                      fontWeight: 900, 
-                      textTransform: 'uppercase', 
-                      fontSize: '0.7rem',
-                      bgcolor: formData.priority === p ? 'primary.main' : 'transparent',
-                      color: formData.priority === p ? 'white' : 'text.secondary',
-                      borderColor: formData.priority === p ? 'primary.main' : 'divider'
-                    }}
-                  >
-                    {p}
-                  </Button>
-                ))}
-              </Stack>
-            </Box>
+                <div>
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block ml-1">
+                    Subject
+                  </label>
+                  <input 
+                    type="text"
+                    placeholder="Briefly describe the issue..."
+                    value={formData.title}
+                    onChange={e => setFormData({...formData, title: e.target.value})}
+                    className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-2xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-brand-500 outline-none"
+                  />
+                </div>
 
-            <Box>
-              <Typography variant="caption" sx={{ fontWeight: 900, color: 'text.secondary', textTransform: 'uppercase', ml: 2, mb: 0.5, display: 'block' }}>
-                Subject
-              </Typography>
-              <TextField 
-                fullWidth
-                placeholder="Briefly describe the issue..."
-                value={formData.title}
-                onChange={e => setFormData({...formData, title: e.target.value})}
-                InputProps={{ sx: { borderRadius: 6, bgcolor: 'action.hover' } }}
-              />
-            </Box>
+                <div>
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block ml-1">
+                    Detailed Description
+                  </label>
+                  <textarea 
+                    rows={4}
+                    placeholder="Provide more details for the technician..."
+                    value={formData.desc}
+                    onChange={e => setFormData({...formData, desc: e.target.value})}
+                    className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-2xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-brand-500 outline-none resize-none"
+                  />
+                </div>
 
-            <Box>
-              <Typography variant="caption" sx={{ fontWeight: 900, color: 'text.secondary', textTransform: 'uppercase', ml: 2, mb: 0.5, display: 'block' }}>
-                Detailed Description
-              </Typography>
-              <TextField 
-                fullWidth
-                multiline
-                rows={4}
-                placeholder="Provide more details for the technician..."
-                value={formData.desc}
-                onChange={e => setFormData({...formData, desc: e.target.value})}
-                InputProps={{ sx: { borderRadius: 6, bgcolor: 'action.hover' } }}
-              />
-            </Box>
-          </Stack>
-        </DialogContent>
-        <DialogActions sx={{ p: 4 }}>
-          <Button 
-            fullWidth 
-            variant="contained" 
-            size="large"
-            onClick={handleRaiseTicket}
-            startIcon={<Send size={18} />}
-            sx={{ py: 2, borderRadius: 6, fontWeight: 900, boxShadow: 10 }}
-          >
-            Raise Support Ticket
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </Box>
+                <button 
+                  onClick={handleRaiseTicket}
+                  className="w-full bg-brand-600 text-white py-4 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-brand-700 transition-colors shadow-xl shadow-brand-600/20 active:scale-95 transform duration-100 flex items-center justify-center gap-2"
+                >
+                  <Send size={18} />
+                  Raise Support Ticket
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 };
 

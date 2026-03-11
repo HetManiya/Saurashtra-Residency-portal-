@@ -22,7 +22,7 @@ router.get('/', protect, async (req: any, res) => {
 });
 
 // Log new package (Admin/Committee/Security)
-router.post('/', protect, authorize(['ADMIN', 'COMMITTEE']), async (req: any, res) => {
+router.post('/', protect, authorize(['ADMIN', 'COMMITTEE', 'SECURITY']), async (req: any, res) => {
   try {
     const { flatId, carrier, trackingNumber, notes } = req.body;
     

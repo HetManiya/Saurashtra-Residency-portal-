@@ -11,17 +11,14 @@
     "lint": "tsc --noEmit"
   },
   "dependencies": {
-    "@emotion/react": "^11.14.0",
-    "@emotion/styled": "^11.14.1",
     "@google/genai": "^1.35.0",
-    "@mui/icons-material": "^7.3.8",
-    "@mui/material": "^7.3.8",
     "@stripe/react-stripe-js": "^5.6.0",
     "@stripe/stripe-js": "^8.8.0",
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
+    "html5-qrcode": "^2.3.8",
     "jsonwebtoken": "^9.0.3",
     "lucide-react": "^0.562.0",
     "mongodb-memory-server": "^11.0.1",

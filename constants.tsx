@@ -43,7 +43,31 @@ export const SOCIETY_INFO = {
   ],
 };
 
-export const FACILITY_BOOKINGS: AmenityBooking[] = [];
+export const FACILITY_BOOKINGS: AmenityBooking[] = [
+  { id: 'b1', facilityId: 1, userName: 'Rahul Sharma', unitNumber: 'A-1-101', date: '2026-03-15', startTime: '18:00', endTime: '22:00', purpose: 'Birthday Party', attendees: 40, isPublic: false, status: 'Confirmed' },
+  { id: 'b2', facilityId: 2, userName: 'Priya Patel', unitNumber: 'A-5-204', date: '2026-03-20', startTime: '19:00', endTime: '23:00', purpose: 'Pre-wedding Function', attendees: 150, isPublic: true, status: 'Pending' },
+  { id: 'b3', facilityId: 3, userName: 'Amit Kumar', unitNumber: 'A-12-302', date: '2026-03-12', startTime: '20:00', endTime: '23:00', purpose: 'Movie Night', attendees: 15, isPublic: false, status: 'Confirmed' }
+];
+
+export const NOTICES: Notice[] = [
+  { id: 'n1', title: 'Water Supply Interruption', content: 'Water supply will be interrupted on Thursday from 10 AM to 2 PM due to tank cleaning.', date: '2026-03-10T08:00:00Z', category: 'Urgent' },
+  { id: 'n2', title: 'Holi Celebration 2026', content: 'Join us for the grand Holi celebration at the Central Party Plot this Sunday. Colors and snacks will be provided.', date: '2026-03-09T10:30:00Z', category: 'Event' },
+  { id: 'n3', title: 'Lift Maintenance Schedule', content: 'Routine maintenance for all lifts in A-1 to A-6 will be carried out next week.', date: '2026-03-08T14:15:00Z', category: 'General' }
+];
+
+export const MAINTENANCE_SAMPLES: MaintenanceRecord[] = [
+  { id: 'm1', flatId: 'A-1-101', month: 'March', year: 2026, amount: 700, status: PaymentStatus.PAID, occupancyType: OccupancyType.OWNER, paidDate: '2026-03-05' },
+  { id: 'm2', flatId: 'A-2-204', month: 'March', year: 2026, amount: 700, status: PaymentStatus.PENDING, occupancyType: OccupancyType.TENANT },
+  { id: 'm3', flatId: 'A-5-302', month: 'February', year: 2026, amount: 700, penaltyAmount: 100, status: PaymentStatus.OVERDUE, occupancyType: OccupancyType.OWNER, lastReminderSent: '2026-03-01' },
+  { id: 'm4', flatId: 'A-12-401', month: 'March', year: 2026, amount: 700, status: PaymentStatus.PAID, occupancyType: OccupancyType.OWNER, paidDate: '2026-03-02' }
+];
+
+export const FUNDS: FundRecord[] = [
+  { id: 'f1', title: 'Navratri Mahotsav 2026', date: '2026-09-15', amount: 50000, status: PaymentStatus.PENDING, purpose: 'Festival', totalCollected: 35000, targetAmount: 50000 },
+  { id: 'f2', title: 'Ganesh Chaturthi', date: '2025-08-20', amount: 20000, status: PaymentStatus.PAID, purpose: 'Festival', totalCollected: 20000, targetAmount: 20000 },
+  { id: 'f3', title: 'Lift Repair Fund', date: '2026-02-10', amount: 150000, status: PaymentStatus.PENDING, purpose: 'Maintenance', totalCollected: 120000, targetAmount: 150000 },
+  { id: 'f4', title: 'Security Camera Upgrade', date: '2026-01-05', amount: 80000, status: PaymentStatus.PAID, purpose: 'Security', totalCollected: 80000, targetAmount: 80000 }
+];
 
 export const TRANSLATIONS: Record<Language, any> = {
   en: {
@@ -436,7 +460,3 @@ export const COMMITTEE: CommitteeMember[] = [
   { id: '2', name: 'Suresh Vaghani', position: 'secretary', phone: '+91 98765 43211', email: 'suresh.v@residency.com', imageUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Suresh' },
   { id: '3', name: 'Manoj Goti', position: 'treasurer', phone: '+91 98765 43212', email: 'manoj.g@residency.com', imageUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Manoj' },
 ];
-
-export const NOTICES: Notice[] = [];
-export const MAINTENANCE_SAMPLES: MaintenanceRecord[] = [];
-export const FUNDS: FundRecord[] = [];

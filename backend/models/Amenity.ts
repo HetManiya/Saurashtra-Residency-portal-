@@ -6,6 +6,7 @@ const amenitySchema = new mongoose.Schema({
   capacity: { type: Number },
   hourlyRate: { type: Number, default: 0 },
   image: { type: String },
+  photoUrl: { type: String },
   status: { type: String, enum: ['AVAILABLE', 'MAINTENANCE', 'CLOSED'], default: 'AVAILABLE' }
 }, { 
   timestamps: true,

@@ -1,18 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Box, Typography, Grid, Card, Button, IconButton, 
-  Avatar, Chip, CircularProgress, Paper, useTheme, 
-  Fade, Stack, Divider, TextField, InputAdornment,
-  List, ListItem, ListItemAvatar, ListItemText
-} from '@mui/material';
 import { History, Clock, Search, Database, FileText, Settings, Key, Loader2 } from 'lucide-react';
 import { api } from '../services/api';
 import { AuditLogEntry } from '../types';
 import { useLanguage } from '../components/LanguageContext';
+import { motion } from 'motion/react';
 
 const AuditLogs: React.FC = () => {
   const { t } = useLanguage();
-  const theme = useTheme();
   const [logs, setLogs] = useState<AuditLogEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -56,148 +50,103 @@ const AuditLogs: React.FC = () => {
 
   const getActionColor = (action: string) => {
     switch (action?.toLowerCase()) {
-      case 'login': return 'success';
-      case 'create': return 'info';
-      case 'update': return 'warning';
-      case 'delete': return 'error';
-      default: return 'default';
+      case 'login': return 'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400';
+      case 'create': return 'bg-blue-100 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400';
+      case 'update': return 'bg-amber-100 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400';
+      case 'delete': return 'bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400';
+      default: return 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400';
     }
   };
 
   return (
-    <Fade in={true}>
-      <Box sx={{ pb: 8 }}>
-        <Box sx={{ 
-          display: 'flex', 
-          flexDirection: { xs: 'column', md: 'row' }, 
-          justifyContent: 'space-between', 
-          alignItems: { md: 'flex-end' }, 
-          gap: 3, 
-          mb: 6,
-          pb: 4,
-          borderBottom: '1px solid',
-          borderColor: 'divider'
-        }}>
-          <Box>
-            <Typography variant="h4" sx={{ fontWeight: 900, tracking: '-0.04em' }}>
-              {t('saurashtra')} <Box component="span" sx={{ color: 'primary.main' }}>{t('audit')}</Box>
-            </Typography>
-            <Typography variant="body1" sx={{ color: 'text.secondary', mt: 1, fontWeight: 500 }}>
-              {t('audit_desc')}
-            </Typography>
-          </Box>
-          <Box sx={{ width: { xs: '100%', md: 320 } }}>
-            <TextField 
-              fullWidth
-              placeholder={t('audit_search')}
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <Search size={18} />
-                  </InputAdornment>
-                ),
-                sx: { borderRadius: 4, bgcolor: 'background.paper' }
-              }}
-            />
-          </Box>
-        </Box>
+    <div className="pb-12 animate-fade-in">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-8 pb-6 border-b border-slate-200 dark:border-slate-800">
+        <div>
+          <h1 className="text-4xl font-black tracking-tighter text-slate-900 dark:text-white mb-2">
+            {t('saurashtra')} <span className="text-brand-600">{t('audit')}</span>
+          </h1>
+          <p className="text-slate-500 dark:text-slate-400 font-medium">
+            {t('audit_desc')}
+          </p>
+        </div>
+        <div className="w-full md:w-80 relative">
+          <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+          <input 
+            type="text"
+            placeholder={t('audit_search')}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl pl-12 pr-4 py-3 text-sm font-bold focus:ring-2 focus:ring-brand-500 outline-none shadow-sm"
+          />
+        </div>
+      </div>
 
-        <Paper sx={{ borderRadius: 8, overflow: 'hidden', border: '1px solid', borderColor: 'divider', boxShadow: 0 }}>
-          <Box sx={{ p: 3, borderBottom: '1px solid', borderColor: 'divider', bgcolor: 'action.hover', display: 'flex', flexWrap: 'wrap', gap: 1.5 }}>
-            {['ALL', 'CREATE', 'UPDATE', 'DELETE', 'LOGIN', 'EXPORT'].map(a => (
-              <Button 
-                key={a}
-                onClick={() => setFilterAction(a)}
-                variant={filterAction === a ? 'contained' : 'text'}
-                sx={{ 
-                  borderRadius: 3, 
-                  px: 3, 
-                  py: 0.75, 
-                  fontWeight: 900, 
-                  textTransform: 'uppercase', 
-                  fontSize: '0.65rem',
-                  bgcolor: filterAction === a ? 'primary.main' : 'transparent',
-                  color: filterAction === a ? 'white' : 'text.secondary',
-                  '&:hover': { bgcolor: filterAction === a ? 'primary.dark' : 'action.selected' }
-                }}
+      <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
+        <div className="p-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 flex flex-wrap gap-2">
+          {['ALL', 'CREATE', 'UPDATE', 'DELETE', 'LOGIN', 'EXPORT'].map(a => (
+            <button 
+              key={a}
+              onClick={() => setFilterAction(a)}
+              className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                filterAction === a 
+                  ? 'bg-brand-600 text-white shadow-lg shadow-brand-600/20' 
+                  : 'text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+              }`}
+            >
+              {a}
+            </button>
+          ))}
+        </div>
+
+        {loading ? (
+          <div className="py-20 text-center flex flex-col items-center justify-center">
+            <Loader2 size={40} className="animate-spin text-brand-600 mb-4" />
+            <span className="text-xs font-black text-slate-400 uppercase tracking-widest">
+              Retrieving Cloud Logs...
+            </span>
+          </div>
+        ) : (
+          <div className="divide-y divide-slate-100 dark:divide-slate-800">
+            {filteredLogs.map((log) => (
+              <div 
+                key={log.id}
+                className="p-6 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors flex items-start gap-4"
               >
-                {a}
-              </Button>
-            ))}
-          </Box>
+                <div className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700 shrink-0">
+                  {getActionIcon(log.action)}
+                </div>
+                
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-3 mb-1">
+                    <h4 className="text-sm font-black text-slate-900 dark:text-white truncate">
+                      {log.userName}
+                    </h4>
+                    <span className={`px-2 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-widest ${getActionColor(log.action)}`}>
+                      {log.action}
+                    </span>
+                  </div>
+                  <p className="text-sm font-medium text-slate-500 dark:text-slate-400 leading-relaxed truncate">
+                    {log.details}
+                  </p>
+                </div>
 
-          {loading ? (
-            <Box sx={{ py: 20, textAlign: 'center' }}>
-              <CircularProgress size={40} sx={{ mb: 2 }} />
-              <Typography variant="caption" sx={{ display: 'block', fontWeight: 900, color: 'text.secondary', textTransform: 'uppercase', letterSpacing: 2 }}>
-                Retrieving Cloud Logs...
-              </Typography>
-            </Box>
-          ) : (
-            <List disablePadding>
-              {filteredLogs.map((log, index) => (
-                <React.Fragment key={log.id}>
-                  <ListItem 
-                    sx={{ 
-                      p: 4, 
-                      transition: 'all 0.2s ease',
-                      '&:hover': { bgcolor: 'action.hover' }
-                    }}
-                  >
-                    <ListItemAvatar sx={{ mr: 2 }}>
-                      <Avatar sx={{ 
-                        width: 48, height: 48, 
-                        borderRadius: 4, 
-                        bgcolor: 'action.hover', 
-                        color: 'text.secondary',
-                        border: '1px solid',
-                        borderColor: 'divider'
-                      }}>
-                        {getActionIcon(log.action)}
-                      </Avatar>
-                    </ListItemAvatar>
-                    <ListItemText 
-                      primary={
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 0.5 }}>
-                          <Typography variant="subtitle1" sx={{ fontWeight: 900 }}>{log.userName}</Typography>
-                          <Chip 
-                            label={log.action} 
-                            size="small" 
-                            color={getActionColor(log.action) as any}
-                            sx={{ fontWeight: 900, textTransform: 'uppercase', fontSize: '0.6rem', borderRadius: 1.5, height: 20 }} 
-                          />
-                        </Box>
-                      }
-                      secondary={
-                        <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500, lineHeight: 1.6 }}>
-                          {log.details}
-                        </Typography>
-                      }
-                    />
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: 'text.disabled', ml: 2 }}>
-                      <Clock size={14} />
-                      <Typography variant="caption" sx={{ fontWeight: 700 }}>
-                        {new Date(log.timestamp).toLocaleString()}
-                      </Typography>
-                    </Box>
-                  </ListItem>
-                  {index < filteredLogs.length - 1 && <Divider />}
-                </React.Fragment>
-              ))}
-              {filteredLogs.length === 0 && (
-                <Box sx={{ py: 10, textAlign: 'center' }}>
-                  <Typography variant="caption" sx={{ fontWeight: 900, color: 'text.secondary', textTransform: 'uppercase' }}>
-                    No records found
-                  </Typography>
-                </Box>
-              )}
-            </List>
-          )}
-        </Paper>
-      </Box>
-    </Fade>
+                <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 shrink-0 ml-4">
+                  <Clock size={14} />
+                  {new Date(log.timestamp).toLocaleString()}
+                </div>
+              </div>
+            ))}
+            {filteredLogs.length === 0 && (
+              <div className="py-20 text-center">
+                <span className="text-xs font-black text-slate-400 uppercase tracking-widest">
+                  No records found
+                </span>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
   );
 };
 

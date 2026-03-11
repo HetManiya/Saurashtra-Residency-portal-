@@ -80,6 +80,47 @@ router.post('/create-order', protect, async (req: any, res) => {
 });
 
 /**
+ * @route   POST /api/v1/payments/verify
+ * @desc    Verify payment status with Stripe and update records
+ */
+router.post('/verify', protect, async (req: any, res) => {
+  try {
+    const { paymentIntentId } = req.body;
+    if (!paymentIntentId) {
+      return res.status(400).json({ message: 'PaymentIntent ID is required' });
+    }
+
+    const stripeClient = getStripe();
+    const paymentIntent = await stripeClient.paymentIntents.retrieve(paymentIntentId);
+
+    if (paymentIntent.status === 'succeeded') {
+      // 1. Update Transaction Status
+      const transaction = await Transaction.findOneAndUpdate(
+        { gatewayOrderId: paymentIntent.id },
+        { status: 'SUCCESS', gatewayPaymentId: paymentIntent.latest_charge as string },
+        { new: true }
+      );
+
+      if (transaction) {
+        // 2. Mark Maintenance Bill as Paid
+        await Maintenance.findByIdAndUpdate(transaction.maintenanceId, {
+          status: 'Paid',
+          paidDate: new Date()
+        });
+        return res.json({ success: true, message: 'Payment verified and record updated.' });
+      } else {
+        return res.status(404).json({ message: 'Transaction not found for this payment.' });
+      }
+    } else {
+      return res.status(400).json({ message: `Payment status is ${paymentIntent.status}` });
+    }
+  } catch (error: any) {
+    console.error('Payment verification failed:', error);
+    res.status(500).json({ message: 'Payment verification failed' });
+  }
+});
+
+/**
  * @route   POST /api/v1/payments/setup-recurring
  * @desc    Setup a Stripe Subscription for recurring maintenance
  */
@@ -122,6 +163,7 @@ router.post('/setup-recurring', protect, async (req: any, res) => {
       mode: 'subscription',
       customer: customerId,
       line_items: [{ price: price.id, quantity: 1 }],
+      metadata: { userId: user._id.toString() },
       success_url: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/dashboard?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/payments`,
     });

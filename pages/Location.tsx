@@ -1,19 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Box, Typography, Grid, Card, Button, IconButton, 
-  Avatar, Chip, CircularProgress, Paper, useTheme, 
-  Fade, Stack, Divider, TextField, InputAdornment,
-  Tooltip, Link, useMediaQuery
-} from '@mui/material';
-import { MapPin, Navigation, Compass, ShieldCheck, Sparkles, Loader2, DoorOpen, TreePine, LayoutGrid, Building2, Info, Smartphone, Mail, Globe, Star, Users, ArrowUpRight } from 'lucide-react';
+import { MapPin, Navigation, Compass, DoorOpen, TreePine, LayoutGrid, Star, Smartphone, Mail, ArrowUpRight, Sparkles, Loader2 } from 'lucide-react';
 import { SOCIETY_INFO, BUILDER_INFO, BUILDINGS } from '../constants';
 import { api } from '../services/api';
 import { useNavigate } from 'react-router-dom';
 
 const Location: React.FC = () => {
   const navigate = useNavigate();
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [localityInfo, setLocalityInfo] = useState<{ text: string; sources: any[] } | null>(null);
   const [loading, setLoading] = useState(false);
   const [hoveredWing, setHoveredWing] = useState<string | null>(null);
@@ -43,384 +35,276 @@ const Location: React.FC = () => {
     const is1BHK = wing.type === '1BHK';
 
     return (
-      <Tooltip 
-        key={wing.id} 
-        title={`${wing.type} • 20 Units`} 
-        arrow 
-        placement="top"
-        open={hoveredWing === wing.name}
-      >
-        <Button
+      <div key={wing.id} className="relative group">
+        <button
           onMouseEnter={() => setHoveredWing(wing.name)}
           onMouseLeave={() => setHoveredWing(null)}
           onClick={() => navigate('/buildings')}
-          sx={{
-            width: '100%',
-            aspectRatio: '4/3',
-            borderRadius: 6,
-            border: '2px solid',
-            borderColor: is1BHK ? 'blue.100' : 'indigo.100',
-            bgcolor: is1BHK ? 'blue.50' : 'indigo.50',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 1,
-            transition: 'all 0.4s ease',
-            '&:hover': {
-              transform: 'scale(1.05)',
-              zIndex: 10,
-              boxShadow: 10,
-              borderColor: is1BHK ? 'blue.400' : 'indigo.400',
-              bgcolor: is1BHK ? 'blue.100' : 'indigo.100'
-            }
-          }}
+          className={`w-full aspect-[4/3] rounded-2xl border-2 flex flex-col items-center justify-center gap-1 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:z-10 ${
+            is1BHK 
+              ? 'border-blue-100 bg-blue-50 hover:border-blue-400 hover:bg-blue-100' 
+              : 'border-indigo-100 bg-indigo-50 hover:border-indigo-400 hover:bg-indigo-100'
+          }`}
         >
-          <Typography variant="body2" sx={{ fontWeight: 900, color: is1BHK ? 'blue.600' : 'indigo.600' }}>
+          <span className={`text-sm font-black ${is1BHK ? 'text-blue-600' : 'text-indigo-600'}`}>
             {wing.name}
-          </Typography>
-          <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: is1BHK ? 'blue.400' : 'indigo.400' }} />
-        </Button>
-      </Tooltip>
+          </span>
+          <div className={`w-1.5 h-1.5 rounded-full ${is1BHK ? 'bg-blue-400' : 'bg-indigo-400'}`} />
+        </button>
+        
+        {hoveredWing === wing.name && (
+          <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-xs font-bold px-3 py-1.5 rounded-lg whitespace-nowrap z-20 pointer-events-none">
+            {wing.type} • 20 Units
+            <div className="absolute bottom-[-4px] left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45" />
+          </div>
+        )}
+      </div>
     );
   };
 
   return (
-    <Fade in={true}>
-      <Box sx={{ pb: 8 }}>
-        <Box sx={{ 
-          display: 'flex', 
-          flexDirection: { xs: 'column', md: 'row' }, 
-          justifyContent: 'space-between', 
-          alignItems: { md: 'flex-end' }, 
-          gap: 3, 
-          mb: 6,
-          pb: 4,
-          borderBottom: '1px solid',
-          borderColor: 'divider'
-        }}>
-          <Box>
-            <Stack direction="row" spacing={1} alignItems="center" sx={{ bgcolor: 'primary.light', px: 2, py: 0.5, borderRadius: 10, width: 'fit-content', mb: 2 }}>
-              <Compass size={14} color={theme.palette.primary.main} />
-              <Typography variant="caption" sx={{ fontWeight: 900, textTransform: 'uppercase', letterSpacing: 1.5, color: 'primary.main' }}>
-                Residency Explorer
-              </Typography>
-            </Stack>
-            <Typography variant="h3" sx={{ fontWeight: 900, tracking: '-0.04em' }}>
-              Residency <Box component="span" sx={{ color: 'primary.main' }}>Site Plan</Box>
-            </Typography>
-            <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 1, color: 'text.secondary' }}>
-              <MapPin size={18} color={theme.palette.primary.main} />
-              <Typography variant="body1" sx={{ fontWeight: 500 }}>{SOCIETY_INFO.location}</Typography>
-            </Stack>
-          </Box>
-          <Button 
-            variant="contained" 
-            color="inherit"
-            startIcon={<Navigation size={18} />}
-            href={SOCIETY_INFO.googleMapsUrl}
-            target="_blank"
-            sx={{ 
-              borderRadius: 8, px: 4, py: 2, 
-              fontWeight: 900, textTransform: 'uppercase', fontSize: '0.7rem',
-              bgcolor: 'text.primary', color: 'background.paper',
-              boxShadow: 10,
-              '&:hover': { bgcolor: 'black' }
-            }}
-          >
-            View Actual Satellite Map
-          </Button>
-        </Box>
+    <div className="pb-8 animate-fade-in">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-8 pb-6 border-b border-slate-200 dark:border-slate-800">
+        <div>
+          <div className="flex items-center gap-2 bg-brand-50 dark:bg-brand-900/20 px-3 py-1 rounded-full w-fit mb-3">
+            <Compass size={14} className="text-brand-600 dark:text-brand-400" />
+            <span className="text-[10px] font-black uppercase tracking-widest text-brand-600 dark:text-brand-400">
+              Residency Explorer
+            </span>
+          </div>
+          <h3 className="text-4xl font-black tracking-tighter text-slate-900 dark:text-white">
+            Residency <span className="text-brand-600">Site Plan</span>
+          </h3>
+          <div className="flex items-center gap-2 mt-2 text-slate-500 dark:text-slate-400">
+            <MapPin size={18} className="text-brand-600" />
+            <span className="font-medium">{SOCIETY_INFO.location}</span>
+          </div>
+        </div>
+        <a 
+          href={SOCIETY_INFO.googleMapsUrl}
+          target="_blank"
+          rel="noreferrer"
+          className="flex items-center gap-2 bg-slate-900 dark:bg-slate-800 text-white px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-black transition-colors shadow-lg"
+        >
+          <Navigation size={18} />
+          View Actual Satellite Map
+        </a>
+      </div>
 
-        <Grid container spacing={6}>
-          <Grid item xs={12} lg={8}>
-            <Stack spacing={6}>
-              <Paper sx={{ p: { xs: 4, md: 6 }, borderRadius: 12, border: '1px solid', borderColor: 'divider', boxShadow: 0 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, mb: 6 }}>
-                  <Avatar sx={{ width: 56, height: 56, bgcolor: 'primary.main', borderRadius: 4 }}>
-                    <LayoutGrid size={28} />
-                  </Avatar>
-                  <Box>
-                    <Typography variant="h5" sx={{ fontWeight: 900 }}>Interactive Plot Layout</Typography>
-                    <Typography variant="caption" sx={{ fontWeight: 900, textTransform: 'uppercase', color: 'text.disabled', letterSpacing: 2 }}>
-                      Digital Twin of Saurashtra Residency
-                    </Typography>
-                  </Box>
-                </Box>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2 space-y-8">
+          <div className="bg-white dark:bg-slate-900 p-6 md:p-8 rounded-[2rem] border border-slate-200 dark:border-slate-800">
+            <div className="flex items-center gap-4 mb-8">
+              <div className="w-14 h-14 bg-brand-600 rounded-2xl flex items-center justify-center text-white">
+                <LayoutGrid size={28} />
+              </div>
+              <div>
+                <h5 className="text-2xl font-black text-slate-900 dark:text-white">Interactive Plot Layout</h5>
+                <span className="text-xs font-black text-slate-400 uppercase tracking-widest">
+                  Digital Twin of Saurashtra Residency
+                </span>
+              </div>
+            </div>
 
-                <Box sx={{ 
-                  position: 'relative', 
-                  bgcolor: 'action.hover', 
-                  p: { xs: 4, md: 6 }, 
-                  borderRadius: 12, 
-                  border: '2px dashed', 
-                  borderColor: 'divider',
-                  minHeight: 800
-                }}>
-                  {/* Gates */}
-                  <Paper sx={{ 
-                    position: 'absolute', top: 0, left: '50%', transform: 'translate(-50%, -50%)',
-                    px: 4, py: 1.5, borderRadius: 4, bgcolor: 'text.primary', color: 'background.paper',
-                    display: 'flex', alignItems: 'center', gap: 2, zIndex: 20, boxShadow: 10
-                  }}>
-                    <DoorOpen size={18} color={theme.palette.success.main} />
-                    <Typography variant="caption" sx={{ fontWeight: 900, textTransform: 'uppercase', letterSpacing: 1 }}>Main Gate 1 (Pasodara Road)</Typography>
-                  </Paper>
+            <div className="relative bg-slate-50 dark:bg-slate-800/50 p-6 md:p-8 rounded-3xl border-2 border-dashed border-slate-200 dark:border-slate-700 min-h-[800px]">
+              {/* Gates */}
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-slate-900 text-white px-4 py-2 rounded-xl flex items-center gap-2 z-20 shadow-lg">
+                <DoorOpen size={18} className="text-green-400" />
+                <span className="text-[10px] font-black uppercase tracking-widest">Main Gate 1 (Pasodara Road)</span>
+              </div>
 
-                  <Paper sx={{ 
-                    position: 'absolute', bottom: 0, left: '50%', transform: 'translate(-50%, 50%)',
-                    px: 4, py: 1.5, borderRadius: 4, bgcolor: 'text.primary', color: 'background.paper',
-                    display: 'flex', alignItems: 'center', gap: 2, zIndex: 20, boxShadow: 10
-                  }}>
-                    <DoorOpen size={18} color={theme.palette.primary.main} />
-                    <Typography variant="caption" sx={{ fontWeight: 900, textTransform: 'uppercase', letterSpacing: 1 }}>Service Gate 2 (Canal Road)</Typography>
-                  </Paper>
+              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 bg-slate-900 text-white px-4 py-2 rounded-xl flex items-center gap-2 z-20 shadow-lg">
+                <DoorOpen size={18} className="text-brand-400" />
+                <span className="text-[10px] font-black uppercase tracking-widest">Service Gate 2 (Canal Road)</span>
+              </div>
 
-                  {/* Central Spine */}
-                  <Box sx={{ 
-                    position: 'absolute', inset: '48px 0', left: '50%', transform: 'translateX(-50%)',
-                    width: { xs: 120, md: 180 }, display: 'flex', flexDirection: 'column', 
-                    alignItems: 'center', justifyContent: 'space-between', py: 10, zIndex: 10, pointerEvents: 'none'
-                  }}>
-                    <Paper sx={{ 
-                      pointerEvents: 'auto', width: '100%', height: 180, borderRadius: 10,
-                      bgcolor: 'success.light', border: '2px solid', borderColor: 'success.main', opacity: 0.2,
-                      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                      transition: 'all 0.3s ease', '&:hover': { opacity: 0.4, transform: 'scale(1.05)' }
-                    }}>
-                      <TreePine size={32} color={theme.palette.success.main} />
-                      <Typography variant="caption" sx={{ fontWeight: 900, textTransform: 'uppercase', color: 'success.main', mt: 1 }}>Central Garden</Typography>
-                    </Paper>
+              {/* Central Spine */}
+              <div className="absolute inset-y-12 left-1/2 -translate-x-1/2 w-32 md:w-48 flex flex-col items-center justify-between py-12 z-10 pointer-events-none">
+                <div className="pointer-events-auto w-full h-48 rounded-3xl bg-green-100 border-2 border-green-500/30 opacity-40 flex flex-col items-center justify-center transition-all duration-300 hover:opacity-60 hover:scale-105">
+                  <TreePine size={32} className="text-green-600" />
+                  <span className="text-[10px] font-black text-green-700 uppercase mt-2">Central Garden</span>
+                </div>
 
-                    <Box sx={{ height: 80, width: 4, bgcolor: 'divider', borderRadius: 2 }} />
+                <div className="h-20 w-1 bg-slate-200 rounded-full" />
 
-                    <Paper sx={{ 
-                      pointerEvents: 'auto', width: '100%', height: 180, borderRadius: 10,
-                      bgcolor: 'success.light', border: '2px solid', borderColor: 'success.main', opacity: 0.2,
-                      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                      transition: 'all 0.3s ease', '&:hover': { opacity: 0.4, transform: 'scale(1.05)' }
-                    }}>
-                      <TreePine size={32} color={theme.palette.success.main} />
-                      <Typography variant="caption" sx={{ fontWeight: 900, textTransform: 'uppercase', color: 'success.main', mt: 1 }}>Back Garden</Typography>
-                    </Paper>
-                  </Box>
+                <div className="pointer-events-auto w-full h-48 rounded-3xl bg-green-100 border-2 border-green-500/30 opacity-40 flex flex-col items-center justify-center transition-all duration-300 hover:opacity-60 hover:scale-105">
+                  <TreePine size={32} className="text-green-600" />
+                  <span className="text-[10px] font-black text-green-700 uppercase mt-2">Back Garden</span>
+                </div>
+              </div>
 
-                  {/* Wings Grid */}
-                  <Grid container spacing={isMobile ? 10 : 24} sx={{ position: 'relative', zIndex: 0 }}>
-                    <Grid item xs={6}>
-                      <Stack spacing={3}>
-                        {leftColWings.map(name => renderWing(name))}
-                      </Stack>
-                    </Grid>
-                    <Grid item xs={6}>
-                      <Stack spacing={3}>
-                        {rightColWings.map(name => renderWing(name))}
-                      </Stack>
-                    </Grid>
-                  </Grid>
-                </Box>
+              {/* Wings Grid */}
+              <div className="grid grid-cols-2 gap-24 md:gap-48 relative z-0">
+                <div className="space-y-4">
+                  {leftColWings.map(name => renderWing(name))}
+                </div>
+                <div className="space-y-4">
+                  {rightColWings.map(name => renderWing(name))}
+                </div>
+              </div>
+            </div>
 
-                <Grid container spacing={3} sx={{ mt: 6 }}>
-                  <Grid item xs={12} md={6}>
-                    <Paper sx={{ p: 4, borderRadius: 8, bgcolor: 'primary.light', border: '1px solid', borderColor: 'primary.main', opacity: 0.8, display: 'flex', gap: 3 }}>
-                      <Avatar sx={{ bgcolor: 'background.paper', color: 'primary.main', borderRadius: 3 }}>
-                        <Star size={20} />
-                      </Avatar>
-                      <Box>
-                        <Typography variant="subtitle2" sx={{ fontWeight: 900, color: 'primary.main', textTransform: 'uppercase' }}>Elite Infrastructure</Typography>
-                        <Typography variant="caption" sx={{ fontWeight: 600, color: 'primary.main', lineHeight: 1.6 }}>
-                          Saurashtra Residency features a planned layout with 40-feet internal RCC roads and separate underground water tanks for every 4 wings.
-                        </Typography>
-                      </Box>
-                    </Paper>
-                  </Grid>
-                  <Grid item xs={12} md={6}>
-                    <Paper sx={{ p: 4, borderRadius: 8, bgcolor: 'success.light', border: '1px solid', borderColor: 'success.main', opacity: 0.8, display: 'flex', gap: 3 }}>
-                      <Avatar sx={{ bgcolor: 'background.paper', color: 'success.main', borderRadius: 3 }}>
-                        <TreePine size={20} />
-                      </Avatar>
-                      <Box>
-                        <Typography variant="subtitle2" sx={{ fontWeight: 900, color: 'success.main', textTransform: 'uppercase' }}>Eco-Friendly Zones</Typography>
-                        <Typography variant="caption" sx={{ fontWeight: 600, color: 'success.main', lineHeight: 1.6 }}>
-                          Two massive gardens (Central & Back Garden) provide 12,000+ sq.ft of recreational green cover for all 480 families.
-                        </Typography>
-                      </Box>
-                    </Paper>
-                  </Grid>
-                </Grid>
-              </Paper>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
+              <div className="bg-blue-50 dark:bg-blue-900/20 p-6 rounded-3xl border border-blue-200 dark:border-blue-800/30 flex gap-4">
+                <div className="w-10 h-10 bg-white dark:bg-slate-800 rounded-xl flex items-center justify-center text-blue-600 shadow-sm shrink-0">
+                  <Star size={20} />
+                </div>
+                <div>
+                  <h6 className="text-sm font-black text-blue-700 dark:text-blue-300 uppercase mb-1">Elite Infrastructure</h6>
+                  <p className="text-xs font-medium text-blue-600/80 dark:text-blue-300/70 leading-relaxed">
+                    Saurashtra Residency features a planned layout with 40-feet internal RCC roads and separate underground water tanks for every 4 wings.
+                  </p>
+                </div>
+              </div>
+              <div className="bg-green-50 dark:bg-green-900/20 p-6 rounded-3xl border border-green-200 dark:border-green-800/30 flex gap-4">
+                <div className="w-10 h-10 bg-white dark:bg-slate-800 rounded-xl flex items-center justify-center text-green-600 shadow-sm shrink-0">
+                  <TreePine size={20} />
+                </div>
+                <div>
+                  <h6 className="text-sm font-black text-green-700 dark:text-green-300 uppercase mb-1">Eco-Friendly Zones</h6>
+                  <p className="text-xs font-medium text-green-600/80 dark:text-green-300/70 leading-relaxed">
+                    Two massive gardens (Central & Back Garden) provide 12,000+ sq.ft of recreational green cover for all 480 families.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
 
-              <Paper sx={{ p: 5, borderRadius: 12, border: '1px solid', borderColor: 'divider', boxShadow: 0 }}>
-                <Typography variant="h5" sx={{ fontWeight: 900, mb: 4, display: 'flex', alignItems: 'center', gap: 2 }}>
-                  <Sparkles size={28} color={theme.palette.primary.main} /> Neighborhood Intelligence
-                </Typography>
-                {loading ? (
-                  <Box sx={{ py: 8, textAlign: 'center' }}>
-                    <CircularProgress size={40} sx={{ mb: 2 }} />
-                    <Typography variant="caption" sx={{ fontWeight: 900, textTransform: 'uppercase', color: 'text.disabled', letterSpacing: 2 }}>Grounding Search Results...</Typography>
-                  </Box>
-                ) : (
-                  <Stack spacing={4}>
-                    <Typography variant="body1" sx={{ color: 'text.secondary', lineHeight: 1.8, fontStyle: 'italic', fontSize: '1.1rem' }}>
-                      "{localityInfo?.text || "Analyzing Pasodara neighborhood data..."}"
-                    </Typography>
-                    {localityInfo?.sources && localityInfo.sources.length > 0 && (
-                      <Box sx={{ pt: 4, borderTop: '1px solid', borderColor: 'divider' }}>
-                        <Typography variant="caption" sx={{ fontWeight: 900, textTransform: 'uppercase', color: 'text.disabled', letterSpacing: 2, display: 'block', mb: 3 }}>Verification Sources</Typography>
-                        <Stack direction="row" spacing={2} flexWrap="wrap" useFlexGap>
-                          {localityInfo.sources.map((s: any, i: number) => (
-                            <Button 
-                              key={i} 
-                              variant="outlined" 
-                              size="small"
-                              href={s.web?.uri}
-                              target="_blank"
-                              sx={{ borderRadius: 4, px: 2, py: 1, fontWeight: 900, textTransform: 'none', fontSize: '0.65rem' }}
-                            >
-                              {s.web?.title || `Ref ${i + 1}`}
-                            </Button>
-                          ))}
-                        </Stack>
-                      </Box>
-                    )}
-                  </Stack>
-                )}
-              </Paper>
-            </Stack>
-          </Grid>
-
-          <Grid item xs={12} lg={4}>
-            <Stack spacing={4}>
-              <Paper sx={{ 
-                p: 5, borderRadius: 12, 
-                bgcolor: 'text.primary', color: 'background.paper',
-                position: 'relative', overflow: 'hidden',
-                boxShadow: 10
-              }}>
-                <Box sx={{ 
-                  position: 'absolute', top: -64, right: -64, 
-                  width: 256, height: 256, 
-                  bgcolor: 'primary.main', borderRadius: '50%', 
-                  opacity: 0.1, filter: 'blur(40px)' 
-                }} />
-                
-                <Box sx={{ position: 'relative', zIndex: 1 }}>
-                  <Stack direction="row" spacing={3} alignItems="center" sx={{ mb: 4 }}>
-                    <Avatar sx={{ width: 80, height: 80, borderRadius: 6, bgcolor: 'white', p: 1 }}>
-                      <img src={BUILDER_INFO.logo} alt="Builder Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-                    </Avatar>
-                    <Box>
-                      <Typography variant="h5" sx={{ fontWeight: 900 }}>{BUILDER_INFO.name}</Typography>
-                      <Stack direction="row" spacing={1} alignItems="center">
-                        <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: 'primary.main' }} />
-                        <Typography variant="caption" sx={{ fontWeight: 900, textTransform: 'uppercase', color: 'primary.light', letterSpacing: 1 }}>
-                          Elite Developer • Est {BUILDER_INFO.founded}
-                        </Typography>
-                      </Stack>
-                    </Box>
-                  </Stack>
-
-                  <Typography variant="body2" sx={{ color: 'text.disabled', fontStyle: 'italic', lineHeight: 1.6, mb: 4 }}>
-                    "{BUILDER_INFO.vision}"
-                  </Typography>
-
-                  <Box sx={{ pt: 4, borderTop: '1px solid rgba(255,255,255,0.1)', mb: 4 }}>
-                    <Typography variant="caption" sx={{ fontWeight: 900, textTransform: 'uppercase', color: 'text.disabled', letterSpacing: 2, display: 'block', mb: 2 }}>Notable Portfolio</Typography>
-                    <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
-                      {BUILDER_INFO.projects.map((p, idx) => (
-                        <Chip key={idx} label={p} size="small" sx={{ bgcolor: 'rgba(255,255,255,0.05)', color: 'text.disabled', fontWeight: 700, borderRadius: 2 }} />
+          <div className="bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] border border-slate-200 dark:border-slate-800">
+            <h5 className="text-2xl font-black mb-6 flex items-center gap-3 text-slate-900 dark:text-white">
+              <Sparkles size={28} className="text-brand-600" /> 
+              Neighborhood Intelligence
+            </h5>
+            {loading ? (
+              <div className="py-12 text-center">
+                <Loader2 size={40} className="animate-spin mx-auto mb-4 text-brand-600" />
+                <span className="text-xs font-black text-slate-400 uppercase tracking-widest">Grounding Search Results...</span>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                <p className="text-lg text-slate-500 dark:text-slate-400 italic leading-relaxed">
+                  "{localityInfo?.text || "Analyzing Pasodara neighborhood data..."}"
+                </p>
+                {localityInfo?.sources && localityInfo.sources.length > 0 && (
+                  <div className="pt-6 border-t border-slate-100 dark:border-slate-800">
+                    <span className="text-xs font-black text-slate-400 uppercase tracking-widest block mb-4">Verification Sources</span>
+                    <div className="flex flex-wrap gap-3">
+                      {localityInfo.sources.map((s: any, i: number) => (
+                        <a 
+                          key={i} 
+                          href={s.web?.uri}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 text-[10px] font-black uppercase hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors text-slate-600 dark:text-slate-300"
+                        >
+                          {s.web?.title || `Ref ${i + 1}`}
+                        </a>
                       ))}
-                    </Stack>
-                  </Box>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
 
-                  <Stack spacing={2}>
-                    <Button 
-                      fullWidth 
-                      variant="contained" 
-                      color="inherit"
-                      startIcon={<Smartphone size={14} />}
-                      href={`tel:${BUILDER_INFO.phone}`}
-                      sx={{ 
-                        borderRadius: 4, py: 1.5, 
-                        fontWeight: 900, textTransform: 'uppercase', fontSize: '0.7rem',
-                        bgcolor: 'background.paper', color: 'text.primary',
-                        '&:hover': { bgcolor: 'primary.light', color: 'primary.main' }
-                      }}
-                    >
-                      Call Developer
-                    </Button>
-                    <Button 
-                      fullWidth 
-                      variant="outlined" 
-                      color="inherit"
-                      startIcon={<Mail size={14} />}
-                      href={`mailto:${BUILDER_INFO.email}`}
-                      sx={{ 
-                        borderRadius: 4, py: 1.5, 
-                        fontWeight: 900, textTransform: 'uppercase', fontSize: '0.7rem',
-                        borderColor: 'rgba(255,255,255,0.1)',
-                        '&:hover': { bgcolor: 'rgba(255,255,255,0.05)' }
-                      }}
-                    >
-                      Email Office
-                    </Button>
-                  </Stack>
-                </Box>
-              </Paper>
+        <div className="space-y-8">
+          <div className="bg-slate-900 dark:bg-slate-800 p-8 rounded-[2.5rem] text-white relative overflow-hidden shadow-xl">
+            <div className="absolute -top-16 -right-16 w-64 h-64 bg-brand-600 rounded-full opacity-10 blur-3xl" />
+            
+            <div className="relative z-10">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="w-20 h-20 bg-white rounded-2xl p-2 flex items-center justify-center">
+                  <img src={BUILDER_INFO.logo} alt="Builder Logo" className="w-full h-full object-contain" />
+                </div>
+                <div>
+                  <h5 className="text-xl font-black">{BUILDER_INFO.name}</h5>
+                  <div className="flex items-center gap-2 mt-1">
+                    <div className="w-2 h-2 rounded-full bg-brand-500" />
+                    <span className="text-[10px] font-black text-brand-300 uppercase tracking-widest">
+                      Elite Developer • Est {BUILDER_INFO.founded}
+                    </span>
+                  </div>
+                </div>
+              </div>
 
-              <Paper sx={{ p: 5, borderRadius: 12, border: '1px solid', borderColor: 'divider', boxShadow: 0 }}>
-                <Typography variant="caption" sx={{ fontWeight: 900, textTransform: 'uppercase', color: 'primary.main', letterSpacing: 2, display: 'block', mb: 4 }}>Spatial Legend</Typography>
-                <Stack spacing={4}>
-                  <Stack direction="row" spacing={3} alignItems="center">
-                    <Avatar sx={{ width: 40, height: 40, borderRadius: 3, bgcolor: 'blue.50', color: 'blue.600' }}>
-                      <LayoutGrid size={20} />
-                    </Avatar>
-                    <Box>
-                      <Typography variant="subtitle2" sx={{ fontWeight: 900 }}>Blue Block</Typography>
-                      <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.disabled', textTransform: 'uppercase' }}>1BHK Units (Wings A-1 to A-6)</Typography>
-                    </Box>
-                  </Stack>
-                  <Stack direction="row" spacing={3} alignItems="center">
-                    <Avatar sx={{ width: 40, height: 40, borderRadius: 3, bgcolor: 'indigo.50', color: 'indigo.600' }}>
-                      <LayoutGrid size={20} />
-                    </Avatar>
-                    <Box>
-                      <Typography variant="subtitle2" sx={{ fontWeight: 900 }}>Indigo Block</Typography>
-                      <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.disabled', textTransform: 'uppercase' }}>2BHK Units (Wings A-7 to A-24)</Typography>
-                    </Box>
-                  </Stack>
-                  <Stack direction="row" spacing={3} alignItems="center">
-                    <Avatar sx={{ width: 40, height: 40, borderRadius: 3, bgcolor: 'success.light', color: 'success.main' }}>
-                      <TreePine size={20} />
-                    </Avatar>
-                    <Box>
-                      <Typography variant="subtitle2" sx={{ fontWeight: 900 }}>Green Zone</Typography>
-                      <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.disabled', textTransform: 'uppercase' }}>Central Recreational Parks</Typography>
-                    </Box>
-                  </Stack>
-                </Stack>
-                <Divider sx={{ my: 4 }} />
-                <Button 
-                  fullWidth 
-                  variant="contained" 
-                  color="inherit"
-                  onClick={() => navigate('/buildings')}
-                  endIcon={<ArrowUpRight size={14} />}
-                  sx={{ 
-                    borderRadius: 4, py: 1.5, 
-                    fontWeight: 900, textTransform: 'uppercase', fontSize: '0.7rem',
-                    bgcolor: 'action.hover', color: 'text.primary',
-                    '&:hover': { bgcolor: 'primary.main', color: 'white' }
-                  }}
+              <p className="text-slate-400 italic leading-relaxed mb-8 text-sm">
+                "{BUILDER_INFO.vision}"
+              </p>
+
+              <div className="pt-6 border-t border-white/10 mb-8">
+                <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-3">Notable Portfolio</span>
+                <div className="flex flex-wrap gap-2">
+                  {BUILDER_INFO.projects.map((p, idx) => (
+                    <span key={idx} className="px-2 py-1 rounded-lg bg-white/5 text-slate-400 text-xs font-bold">
+                      {p}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <a 
+                  href={`tel:${BUILDER_INFO.phone}`}
+                  className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-white text-slate-900 font-black text-xs uppercase tracking-widest hover:bg-brand-50 hover:text-brand-600 transition-colors"
                 >
-                  Explore Individual Wings
-                </Button>
-              </Paper>
-            </Stack>
-          </Grid>
-        </Grid>
-      </Box>
-    </Fade>
+                  <Smartphone size={14} />
+                  Call Developer
+                </a>
+                <a 
+                  href={`mailto:${BUILDER_INFO.email}`}
+                  className="flex items-center justify-center gap-2 w-full py-3 rounded-xl border border-white/20 text-white font-black text-xs uppercase tracking-widest hover:bg-white/5 transition-colors"
+                >
+                  <Mail size={14} />
+                  Email Office
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] border border-slate-200 dark:border-slate-800">
+            <span className="text-[10px] font-black text-brand-600 uppercase tracking-widest block mb-6">Spatial Legend</span>
+            <div className="space-y-6">
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 bg-blue-50 dark:bg-blue-900/20 rounded-xl flex items-center justify-center text-blue-600">
+                  <LayoutGrid size={20} />
+                </div>
+                <div>
+                  <h6 className="text-sm font-black text-slate-900 dark:text-white">Blue Block</h6>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase">1BHK Units (Wings A-1 to A-6)</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl flex items-center justify-center text-indigo-600">
+                  <LayoutGrid size={20} />
+                </div>
+                <div>
+                  <h6 className="text-sm font-black text-slate-900 dark:text-white">Indigo Block</h6>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase">2BHK Units (Wings A-7 to A-24)</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 bg-green-50 dark:bg-green-900/20 rounded-xl flex items-center justify-center text-green-600">
+                  <TreePine size={20} />
+                </div>
+                <div>
+                  <h6 className="text-sm font-black text-slate-900 dark:text-white">Green Zone</h6>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase">Central Recreational Parks</span>
+                </div>
+              </div>
+            </div>
+            <div className="h-px bg-slate-100 dark:bg-slate-800 my-6" />
+            <button 
+              onClick={() => navigate('/buildings')}
+              className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-black text-xs uppercase tracking-widest hover:bg-brand-600 hover:text-white transition-colors"
+            >
+              Explore Individual Wings
+              <ArrowUpRight size={14} />
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 

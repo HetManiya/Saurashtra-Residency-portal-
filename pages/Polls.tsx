@@ -1,13 +1,7 @@
 import React, { useState } from 'react';
-import { 
-  Box, Typography, Grid, Card, Button, IconButton, 
-  Avatar, Chip, CircularProgress, Paper, useTheme, 
-  Fade, Stack, Divider, TextField, InputAdornment,
-  Dialog, DialogTitle, DialogContent, DialogActions,
-  LinearProgress, Tooltip, AvatarGroup
-} from '@mui/material';
-import { PieChart, Plus, CheckCircle2, Clock, X, Send, BarChart3, Users, Lock } from 'lucide-react';
+import { PieChart, Plus, CheckCircle2, Clock, X, Send, Lock } from 'lucide-react';
 import { useLanguage } from '../components/LanguageContext';
+import { motion, AnimatePresence } from 'motion/react';
 
 interface PollOption {
   id: string;
@@ -27,7 +21,6 @@ interface Poll {
 
 const Polls: React.FC = () => {
   const { t } = useLanguage();
-  const theme = useTheme();
   const [showModal, setShowModal] = useState(false);
   const [polls, setPolls] = useState<Poll[]>([
     {
@@ -93,260 +86,205 @@ const Polls: React.FC = () => {
   };
 
   return (
-    <Fade in={true}>
-      <Box sx={{ maxWidth: 900, mx: 'auto', pb: 8 }}>
-        <Box sx={{ 
-          display: 'flex', 
-          flexDirection: { xs: 'column', md: 'row' }, 
-          justifyContent: 'space-between', 
-          alignItems: { md: 'flex-end' }, 
-          gap: 3, 
-          mb: 6,
-          pb: 4,
-          borderBottom: '1px solid',
-          borderColor: 'divider'
-        }}>
-          <Box>
-            <Typography variant="h3" sx={{ fontWeight: 900, tracking: '-0.04em' }}>
-              Community <Box component="span" sx={{ color: 'primary.main' }}>Polls</Box>
-            </Typography>
-            <Typography variant="body1" sx={{ color: 'text.secondary', mt: 1, fontWeight: 500 }}>
-              Your voice matters. Vote on society decisions.
-            </Typography>
-          </Box>
-          <Button 
-            variant="contained" 
-            startIcon={<Plus size={18} strokeWidth={3} />}
-            onClick={() => setShowModal(true)}
-            sx={{ 
-              borderRadius: 6, px: 4, py: 1.5, 
-              fontWeight: 900, textTransform: 'uppercase', fontSize: '0.7rem',
-              boxShadow: 10,
-              '&:active': { transform: 'scale(0.95)' }
-            }}
-          >
-            Create Poll
-          </Button>
-        </Box>
-
-        <Stack spacing={6}>
-          {polls.map((poll) => (
-            <Card 
-              key={poll.id} 
-              sx={{ 
-                p: { xs: 4, md: 6 }, 
-                borderRadius: 12, 
-                border: '1px solid', 
-                borderColor: 'divider', 
-                boxShadow: 0,
-                position: 'relative',
-                overflow: 'hidden',
-                opacity: poll.status === 'Closed' ? 0.7 : 1,
-                transition: 'all 0.3s ease',
-                '&:hover': {
-                  borderColor: 'primary.main',
-                  boxShadow: 10
-                }
-              }}
-            >
-              {poll.status === 'Closed' && (
-                <Box sx={{ 
-                  position: 'absolute', top: 24, right: 24, 
-                  display: 'flex', alignItems: 'center', gap: 1, 
-                  px: 2, py: 0.5, bgcolor: 'action.hover', borderRadius: 10,
-                  border: '1px solid', borderColor: 'divider'
-                }}>
-                  <Lock size={12} color={theme.palette.text.disabled} />
-                  <Typography variant="caption" sx={{ fontWeight: 900, textTransform: 'uppercase', color: 'text.disabled', fontSize: '0.6rem' }}>Closed</Typography>
-                </Box>
-              )}
-              
-              <Box sx={{ mb: 6 }}>
-                <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 2 }}>
-                  <Avatar sx={{ width: 40, height: 40, borderRadius: 3, bgcolor: 'primary.light', color: 'primary.main' }}>
-                    <PieChart size={20} />
-                  </Avatar>
-                  <Typography variant="caption" sx={{ fontWeight: 900, textTransform: 'uppercase', color: 'text.disabled', letterSpacing: 1 }}>
-                    #{poll.id} • {poll.totalVotes} Votes
-                  </Typography>
-                </Stack>
-                <Typography variant="h4" sx={{ fontWeight: 900, tracking: '-0.02em', lineHeight: 1.2 }}>
-                  {poll.question}
-                </Typography>
-              </Box>
-
-              <Stack spacing={3}>
-                {poll.options.map((option) => {
-                  const percentage = poll.totalVotes > 0 ? Math.round((option.votes / poll.totalVotes) * 100) : 0;
-                  const isSelected = poll.userVoted === option.id;
-                  
-                  return (
-                    <Button
-                      key={option.id}
-                      disabled={poll.status === 'Closed' || !!poll.userVoted}
-                      onClick={() => handleVote(poll.id, option.id)}
-                      sx={{
-                        width: '100%',
-                        p: 0,
-                        borderRadius: 4,
-                        border: '2px solid',
-                        borderColor: isSelected ? 'primary.main' : 'divider',
-                        bgcolor: isSelected ? 'primary.light' : 'transparent',
-                        overflow: 'hidden',
-                        display: 'block',
-                        textAlign: 'left',
-                        textTransform: 'none',
-                        transition: 'all 0.3s ease',
-                        '&:hover': {
-                          borderColor: 'primary.main',
-                          bgcolor: isSelected ? 'primary.light' : 'action.hover'
-                        }
-                      }}
-                    >
-                      <Box sx={{ position: 'relative', p: 3 }}>
-                        <Box sx={{ 
-                          position: 'absolute', left: 0, top: 0, bottom: 0, 
-                          width: `${percentage}%`, bgcolor: isSelected ? 'primary.main' : 'action.hover', 
-                          opacity: isSelected ? 0.1 : 0.5, transition: 'width 1s ease' 
-                        }} />
-                        
-                        <Box sx={{ position: 'relative', zIndex: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                          <Stack direction="row" spacing={2} alignItems="center">
-                            <Avatar sx={{ 
-                              width: 24, height: 24, border: '2px solid', 
-                              borderColor: isSelected ? 'primary.main' : 'divider',
-                              bgcolor: isSelected ? 'primary.main' : 'transparent',
-                              color: 'white'
-                            }}>
-                              {isSelected && <CheckCircle2 size={14} />}
-                            </Avatar>
-                            <Typography variant="subtitle2" sx={{ fontWeight: 900, color: isSelected ? 'primary.main' : 'text.primary' }}>
-                              {option.text}
-                            </Typography>
-                          </Stack>
-                          <Stack direction="row" spacing={2} alignItems="center">
-                            <Typography variant="caption" sx={{ fontWeight: 900, color: 'text.disabled' }}>{option.votes}</Typography>
-                            <Typography variant="subtitle2" sx={{ fontWeight: 900 }}>{percentage}%</Typography>
-                          </Stack>
-                        </Box>
-                      </Box>
-                    </Button>
-                  );
-                })}
-              </Stack>
-
-              <Box sx={{ mt: 6, pt: 4, borderTop: '1px solid', borderColor: 'divider', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                 <Stack direction="row" spacing={1} alignItems="center" sx={{ color: 'text.disabled' }}>
-                    <Clock size={14} />
-                    <Typography variant="caption" sx={{ fontWeight: 900, textTransform: 'uppercase' }}>
-                      Ends {new Date(poll.endDate).toLocaleDateString()}
-                    </Typography>
-                 </Stack>
-                 <AvatarGroup max={4} sx={{ '& .MuiAvatar-root': { width: 32, height: 32, fontSize: '0.6rem', fontWeight: 900, border: '2px solid', borderColor: 'background.paper' } }}>
-                    {[1,2,3,4,5].map(i => (
-                      <Avatar key={i} src={`https://api.dicebear.com/7.x/avataaars/svg?seed=user${i + poll.id}`} />
-                    ))}
-                 </AvatarGroup>
-              </Box>
-            </Card>
-          ))}
-        </Stack>
-
-        {/* Create Poll Modal */}
-        <Dialog 
-          open={showModal} 
-          onClose={() => setShowModal(false)}
-          maxWidth="sm"
-          fullWidth
-          PaperProps={{ sx: { borderRadius: 10, p: 0, overflow: 'hidden' } }}
+    <div className="pb-12 animate-fade-in max-w-4xl mx-auto">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-8 pb-6 border-b border-slate-200 dark:border-slate-800">
+        <div>
+          <h1 className="text-4xl font-black tracking-tighter text-slate-900 dark:text-white mb-2">
+            Community <span className="text-brand-600">Polls</span>
+          </h1>
+          <p className="text-slate-500 dark:text-slate-400 font-medium">
+            Your voice matters. Vote on society decisions.
+          </p>
+        </div>
+        <button 
+          onClick={() => setShowModal(true)}
+          className="flex items-center gap-2 bg-brand-600 text-white px-6 py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-brand-700 transition-colors shadow-lg shadow-brand-600/20 active:scale-95 transform duration-100"
         >
-          <DialogTitle sx={{ p: 4, borderBottom: '1px solid', borderColor: 'divider', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Typography variant="h4" sx={{ fontWeight: 900, tracking: '-0.04em' }}>New Poll</Typography>
-            <IconButton onClick={() => setShowModal(false)}>
-              <X size={28} />
-            </IconButton>
-          </DialogTitle>
-          <DialogContent sx={{ p: 4 }}>
-            <Stack spacing={4} component="form" onSubmit={handleCreatePoll} sx={{ mt: 1 }}>
-              <Box>
-                <Typography variant="caption" sx={{ fontWeight: 900, color: 'text.disabled', textTransform: 'uppercase', ml: 1, mb: 1, display: 'block' }}>Question</Typography>
-                <TextField 
-                  fullWidth 
-                  multiline
-                  rows={3}
-                  placeholder="What would you like to ask the community?" 
-                  required
-                  value={newPoll.question}
-                  onChange={(e) => setNewPoll({...newPoll, question: e.target.value})}
-                  InputProps={{ sx: { borderRadius: 8, bgcolor: 'action.hover' } }}
-                />
-              </Box>
+          <Plus size={18} strokeWidth={3} />
+          Create Poll
+        </button>
+      </div>
 
-              <Box>
-                <Typography variant="caption" sx={{ fontWeight: 900, color: 'text.disabled', textTransform: 'uppercase', ml: 1, mb: 1, display: 'block' }}>Options</Typography>
-                <Stack spacing={2}>
-                  {newPoll.options.map((opt, i) => (
-                    <Box key={i} sx={{ position: 'relative' }}>
-                      <TextField 
-                        fullWidth 
-                        placeholder={`Option ${i + 1}`} 
-                        required
-                        value={opt}
-                        onChange={(e) => {
-                          const updated = [...newPoll.options];
-                          updated[i] = e.target.value;
-                          setNewPoll({...newPoll, options: updated});
-                        }}
-                        InputProps={{ sx: { borderRadius: 8, bgcolor: 'action.hover' } }}
-                      />
-                      {newPoll.options.length > 2 && (
-                        <IconButton 
-                          onClick={() => setNewPoll({...newPoll, options: newPoll.options.filter((_, idx) => idx !== i)})}
-                          sx={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)' }}
-                        >
-                          <X size={16} />
-                        </IconButton>
-                      )}
-                    </Box>
-                  ))}
-                  <Button 
-                    fullWidth 
-                    variant="outlined" 
-                    onClick={() => setNewPoll({...newPoll, options: [...newPoll.options, '']})}
-                    sx={{ 
-                      borderRadius: 8, py: 2, 
-                      borderStyle: 'dashed',
-                      fontWeight: 900, textTransform: 'uppercase', fontSize: '0.65rem',
-                      color: 'text.disabled',
-                      '&:hover': { borderColor: 'primary.main', color: 'primary.main' }
-                    }}
+      <div className="space-y-8">
+        {polls.map((poll) => (
+          <div 
+            key={poll.id} 
+            className={`bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] border transition-all duration-300 relative overflow-hidden group ${
+              poll.status === 'Closed' 
+                ? 'border-slate-200 dark:border-slate-800 opacity-70' 
+                : 'border-slate-200 dark:border-slate-800 hover:border-brand-500 hover:shadow-xl'
+            }`}
+          >
+            {poll.status === 'Closed' && (
+              <div className="absolute top-6 right-6 flex items-center gap-2 px-3 py-1 bg-slate-100 dark:bg-slate-800 rounded-full border border-slate-200 dark:border-slate-700">
+                <Lock size={12} className="text-slate-400" />
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Closed</span>
+              </div>
+            )}
+            
+            <div className="mb-8">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-xl bg-brand-50 dark:bg-brand-900/20 flex items-center justify-center text-brand-600 dark:text-brand-400">
+                  <PieChart size={20} />
+                </div>
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                  #{poll.id} • {poll.totalVotes} Votes
+                </span>
+              </div>
+              <h3 className="text-2xl font-black text-slate-900 dark:text-white leading-tight">
+                {poll.question}
+              </h3>
+            </div>
+
+            <div className="space-y-4">
+              {poll.options.map((option) => {
+                const percentage = poll.totalVotes > 0 ? Math.round((option.votes / poll.totalVotes) * 100) : 0;
+                const isSelected = poll.userVoted === option.id;
+                
+                return (
+                  <button
+                    key={option.id}
+                    disabled={poll.status === 'Closed' || !!poll.userVoted}
+                    onClick={() => handleVote(poll.id, option.id)}
+                    className={`w-full relative p-0 rounded-2xl border-2 overflow-hidden transition-all duration-300 group/btn ${
+                      isSelected 
+                        ? 'border-brand-500 bg-brand-50 dark:bg-brand-900/10' 
+                        : 'border-slate-200 dark:border-slate-800 bg-transparent hover:border-brand-300 dark:hover:border-brand-700'
+                    }`}
                   >
-                    + Add Option
-                  </Button>
-                </Stack>
-              </Box>
+                    <div 
+                      className={`absolute left-0 top-0 bottom-0 transition-all duration-1000 ease-out ${
+                        isSelected ? 'bg-brand-200/50 dark:bg-brand-900/30' : 'bg-slate-100/50 dark:bg-slate-800/50'
+                      }`}
+                      style={{ width: `${percentage}%` }}
+                    />
+                    
+                    <div className="relative z-10 p-4 flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${
+                          isSelected 
+                            ? 'border-brand-500 bg-brand-500 text-white' 
+                            : 'border-slate-300 dark:border-slate-600 bg-transparent'
+                        }`}>
+                          {isSelected && <CheckCircle2 size={14} />}
+                        </div>
+                        <span className={`text-sm font-black ${
+                          isSelected ? 'text-brand-700 dark:text-brand-300' : 'text-slate-700 dark:text-slate-300'
+                        }`}>
+                          {option.text}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span className="text-xs font-bold text-slate-400">{option.votes}</span>
+                        <span className="text-sm font-black text-slate-900 dark:text-white">{percentage}%</span>
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
 
-              <Button 
-                fullWidth 
-                variant="contained" 
-                size="large"
-                type="submit"
-                startIcon={<Send size={18} />}
-                sx={{ 
-                  borderRadius: 10, py: 2, 
-                  fontWeight: 900, textTransform: 'uppercase', 
-                  letterSpacing: 1.5,
-                  boxShadow: 10,
-                  '&:active': { transform: 'scale(0.95)' }
-                }}
-              >
-                Launch Community Poll
-              </Button>
-            </Stack>
-          </DialogContent>
-        </Dialog>
-      </Box>
-    </Fade>
+            <div className="mt-8 pt-6 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center">
+               <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                  <Clock size={14} />
+                  Ends {new Date(poll.endDate).toLocaleDateString()}
+               </div>
+               <div className="flex -space-x-2">
+                  {[1,2,3,4,5].map(i => (
+                    <img 
+                      key={i} 
+                      src={`https://api.dicebear.com/7.x/avataaars/svg?seed=user${i + poll.id}`} 
+                      alt="User"
+                      className="w-8 h-8 rounded-full border-2 border-white dark:border-slate-900 bg-slate-100"
+                    />
+                  ))}
+               </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Create Poll Modal */}
+      <AnimatePresence>
+        {showModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 20 }}
+              className="bg-white dark:bg-slate-900 w-full max-w-lg rounded-[2.5rem] shadow-2xl overflow-hidden"
+            >
+              <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-800/50">
+                <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">New Poll</h2>
+                <button onClick={() => setShowModal(false)} className="p-2 text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl transition-colors">
+                  <X size={24} />
+                </button>
+              </div>
+              
+              <form onSubmit={handleCreatePoll} className="p-8 space-y-6">
+                <div>
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block ml-1">Question</label>
+                  <textarea 
+                    rows={3}
+                    placeholder="What would you like to ask the community?" 
+                    required
+                    value={newPoll.question}
+                    onChange={(e) => setNewPoll({...newPoll, question: e.target.value})}
+                    className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-2xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-brand-500 outline-none resize-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block ml-1">Options</label>
+                  <div className="space-y-3">
+                    {newPoll.options.map((opt, i) => (
+                      <div key={i} className="relative">
+                        <input 
+                          type="text"
+                          placeholder={`Option ${i + 1}`} 
+                          required
+                          value={opt}
+                          onChange={(e) => {
+                            const updated = [...newPoll.options];
+                            updated[i] = e.target.value;
+                            setNewPoll({...newPoll, options: updated});
+                          }}
+                          className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-2xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-brand-500 outline-none pr-10"
+                        />
+                        {newPoll.options.length > 2 && (
+                          <button 
+                            type="button"
+                            onClick={() => setNewPoll({...newPoll, options: newPoll.options.filter((_, idx) => idx !== i)})}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 transition-colors"
+                          >
+                            <X size={16} />
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                    <button 
+                      type="button"
+                      onClick={() => setNewPoll({...newPoll, options: [...newPoll.options, '']})}
+                      className="w-full border-2 border-dashed border-slate-200 dark:border-slate-700 text-slate-400 hover:border-brand-500 hover:text-brand-500 py-3 rounded-2xl font-black text-xs uppercase tracking-widest transition-colors"
+                    >
+                      + Add Option
+                    </button>
+                  </div>
+                </div>
+
+                <button 
+                  type="submit"
+                  className="w-full bg-brand-600 text-white py-4 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-brand-700 transition-colors shadow-xl shadow-brand-600/20 active:scale-95 transform duration-100 flex items-center justify-center gap-2"
+                >
+                  <Send size={18} />
+                  Launch Community Poll
+                </button>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 };
 

@@ -1,28 +1,15 @@
+
 import React, { useState, useEffect, useMemo } from 'react';
-import { 
-  Box, Typography, Grid, Card, Button, IconButton, 
-  Avatar, Chip, CircularProgress, Paper, useTheme, 
-  Fade, Stack, Divider, TextField, InputAdornment,
-  Dialog, DialogTitle, DialogContent, DialogActions,
-  useMediaQuery, LinearProgress, Tooltip
-} from '@mui/material';
-import { 
-  Search, Building2, ChevronRight, Zap, Droplets, MapPin, 
-  LayoutGrid, Home, Loader2, Users, X, User, Phone, 
-  Calendar, Briefcase, Info, Edit3, Save, CheckCircle2, 
-  Trash2, PlusCircle, Star, ShieldCheck, Wallet, CreditCard, 
-  ArrowRight, MessageSquare, AlertCircle, History, Receipt, 
-  Ghost, FileText, ClipboardCheck, Filter, Download 
-} from 'lucide-react';
+// Added 'Download' to lucide-react imports to fix the error: Cannot find name 'Download'
+import { Search, Building2, ChevronRight, Zap, Droplets, MapPin, LayoutGrid, Home, Loader2, Users, X, User, Phone, Calendar, Briefcase, Info, Edit3, Save, CheckCircle2, Trash2, PlusCircle, Star, ShieldCheck, Wallet, CreditCard, ArrowRight, MessageSquare, AlertCircle, History, Receipt, Ghost, FileText, ClipboardCheck, Filter, Download } from 'lucide-react';
 import { api } from '../services/api';
 import { SOCIETY_INFO, BUILDINGS as WING_CONSTANTS } from '../constants';
 import { FlatType, Building, Flat, FamilyMember, OccupancyType, PaymentStatus, MaintenanceRecord } from '../types';
 import { useLanguage } from '../components/LanguageContext';
+import SocietyMap from '../components/SocietyMap';
 
 const Buildings: React.FC = () => {
   const { t } = useLanguage();
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [buildings, setBuildings] = useState<Building[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -33,6 +20,7 @@ const Buildings: React.FC = () => {
   const [showAuditModal, setShowAuditModal] = useState(false);
   const [auditSearch, setAuditSearch] = useState('');
   const [totalMaintenance, setTotalMaintenance] = useState(2500);
+  const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
   
   useEffect(() => {
     const stored = localStorage.getItem('sr_user');
@@ -69,6 +57,7 @@ const Buildings: React.FC = () => {
 
   const isAdmin = user?.role === 'ADMIN' || user?.role === 'COMMITTEE';
 
+  // Calculate society-wide vacant/unregistered units
   const vacancyReport = useMemo(() => {
     const report: Record<string, string[]> = {};
     let totalVacant = 0;
@@ -109,13 +98,11 @@ const Buildings: React.FC = () => {
     const unitsPerFloor = [1, 2, 3, 4];
     
     return floors.map(floor => (
-      <Box key={floor} sx={{ display: 'flex', alignItems: 'center', gap: { xs: 2, md: 4 }, mb: 2 }}>
-        <Box sx={{ width: 60, textAlign: 'right' }}>
-          <Typography variant="caption" sx={{ fontWeight: 900, textTransform: 'uppercase', color: 'text.disabled', letterSpacing: 1 }}>
-            Floor {floor}
-          </Typography>
-        </Box>
-        <Grid container spacing={2} sx={{ flex: 1 }}>
+      <div key={floor} className="flex items-center gap-8 group">
+        <div className="w-20 text-right">
+          <p className="text-[11px] font-black uppercase tracking-widest text-slate-300 dark:text-slate-600 group-hover:text-brand-600 transition-colors">Floor {floor}</p>
+        </div>
+        <div className="flex-1 grid grid-cols-4 gap-6">
           {unitsPerFloor.map(unit => {
             const unitNo = `${floor}0${unit}`;
             const flatId = `${building.name}-${unitNo}`;
@@ -123,479 +110,387 @@ const Buildings: React.FC = () => {
             const isOccupied = !!profile;
 
             return (
-              <Grid item xs={3} key={unitNo}>
-                <Button
-                  fullWidth
-                  onClick={() => setSelectedFlat({ unitNumber: unitNo, profile })}
-                  sx={{
-                    aspectRatio: '16/10',
-                    borderRadius: 4,
-                    border: '2px solid',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    p: 1,
-                    transition: 'all 0.3s ease',
-                    position: 'relative',
-                    overflow: 'hidden',
-                    bgcolor: !isOccupied 
-                      ? 'action.hover' 
-                      : profile.occupancyType === 'Owner'
-                        ? 'success.light'
-                        : 'info.light',
-                    borderColor: !isOccupied 
-                      ? 'divider' 
-                      : profile.occupancyType === 'Owner'
-                        ? 'success.main'
-                        : 'info.main',
-                    borderStyle: !isOccupied ? 'dashed' : 'solid',
-                    opacity: !isOccupied ? 0.6 : 1,
-                    '&:hover': {
-                      transform: 'translateY(-4px)',
-                      boxShadow: 4,
-                      bgcolor: !isOccupied 
-                        ? 'action.selected' 
-                        : profile.occupancyType === 'Owner'
-                          ? 'success.light'
-                          : 'info.light',
-                    }
-                  }}
-                >
-                  <Box sx={{ 
-                    position: 'absolute', top: 0, left: 0, right: 0, height: 4,
-                    bgcolor: !isOccupied ? 'text.disabled' : profile.occupancyType === 'Owner' ? 'success.main' : 'info.main'
-                  }} />
-                  <Typography variant="h6" sx={{ 
-                    fontWeight: 900, 
-                    color: !isOccupied ? 'text.disabled' : 'text.primary',
-                    fontSize: { xs: '0.8rem', md: '1.25rem' }
-                  }}>
-                    {unitNo}
-                  </Typography>
-                  {isOccupied && (
-                    <Stack direction="row" spacing={0.5} alignItems="center" sx={{ mt: 0.5 }}>
-                      <User size={10} color={theme.palette.primary.main} />
-                      <Typography variant="caption" sx={{ 
-                        fontWeight: 900, 
-                        fontSize: '0.5rem', 
-                        color: 'text.secondary',
-                        textTransform: 'uppercase',
-                        maxWidth: 40,
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap'
-                      }}>
-                        {profile.name.split(' ')[0]}
-                      </Typography>
-                    </Stack>
-                  )}
-                </Button>
-              </Grid>
+              <button 
+                key={unitNo}
+                onClick={() => setSelectedFlat({ unitNumber: unitNo, profile })}
+                className={`
+                  relative aspect-[16/10] rounded-2xl border-2 transition-all duration-300 overflow-hidden group/flat flex flex-col items-center justify-center
+                  ${!isOccupied 
+                    ? 'bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 border-dashed opacity-60' 
+                    : profile.occupancyType === 'Owner'
+                      ? 'bg-emerald-50/50 dark:bg-emerald-900/10 border-emerald-100 dark:border-emerald-900/40 hover:bg-emerald-100'
+                      : 'bg-blue-50/50 dark:bg-blue-900/10 border-blue-100 dark:border-blue-900/40 hover:bg-blue-100'
+                  }
+                  hover:scale-105 hover:shadow-xl hover:-translate-y-1 active:scale-95
+                `}
+              >
+                <div className={`
+                  absolute top-0 inset-x-0 h-1 transition-all duration-300
+                  ${!isOccupied ? 'bg-slate-200 dark:bg-slate-700' : profile.occupancyType === 'Owner' ? 'bg-emerald-500' : 'bg-blue-500'}
+                `} />
+                
+                <span className={`text-xl font-black tracking-tighter transition-colors ${
+                  !isOccupied ? 'text-slate-300 dark:text-slate-700' : 'text-slate-900 dark:text-white group-hover/flat:text-brand-600'
+                }`}>
+                  {unitNo}
+                </span>
+                
+                {isOccupied && (
+                  <div className="mt-1 flex items-center gap-1">
+                    <User size={10} className="text-brand-500" />
+                    <span className="text-[8px] font-black uppercase text-slate-400 truncate max-w-[60px]">{profile.name.split(' ')[0]}</span>
+                  </div>
+                )}
+              </button>
             );
           })}
-        </Grid>
-      </Box>
+        </div>
+      </div>
     ));
   };
 
   if (loading) {
     return (
-      <Box sx={{ height: '60vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-        <CircularProgress size={40} sx={{ mb: 2 }} />
-        <Typography variant="caption" sx={{ fontWeight: 900, textTransform: 'uppercase', color: 'text.secondary', letterSpacing: 2 }}>
-          Auditing Society Assets...
-        </Typography>
-      </Box>
+      <div className="h-[60vh] flex flex-col items-center justify-center">
+        <Loader2 className="animate-spin text-brand-600 mb-4" size={40} />
+        <p className="font-black uppercase tracking-widest text-xs text-slate-400">Auditing Society Assets...</p>
+      </div>
     );
   }
 
   return (
-    <Fade in={true}>
-      <Box sx={{ pb: 8 }}>
-        <Box sx={{ 
-          display: 'flex', 
-          flexDirection: { xs: 'column', md: 'row' }, 
-          justifyContent: 'space-between', 
-          alignItems: { md: 'center' }, 
-          gap: 3, 
-          mb: 6,
-          pb: 4,
-          borderBottom: '1px solid',
-          borderColor: 'divider'
-        }}>
-          <Box>
-            <Typography variant="h4" sx={{ fontWeight: 900, tracking: '-0.04em' }}>
-              {t('residential_infra')}
-            </Typography>
-            <Typography variant="body1" sx={{ color: 'text.secondary', mt: 1, fontWeight: 500 }}>
-              Real-time occupancy tracking for Pasodara portal
-            </Typography>
-          </Box>
+    <div className="space-y-10 animate-fade-up">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-8 border-b border-slate-200 dark:border-slate-800">
+        <div>
+          <h1 className="text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">{t('residential_infra')}</h1>
+          <p className="text-slate-500 dark:text-slate-400 mt-2 font-medium">Real-time occupancy tracking for Pasodara portal</p>
+        </div>
 
-          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={3} alignItems="center">
-            <Stack direction="row" spacing={2}>
-              <Paper sx={{ px: 3, py: 1.5, borderRadius: 4, textAlign: 'center', border: '1px solid', borderColor: 'success.light', bgcolor: 'success.light', opacity: 0.8 }}>
-                <Typography variant="caption" sx={{ fontWeight: 900, color: 'success.main', textTransform: 'uppercase', letterSpacing: 1, display: 'block', mb: 0.5 }}>Registered</Typography>
-                <Typography variant="h5" sx={{ fontWeight: 900, color: 'success.main', lineHeight: 1 }}>{occupiedCount}</Typography>
-              </Paper>
-              <Paper sx={{ px: 3, py: 1.5, borderRadius: 4, textAlign: 'center', border: '1px solid', borderColor: 'divider', bgcolor: 'action.hover' }}>
-                <Typography variant="caption" sx={{ fontWeight: 900, color: 'text.secondary', textTransform: 'uppercase', letterSpacing: 1, display: 'block', mb: 0.5 }}>Vacant</Typography>
-                <Typography variant="h5" sx={{ fontWeight: 900, color: 'text.primary', lineHeight: 1 }}>{vacantCount}</Typography>
-              </Paper>
-            </Stack>
-            {isAdmin && (
-              <Button 
-                variant="contained" 
-                color="inherit"
-                startIcon={<FileText size={18} />}
-                onClick={() => setShowAuditModal(true)}
-                sx={{ 
-                  borderRadius: 6, px: 4, py: 1.5, 
-                  fontWeight: 900, textTransform: 'uppercase', 
-                  boxShadow: 6, bgcolor: 'text.primary', color: 'background.paper',
-                  '&:hover': { bgcolor: 'primary.main' }
-                }}
-              >
-                Vacancy Report
-              </Button>
-            )}
-          </Stack>
-        </Box>
+        <div className="flex flex-col sm:flex-row gap-6 items-center">
+          <div className="flex gap-4">
+            <div className="bg-emerald-50 dark:bg-emerald-900/10 border border-emerald-100 dark:border-emerald-800 px-6 py-3 rounded-2xl text-center">
+               <p className="text-[10px] font-black uppercase text-emerald-600 tracking-widest mb-1">Registered</p>
+               <p className="text-2xl font-black text-emerald-700 dark:text-emerald-400 leading-none">{occupiedCount}</p>
+            </div>
+            <div className="bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 px-6 py-3 rounded-2xl text-center">
+               <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-1">Vacant</p>
+               <p className="text-2xl font-black text-slate-900 dark:text-white leading-none">{vacantCount}</p>
+            </div>
+          </div>
+          <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-xl">
+            <button
+              onClick={() => setViewMode('list')}
+              className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all ${
+                viewMode === 'list' 
+                  ? 'bg-white dark:bg-slate-700 text-brand-600 shadow-sm' 
+                  : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
+              }`}
+            >
+              List View
+            </button>
+            <button
+              onClick={() => setViewMode('map')}
+              className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all ${
+                viewMode === 'map' 
+                  ? 'bg-white dark:bg-slate-700 text-brand-600 shadow-sm' 
+                  : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
+              }`}
+            >
+              Site Map
+            </button>
+          </div>
+          {isAdmin && (
+            <button 
+              onClick={() => setShowAuditModal(true)}
+              className="px-6 py-4 bg-slate-900 dark:bg-slate-800 text-white rounded-3xl font-black text-xs uppercase tracking-widest flex items-center gap-2 hover:bg-brand-600 transition-all shadow-xl"
+            >
+              <FileText size={18} /> Vacancy Report
+            </button>
+          )}
+        </div>
+      </div>
 
-        <Grid container spacing={4}>
-          {filteredBuildings.map((building, index) => {
+      {viewMode === 'map' ? (
+        <SocietyMap 
+          buildings={filteredBuildings} 
+          registeredUnits={registeredUnits} 
+          onBuildingClick={setSelectedBuilding} 
+        />
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+          {filteredBuildings.map((building, index: number) => {
             const wingOccupied = registeredUnits.filter(p => p.flatId.startsWith(building.name)).length;
             return (
-              <Grid item xs={12} sm={6} lg={4} xl={3} key={building.id || index}>
-                <Card 
-                  onClick={() => setSelectedBuilding(building)}
-                  sx={{ 
-                    borderRadius: 8, 
-                    border: '1px solid', 
-                    borderColor: 'divider', 
-                    boxShadow: 0,
-                    cursor: 'pointer',
-                    transition: 'all 0.3s ease',
-                    '&:hover': {
-                      transform: 'translateY(-8px)',
-                      boxShadow: 6,
-                      borderColor: 'primary.main'
-                    }
-                  }}
-                >
-                  <Box sx={{ height: 10, bgcolor: building.type === '1BHK' ? 'info.main' : 'primary.main' }} />
-                  <Box sx={{ p: 4 }}>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
-                      <Avatar sx={{ 
-                        width: 56, height: 56, borderRadius: 4, 
-                        bgcolor: 'action.hover', color: 'text.secondary',
-                        transition: 'all 0.3s ease',
-                        '.MuiCard-root:hover &': { bgcolor: 'primary.main', color: 'white' }
-                      }}>
-                        <Building2 size={28} />
-                      </Avatar>
-                      <Box sx={{ textAlign: 'right' }}>
-                        <Chip 
-                          label={building.type} 
-                          size="small" 
-                          sx={{ fontWeight: 900, textTransform: 'uppercase', fontSize: '0.6rem', borderRadius: 2, mb: 1 }} 
-                        />
-                        <Typography variant="caption" sx={{ display: 'block', fontWeight: 900, color: 'primary.main', textTransform: 'uppercase', fontSize: '0.6rem' }}>
-                          {wingOccupied}/20 Registered
-                        </Typography>
-                      </Box>
-                    </Box>
+              <div 
+                key={building.id || index} 
+                className="group bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 overflow-hidden shadow-sm premium-card flex flex-col cursor-pointer"
+                onClick={() => setSelectedBuilding(building)}
+              >
+                <div className={`h-2.5 w-full transition-colors duration-500 ${building.type === '1BHK' ? 'bg-blue-500' : 'bg-indigo-600'}`} />
+                <div className="p-8 flex-1 flex flex-col">
+                  <div className="flex items-center justify-between mb-8">
+                    <div className="p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl text-slate-400 group-hover:bg-brand-600 group-hover:text-white transition-all duration-300">
+                      <Building2 size={28} />
+                    </div>
+                    <div className="text-right">
+                      <div className="text-[10px] font-black px-3 py-1.5 rounded-full uppercase tracking-widest border border-slate-100 dark:border-slate-800 text-slate-500 mb-2">
+                        {building.type}
+                      </div>
+                      <p className="text-[9px] font-black text-brand-600 uppercase tracking-widest">{wingOccupied}/20 Registered</p>
+                    </div>
+                  </div>
+                  
+                  <h3 className="text-3xl font-black text-slate-900 dark:text-white mb-6 group-hover:text-brand-600 transition-colors">Wing {building.name}</h3>
+                  
+                  <div className="grid grid-cols-2 gap-4 mb-8">
+                    <div className="bg-slate-50/50 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-100 dark:border-slate-800/50">
+                      <p className="text-[10px] text-slate-400 uppercase font-black tracking-widest mb-1 flex items-center gap-1"><LayoutGrid size={10} /> Floors</p>
+                      <p className="text-xl font-black">5</p>
+                    </div>
+                    <div className="bg-slate-50/50 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-100 dark:border-slate-800/50">
+                      <p className="text-[10px] text-slate-400 uppercase font-black tracking-widest mb-1 flex items-center gap-1"><Home size={10} /> Parking</p>
+                      <p className="text-xl font-black">{building.parkingSpots || 20}</p>
+                    </div>
+                  </div>
 
-                    <Typography variant="h4" sx={{ fontWeight: 900, mb: 3 }}>Wing {building.name}</Typography>
-
-                    <Grid container spacing={2} sx={{ mb: 4 }}>
-                      <Grid item xs={6}>
-                        <Paper sx={{ p: 2, borderRadius: 4, bgcolor: 'action.hover', border: '1px solid', borderColor: 'divider' }}>
-                          <Typography variant="caption" sx={{ fontWeight: 900, color: 'text.secondary', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
-                            <LayoutGrid size={10} /> Floors
-                          </Typography>
-                          <Typography variant="h6" sx={{ fontWeight: 900 }}>5</Typography>
-                        </Paper>
-                      </Grid>
-                      <Grid item xs={6}>
-                        <Paper sx={{ p: 2, borderRadius: 4, bgcolor: 'action.hover', border: '1px solid', borderColor: 'divider' }}>
-                          <Typography variant="caption" sx={{ fontWeight: 900, color: 'text.secondary', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
-                            <Home size={10} /> Parking
-                          </Typography>
-                          <Typography variant="h6" sx={{ fontWeight: 900 }}>{building.parkingSpots || 20}</Typography>
-                        </Paper>
-                      </Grid>
-                    </Grid>
-
-                    <Button 
-                      fullWidth 
-                      variant="contained" 
-                      color="inherit"
-                      endIcon={<ChevronRight size={18} />}
-                      sx={{ 
-                        borderRadius: 4, py: 1.5, 
-                        fontWeight: 900, textTransform: 'uppercase', fontSize: '0.7rem',
-                        bgcolor: 'text.primary', color: 'background.paper',
-                        '&:hover': { bgcolor: 'primary.main' }
-                      }}
-                    >
-                      {t('view_wing_mgmt')}
-                    </Button>
-                  </Box>
-                </Card>
-              </Grid>
+                  <button className="w-full flex items-center justify-between px-6 py-4 bg-slate-900 dark:bg-slate-800 text-white rounded-2xl font-black text-xs uppercase tracking-widest group-hover:bg-brand-600 transition-all duration-300">
+                    {t('view_wing_mgmt')}
+                    <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                  </button>
+                </div>
+              </div>
             );
           })}
-        </Grid>
+        </div>
+      )}
 
-        {/* Vacancy Audit Modal */}
-        <Dialog 
-          open={showAuditModal} 
-          onClose={() => setShowAuditModal(false)}
-          maxWidth="md"
-          fullWidth
-          PaperProps={{ sx: { borderRadius: 10, p: 0, overflow: 'hidden' } }}
-        >
-          <DialogTitle sx={{ p: 4, borderBottom: '1px solid', borderColor: 'divider', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Stack direction="row" spacing={2} alignItems="center">
-              <Avatar sx={{ width: 56, height: 56, bgcolor: 'text.primary', borderRadius: 4 }}>
-                <ClipboardCheck size={32} />
-              </Avatar>
-              <Box>
-                <Typography variant="h5" sx={{ fontWeight: 900 }}>Detailed Occupancy Audit</Typography>
-                <Typography variant="caption" sx={{ fontWeight: 900, color: 'primary.main', textTransform: 'uppercase' }}>
-                  Listing {vacancyReport.totalVacant} Unregistered units across 24 wings
-                </Typography>
-              </Box>
-            </Stack>
-            <Stack direction="row" spacing={2} alignItems="center">
-              <TextField 
-                size="small"
-                placeholder="Search Wing..."
-                value={auditSearch}
-                onChange={(e) => setAuditSearch(e.target.value)}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <Search size={16} />
-                    </InputAdornment>
-                  ),
-                  sx: { borderRadius: 3, bgcolor: 'action.hover' }
+      {/* Vacancy Audit Modal */}
+      {showAuditModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
+          <div className="absolute inset-0 bg-slate-900/80 backdrop-blur-xl animate-in fade-in duration-300" onClick={() => setShowAuditModal(false)} />
+          <div className="relative w-full max-w-4xl bg-white dark:bg-slate-900 rounded-[3.5rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 border border-slate-100 dark:border-slate-800 flex flex-col max-h-[85vh]">
+            <div className="p-10 border-b border-slate-100 dark:border-slate-800 flex flex-col md:flex-row justify-between items-center bg-white dark:bg-slate-900 sticky top-0 z-10 gap-6">
+              <div className="flex items-center gap-5">
+                <div className="w-16 h-16 bg-slate-900 dark:bg-brand-600 rounded-3xl flex items-center justify-center text-white shadow-xl">
+                  <ClipboardCheck size={32} />
+                </div>
+                <div>
+                  <h3 className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter">Detailed Occupancy Audit</h3>
+                  <p className="text-[10px] font-black uppercase text-brand-600 tracking-widest">
+                    Listing {vacancyReport.totalVacant} Unregistered units across 24 wings
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="relative">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                  <input 
+                    type="text" 
+                    placeholder="Search Wing..." 
+                    className="pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-xl text-xs font-bold outline-none"
+                    value={auditSearch}
+                    onChange={(e) => setAuditSearch(e.target.value)}
+                  />
+                </div>
+                <button onClick={() => setShowAuditModal(false)} className="p-3 text-slate-300 hover:text-slate-900 dark:hover:text-white transition-all"><X size={28} /></button>
+              </div>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-10 bg-slate-50/50 dark:bg-slate-900/50">
+               <div className="space-y-8">
+                  {/* Fixed TypeScript error by adding explicit type annotation for entries to avoid 'unknown' flats array */}
+                  {Object.entries(vacancyReport.report)
+                    .filter(([wing]) => wing.toLowerCase().includes(auditSearch.toLowerCase()))
+                    .map(([wing, flats]: [string, string[]]) => (
+                    <div key={wing} className="bg-white dark:bg-slate-800 p-8 rounded-[2.5rem] border border-slate-100 dark:border-slate-700 shadow-sm">
+                       <div className="flex items-center justify-between mb-6">
+                          <div className="flex items-center gap-3">
+                            <span className="w-10 h-10 bg-slate-100 dark:bg-slate-900 rounded-xl flex items-center justify-center font-black text-slate-400">
+                              {wing}
+                            </span>
+                            <h4 className="text-xl font-black tracking-tight">Wing {wing} Vacancies</h4>
+                          </div>
+                          <span className="text-[10px] font-black bg-rose-50 text-rose-600 px-3 py-1 rounded-lg uppercase tracking-widest">
+                            {flats.length} Missing Profiles
+                          </span>
+                       </div>
+                       <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-3">
+                          {flats.map((f: string) => (
+                            <div key={f} className="flex flex-col items-center p-3 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-transparent hover:border-brand-600/30 transition-all cursor-default">
+                               <span className="text-sm font-black text-slate-400">{f}</span>
+                               <Ghost size={12} className="text-slate-300 mt-1" />
+                            </div>
+                          ))}
+                       </div>
+                    </div>
+                  ))}
+               </div>
+            </div>
+
+            <div className="p-8 bg-slate-50 dark:bg-slate-800 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center">
+              <div className="flex items-center gap-3 text-slate-500 text-xs font-bold">
+                <AlertCircle size={16} className="text-amber-500" />
+                <span>Units listed here have no entry in the digital profiles table.</span>
+              </div>
+              <button 
+                onClick={() => {
+                  {/* Fixed TypeScript error by adding explicit type annotation for entries */}
+                  api.exportToCSV(
+                    Object.entries(vacancyReport.report).flatMap(([wing, flats]: [string, string[]]) => flats.map((f: string) => ({ Wing: wing, Flat: f }))),
+                    'Saurashtra_Vacancy_Report'
+                  );
                 }}
-              />
-              <IconButton onClick={() => setShowAuditModal(false)}>
-                <X size={24} />
-              </IconButton>
-            </Stack>
-          </DialogTitle>
-          <DialogContent sx={{ p: 4, bgcolor: 'action.hover' }}>
-            <Stack spacing={3}>
-              {Object.entries(vacancyReport.report)
-                .filter(([wing]) => wing.toLowerCase().includes(auditSearch.toLowerCase()))
-                .map(([wing, flats]: [string, string[]]) => (
-                <Paper key={wing} sx={{ p: 4, borderRadius: 6, border: '1px solid', borderColor: 'divider' }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-                    <Stack direction="row" spacing={2} alignItems="center">
-                      <Avatar sx={{ width: 40, height: 40, borderRadius: 3, bgcolor: 'action.hover', color: 'text.disabled', fontWeight: 900 }}>
-                        {wing}
-                      </Avatar>
-                      <Typography variant="h6" sx={{ fontWeight: 900 }}>Wing {wing} Vacancies</Typography>
-                    </Stack>
-                    <Chip 
-                      label={`${flats.length} Missing Profiles`} 
-                      size="small" 
-                      color="error" 
-                      sx={{ fontWeight: 900, textTransform: 'uppercase', fontSize: '0.6rem', borderRadius: 2 }} 
-                    />
-                  </Box>
-                  <Grid container spacing={1}>
-                    {flats.map((f: string) => (
-                      <Grid item xs={3} sm={2} md={1.5} key={f}>
-                        <Paper sx={{ p: 1, textAlign: 'center', bgcolor: 'action.hover', border: '1px solid', borderColor: 'transparent', '&:hover': { borderColor: 'primary.main' } }}>
-                          <Typography variant="caption" sx={{ fontWeight: 900, color: 'text.disabled', display: 'block' }}>{f}</Typography>
-                          <Ghost size={12} style={{ opacity: 0.3 }} />
-                        </Paper>
-                      </Grid>
-                    ))}
-                  </Grid>
-                </Paper>
-              ))}
-            </Stack>
-          </DialogContent>
-          <DialogActions sx={{ p: 3, borderTop: '1px solid', borderColor: 'divider', justifyContent: 'space-between' }}>
-            <Stack direction="row" spacing={1} alignItems="center" sx={{ color: 'text.secondary' }}>
-              <AlertCircle size={16} color={theme.palette.warning.main} />
-              <Typography variant="caption" sx={{ fontWeight: 500 }}>Units listed here have no entry in the digital profiles table.</Typography>
-            </Stack>
-            <Button 
-              variant="contained" 
-              startIcon={<Download size={18} />}
-              onClick={() => {
-                api.exportToCSV(
-                  Object.entries(vacancyReport.report).flatMap(([wing, flats]: [string, string[]]) => flats.map((f: string) => ({ Wing: wing, Flat: f }))),
-                  'Saurashtra_Vacancy_Report'
-                );
-              }}
-              sx={{ borderRadius: 4, fontWeight: 900, textTransform: 'uppercase', fontSize: '0.7rem' }}
-            >
-              Download List
-            </Button>
-          </DialogActions>
-        </Dialog>
+                className="px-6 py-3 bg-brand-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-lg flex items-center gap-2"
+              >
+                <Download size={14} /> Download List
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
-        {/* Wing Map Modal */}
-        <Dialog 
-          open={!!selectedBuilding} 
-          onClose={() => setSelectedBuilding(null)}
-          maxWidth="lg"
-          fullWidth
-          PaperProps={{ sx: { borderRadius: 10, p: 0, overflow: 'hidden' } }}
-        >
-          <DialogTitle sx={{ p: 4, borderBottom: '1px solid', borderColor: 'divider', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Stack direction="row" spacing={3} alignItems="center">
-              <Avatar sx={{ width: 64, height: 64, bgcolor: 'primary.main', borderRadius: 4, boxShadow: 6 }}>
-                <Building2 size={32} />
-              </Avatar>
-              <Box>
-                <Typography variant="h4" sx={{ fontWeight: 900 }}>Wing {selectedBuilding?.name}</Typography>
-                <Typography variant="caption" sx={{ fontWeight: 900, color: 'primary.main', textTransform: 'uppercase' }}>Real-Time Occupancy Map</Typography>
-              </Box>
-            </Stack>
-            <IconButton onClick={() => setSelectedBuilding(null)} sx={{ p: 2 }}>
-              <X size={32} />
-            </IconButton>
-          </DialogTitle>
-          <DialogContent sx={{ p: 4, bgcolor: 'action.hover' }}>
-            <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Stack direction="row" spacing={2} alignItems="center">
-                <LayoutGrid size={24} color={theme.palette.primary.main} />
-                <Typography variant="h6" sx={{ fontWeight: 900, textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: 1 }}>{t('floor_map')}</Typography>
-              </Stack>
-              <Stack direction="row" spacing={3}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Box sx={{ width: 12, height: 12, borderRadius: 1, bgcolor: 'success.main' }} />
-                  <Typography variant="caption" sx={{ fontWeight: 900, textTransform: 'uppercase', color: 'text.disabled', fontSize: '0.6rem' }}>Registered Owner</Typography>
-                </Box>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Box sx={{ width: 12, height: 12, borderRadius: 1, bgcolor: 'info.main' }} />
-                  <Typography variant="caption" sx={{ fontWeight: 900, textTransform: 'uppercase', color: 'text.disabled', fontSize: '0.6rem' }}>Registered Tenant</Typography>
-                </Box>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Box sx={{ width: 12, height: 12, borderRadius: 1, border: '2px dashed', borderColor: 'divider', bgcolor: 'background.paper' }} />
-                  <Typography variant="caption" sx={{ fontWeight: 900, textTransform: 'uppercase', color: 'text.disabled', fontSize: '0.6rem' }}>Unregistered / Vacant</Typography>
-                </Box>
-              </Stack>
-            </Box>
+      {/* Wing Map Modal */}
+      {selectedBuilding && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-6">
+          <div className="absolute inset-0 bg-slate-900/80 backdrop-blur-xl animate-in fade-in duration-300" onClick={() => setSelectedBuilding(null)} />
+          <div className="relative w-full max-w-6xl bg-white dark:bg-slate-900 rounded-[3.5rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 border border-slate-100 dark:border-slate-800 flex flex-col max-h-[90vh]">
+            <div className="p-10 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-white dark:bg-slate-900 sticky top-0 z-10">
+              <div className="flex items-center gap-6">
+                <div className="w-16 h-16 bg-brand-600 rounded-3xl flex items-center justify-center text-white shadow-xl shadow-brand-500/20">
+                  <Building2 size={32} />
+                </div>
+                <div>
+                  <h3 className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter">Wing {selectedBuilding.name}</h3>
+                  <p className="text-xs font-black uppercase text-brand-600 tracking-widest">Real-Time Occupancy Map</p>
+                </div>
+              </div>
+              <button onClick={() => setSelectedBuilding(null)} className="p-4 text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded-3xl transition-all"><X size={32} /></button>
+            </div>
 
-            <Paper sx={{ p: 6, borderRadius: 8, border: '1px solid', borderColor: 'divider', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.05)' }}>
-              <Box sx={{ maxWidth: 800, mx: 'auto' }}>
-                {selectedBuilding && renderFloorGrid(selectedBuilding)}
-                <Box sx={{ mt: 4, display: 'flex', alignItems: 'center', gap: 4 }}>
-                  <Box sx={{ width: 60 }} />
-                  <Box sx={{ flex: 1, height: 12, bgcolor: 'action.hover', borderRadius: 6, position: 'relative' }}>
-                    <Chip 
-                      label="Lobby Entrance" 
-                      size="small" 
-                      sx={{ 
-                        position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
-                        fontWeight: 900, textTransform: 'uppercase', fontSize: '0.6rem',
-                        bgcolor: 'text.primary', color: 'background.paper'
-                      }} 
-                    />
-                  </Box>
-                </Box>
-              </Box>
-            </Paper>
-          </DialogContent>
-        </Dialog>
+            <div className="flex-1 overflow-y-auto p-10 bg-slate-50/30 dark:bg-slate-900/30 space-y-12">
+              <section className="space-y-10">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-3">
+                    <LayoutGrid className="text-brand-600" size={24} />
+                    <h4 className="text-xl font-black text-slate-900 dark:text-white tracking-tight uppercase tracking-widest text-xs">{t('floor_map')}</h4>
+                  </div>
+                  <div className="flex items-center gap-6">
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded bg-emerald-500 shadow-sm"></div>
+                      <span className="text-[9px] font-black uppercase text-slate-400 tracking-widest">Registered Owner</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded bg-blue-500 shadow-sm"></div>
+                      <span className="text-[9px] font-black uppercase text-slate-400 tracking-widest">Registered Tenant</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded border-2 border-dashed border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800"></div>
+                      <span className="text-[9px] font-black uppercase text-slate-400 tracking-widest">Unregistered / Vacant</span>
+                    </div>
+                  </div>
+                </div>
 
-        {/* Flat & Residents Details Modal */}
-        <Dialog 
-          open={!!selectedFlat} 
-          onClose={() => setSelectedFlat(null)}
-          maxWidth="sm"
-          fullWidth
-          PaperProps={{ sx: { borderRadius: 10, p: 0, overflow: 'hidden' } }}
-        >
-          <DialogTitle sx={{ p: 4, borderBottom: '1px solid', borderColor: 'divider', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Stack direction="row" spacing={2} alignItems="center">
-              <Avatar sx={{ width: 48, height: 48, bgcolor: 'text.primary', borderRadius: 4 }}>
-                <Home size={24} />
-              </Avatar>
-              <Box>
-                <Typography variant="h5" sx={{ fontWeight: 900 }}>{t('unit')} {selectedFlat?.unitNumber}</Typography>
-                <Typography variant="caption" sx={{ fontWeight: 900, color: 'text.disabled', textTransform: 'uppercase' }}>
-                  {selectedFlat?.profile ? 'Registered Occupant' : 'Unregistered Profile'}
-                </Typography>
-              </Box>
-            </Stack>
-            <IconButton onClick={() => setSelectedFlat(null)}>
-              <X size={28} />
-            </IconButton>
-          </DialogTitle>
-          <DialogContent sx={{ p: 4, bgcolor: 'action.hover' }}>
-            {selectedFlat?.profile ? (
-              <Stack spacing={4}>
-                <Paper sx={{ p: 4, borderRadius: 6, border: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <Stack direction="row" spacing={3} alignItems="center">
-                    <Avatar 
-                      src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${selectedFlat.profile.name}`}
-                      sx={{ width: 80, height: 80, borderRadius: 6, bgcolor: 'primary.light' }}
-                    />
-                    <Box>
-                      <Typography variant="h5" sx={{ fontWeight: 900 }}>{selectedFlat.profile.name}</Typography>
-                      <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 1 }}>
-                        <Chip label={selectedFlat.profile.occupancyType} size="small" sx={{ fontWeight: 900, textTransform: 'uppercase', fontSize: '0.6rem', borderRadius: 1.5 }} />
-                        <Typography variant="caption" sx={{ fontWeight: 900, color: 'primary.main', textTransform: 'uppercase' }}>{selectedFlat.profile.status} Member</Typography>
-                      </Stack>
-                    </Box>
-                  </Stack>
-                </Paper>
+                <div className="bg-white dark:bg-slate-800/40 p-12 rounded-[3.5rem] border border-slate-100 dark:border-slate-800/60 shadow-inner">
+                  <div className="flex flex-col gap-6 max-w-4xl mx-auto">
+                    {renderFloorGrid(selectedBuilding)}
+                    
+                    <div className="mt-6 flex items-center gap-8">
+                      <div className="w-20" />
+                      <div className="flex-1 h-3 bg-slate-100 dark:bg-slate-800 rounded-full relative">
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-6 py-1 rounded-full text-[8px] font-black uppercase tracking-widest shadow-xl">
+                          Lobby Entrance
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </section>
+            </div>
+          </div>
+        </div>
+      )}
 
-                <Paper sx={{ p: 4, borderRadius: 8, border: '1px solid', borderColor: 'divider', boxShadow: 6, position: 'relative', overflow: 'hidden' }}>
-                  <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 4 }}>
-                    <Avatar sx={{ bgcolor: 'primary.main', color: 'white', borderRadius: 4 }}>
-                      <CreditCard size={24} />
-                    </Avatar>
-                    <Box>
-                      <Typography variant="h6" sx={{ fontWeight: 900 }}>{t('maintenance')} Summary</Typography>
-                      <Typography variant="caption" sx={{ fontWeight: 900, color: 'text.disabled', textTransform: 'uppercase' }}>Society Dues</Typography>
-                    </Box>
-                  </Stack>
-                  <Divider sx={{ mb: 4 }} />
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Box>
-                      <Typography variant="caption" sx={{ fontWeight: 900, color: 'text.disabled', textTransform: 'uppercase', display: 'block', mb: 0.5 }}>Standard Maintenance</Typography>
-                      <Typography variant="h4" sx={{ fontWeight: 900 }}>₹{totalMaintenance}</Typography>
-                    </Box>
-                    <Button 
-                      variant="contained" 
-                      sx={{ borderRadius: 8, px: 5, py: 2, fontWeight: 900, textTransform: 'uppercase', boxShadow: 10 }}
-                    >
-                      {t('pay_now')}
-                    </Button>
-                  </Box>
-                </Paper>
-              </Stack>
-            ) : (
-              <Box sx={{ py: 10, textAlign: 'center' }}>
-                <Avatar sx={{ width: 120, height: 120, borderRadius: 8, bgcolor: 'action.hover', border: '4px dashed', borderColor: 'divider', mx: 'auto', mb: 4 }}>
-                  <Ghost size={64} style={{ opacity: 0.2 }} />
-                </Avatar>
-                <Typography variant="h5" sx={{ fontWeight: 900, color: 'text.disabled', mb: 1 }}>No Active Registration</Typography>
-                <Typography variant="body2" sx={{ color: 'text.disabled', maxWidth: 300, mx: 'auto', mb: 4 }}>
-                  This unit has no registered users in the digital portal. Dues are tracked against the property.
-                </Typography>
-                <Button variant="contained" color="inherit" sx={{ borderRadius: 4, fontWeight: 900, textTransform: 'uppercase', bgcolor: 'text.primary', color: 'background.paper' }}>
-                  Initiate Offline Ledger
-                </Button>
-              </Box>
-            )}
-          </DialogContent>
-        </Dialog>
-      </Box>
-    </Fade>
+      {/* Flat & Residents Details Modal */}
+      {selectedFlat && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-6">
+          <div className="absolute inset-0 bg-slate-900/80 backdrop-blur-xl animate-in fade-in duration-300" onClick={() => setSelectedFlat(null)} />
+          <div className="relative w-full max-w-2xl bg-white dark:bg-slate-900 rounded-[3.5rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 border border-slate-100 dark:border-slate-800 flex flex-col max-h-[85vh]">
+            <div className="p-10 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-white dark:bg-slate-900 sticky top-0 z-10">
+              <div className="flex items-center gap-5">
+                <div className="w-12 h-12 bg-slate-900 dark:bg-brand-600 rounded-2xl flex items-center justify-center text-white">
+                  <Home size={24} />
+                </div>
+                <div>
+                  <h3 className="text-2xl font-black text-slate-900 dark:text-white tracking-tighter">{t('unit')} {selectedFlat.unitNumber}</h3>
+                  <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">
+                    {selectedFlat.profile ? 'Registered Occupant' : 'Unregistered Profile'}
+                  </p>
+                </div>
+              </div>
+              <button onClick={() => setSelectedFlat(null)} className="p-3 text-slate-300 hover:text-slate-900 dark:hover:text-white transition-all"><X size={28} /></button>
+            </div>
+
+            <div className="p-10 space-y-12 overflow-y-auto flex-1 bg-slate-50/50 dark:bg-slate-900/50">
+              {selectedFlat.profile ? (
+                <div className="space-y-4">
+                  <div className="bg-white dark:bg-slate-800 p-8 rounded-3xl border border-slate-100 dark:border-slate-700 flex items-center justify-between group">
+                    <div className="flex items-center gap-6">
+                      <div className="w-20 h-20 bg-brand-50 dark:bg-brand-900/10 rounded-[2rem] overflow-hidden flex items-center justify-center">
+                        <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${selectedFlat.profile.name}`} alt="user" />
+                      </div>
+                      <div>
+                        <p className="font-black text-2xl text-slate-900 dark:text-white tracking-tight">{selectedFlat.profile.name}</p>
+                        <div className="flex items-center gap-3 mt-1">
+                           <span className="px-3 py-1 bg-slate-50 dark:bg-slate-900 rounded-lg text-[9px] font-black uppercase text-slate-400 border border-slate-100 dark:border-slate-700">{selectedFlat.profile.occupancyType}</span>
+                           <span className="text-[10px] font-bold text-brand-600 uppercase tracking-widest">{selectedFlat.profile.status} Member</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <section className="bg-white dark:bg-slate-800 p-8 rounded-[2.5rem] border border-slate-100 dark:border-slate-700 shadow-sm relative overflow-hidden group">
+                    <div className="flex items-center gap-4 mb-8">
+                      <div className="w-12 h-12 bg-brand-600 text-white rounded-2xl flex items-center justify-center">
+                        <CreditCard size={24} />
+                      </div>
+                      <div>
+                        <h4 className="text-lg font-black tracking-tight">{t('maintenance')} Summary</h4>
+                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Society Dues</p>
+                      </div>
+                    </div>
+                    <div className="pt-6 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                      <div>
+                        <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-1">Standard Maintenance</p>
+                        <p className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter">₹{totalMaintenance}</p>
+                      </div>
+                      <button 
+                        onClick={() => {}} 
+                        className="px-10 py-4 bg-brand-600 text-white rounded-[2rem] font-black text-xs uppercase tracking-widest shadow-2xl hover:bg-brand-700 transition-all flex items-center gap-3"
+                      >
+                        {t('pay_now')}
+                      </button>
+                    </div>
+                  </section>
+                </div>
+              ) : (
+                <div className="py-20 text-center space-y-6">
+                   <div className="w-32 h-32 bg-slate-100 dark:bg-slate-800 rounded-[3rem] flex items-center justify-center text-slate-300 dark:text-slate-600 mx-auto border-4 border-dashed border-slate-200 dark:border-slate-700">
+                     <Ghost size={64} />
+                   </div>
+                   <div>
+                      <h4 className="text-2xl font-black text-slate-400 dark:text-slate-600 tracking-tight">No Active Registration</h4>
+                      <p className="text-slate-400 text-sm max-w-xs mx-auto mt-2">This unit has no registered users in the digital portal. Dues are tracked against the property.</p>
+                   </div>
+                   <button className="px-8 py-3.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all hover:scale-105">
+                     Initiate Offline Ledger
+                   </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   );
 };
 

@@ -148,6 +148,33 @@ export const api = {
     }
   },
 
+  getNotifications: async () => {
+    try {
+      const response = await fetch('/api/v1/notifications', {
+        headers: getAuthHeader()
+      });
+      return await handleResponse(response);
+    } catch (e) {
+      return [];
+    }
+  },
+
+  markNotificationRead: async (id: string) => {
+    const response = await fetch(`/api/v1/notifications/${id}/read`, {
+      method: 'PATCH',
+      headers: getAuthHeader()
+    });
+    return handleResponse(response);
+  },
+
+  markAllNotificationsRead: async () => {
+    const response = await fetch('/api/v1/notifications/read-all', {
+      method: 'PATCH',
+      headers: getAuthHeader()
+    });
+    return handleResponse(response);
+  },
+
   getMaintenanceRecords: async (flatId?: string, month?: string, year?: number): Promise<MaintenanceRecord[]> => {
     try {
       const params = new URLSearchParams();
@@ -309,6 +336,18 @@ export const api = {
     const response = await fetch(`/api/v1/admin/reject-registration/${userId}`, {
       method: 'POST',
       headers: getAuthHeader()
+    });
+    return handleResponse(response);
+  },
+
+  verifyPayment: async (paymentIntentId: string) => {
+    const response = await fetch('/api/v1/payments/verify', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthHeader()
+      },
+      body: JSON.stringify({ paymentIntentId })
     });
     return handleResponse(response);
   },
@@ -531,6 +570,25 @@ export const api = {
 
   async getActiveVisitors() {
     const response = await fetch('/api/society/visitors/active', {
+      headers: getAuthHeader()
+    });
+    return handleResponse(response);
+  },
+
+  async getVisitorHistory(startDate?: string, endDate?: string, search?: string) {
+    const params = new URLSearchParams();
+    if (startDate) params.append('startDate', startDate);
+    if (endDate) params.append('endDate', endDate);
+    if (search) params.append('search', search);
+
+    const response = await fetch(`/api/society/visitors/history?${params.toString()}`, {
+      headers: getAuthHeader()
+    });
+    return handleResponse(response);
+  },
+
+  async getVisitorAnalytics() {
+    const response = await fetch('/api/society/visitors/analytics', {
       headers: getAuthHeader()
     });
     return handleResponse(response);

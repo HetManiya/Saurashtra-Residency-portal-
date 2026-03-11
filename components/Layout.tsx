@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import ChatAssistant from './ChatAssistant';
 import { useLanguage } from './LanguageContext';
+import { api } from '../services/api';
 
 interface LayoutProps { children: React.ReactNode; }
 
@@ -167,6 +168,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [user, setUser] = useState<any>(null);
   const [time, setTime] = useState(new Date());
   const [isLangMenuOpen, setIsLangMenuOpen] = useState(false);
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [notifications, setNotifications] = useState<any[]>([]);
   const location = useLocation();
   const navigate = useNavigate();
   const { language, setLanguage, t } = useLanguage();
@@ -176,9 +179,37 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     const storedUser = localStorage.getItem('sr_user');
     if (storedUser) {
       setUser(JSON.parse(storedUser));
+      loadNotifications();
     }
     return () => clearInterval(timer);
   }, []);
+
+  const loadNotifications = async () => {
+    try {
+      const data = await api.getNotifications();
+      setNotifications(data);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleMarkAsRead = async (id: string) => {
+    try {
+      await api.markNotificationRead(id);
+      setNotifications(notifications.map(n => n.id === id ? { ...n, read: true } : n));
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleMarkAllAsRead = async () => {
+    try {
+      await api.markAllNotificationsRead();
+      setNotifications(notifications.map(n => ({ ...n, read: true })));
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   useEffect(() => {
     if (isDarkMode) {
@@ -255,6 +286,54 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           </div>
 
           <div className="flex items-center gap-3">
+            <div className="relative">
+              <button 
+                onClick={() => setIsNotificationsOpen(!isNotificationsOpen)} 
+                className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800 text-slate-500 hover:text-brand-600 transition-all relative"
+              >
+                <Bell size={20} />
+                {notifications.filter(n => !n.read).length > 0 && (
+                  <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+                )}
+              </button>
+              {isNotificationsOpen && (
+                <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl shadow-2xl z-50 overflow-hidden flex flex-col max-h-96">
+                  <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-800/50">
+                    <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-widest">Notifications</h3>
+                    {notifications.some(n => !n.read) && (
+                      <button onClick={handleMarkAllAsRead} className="text-[10px] font-bold text-brand-600 hover:text-brand-700 uppercase tracking-widest">
+                        Mark all read
+                      </button>
+                    )}
+                  </div>
+                  <div className="overflow-y-auto flex-1 custom-scrollbar">
+                    {notifications.length === 0 ? (
+                      <div className="p-8 text-center text-slate-400 text-xs font-medium italic">
+                        No notifications yet.
+                      </div>
+                    ) : (
+                      notifications.map(n => (
+                        <div 
+                          key={n.id || n._id} 
+                          onClick={() => !n.read && handleMarkAsRead(n.id || n._id)}
+                          className={`p-4 border-b border-slate-50 dark:border-slate-800/50 cursor-pointer transition-colors ${n.read ? 'opacity-60 hover:bg-slate-50 dark:hover:bg-slate-800/50' : 'bg-brand-50/50 dark:bg-brand-900/10 hover:bg-brand-50 dark:hover:bg-brand-900/20'}`}
+                        >
+                          <div className="flex justify-between items-start mb-1">
+                            <h4 className={`text-xs font-bold ${n.read ? 'text-slate-700 dark:text-slate-300' : 'text-slate-900 dark:text-white'}`}>{n.title}</h4>
+                            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider shrink-0 ml-2">
+                              {new Date(n.createdAt).toLocaleDateString()}
+                            </span>
+                          </div>
+                          <p className={`text-[11px] leading-relaxed ${n.read ? 'text-slate-500 dark:text-slate-400' : 'text-slate-600 dark:text-slate-300'}`}>
+                            {n.message}
+                          </p>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
             <button onClick={() => setIsDarkMode(!isDarkMode)} className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800 text-slate-500 hover:text-brand-600 transition-all">
               {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
             </button>

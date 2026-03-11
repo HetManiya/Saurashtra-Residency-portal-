@@ -1,25 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  Box, Typography, Grid, Card, Button, IconButton, 
-  Avatar, Chip, CircularProgress, Paper, useTheme, 
-  Fade, Stack, Divider, TextField, InputAdornment,
-  Dialog, DialogTitle, DialogContent, DialogActions,
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  FormControl, InputLabel, Select, MenuItem, useMediaQuery
-} from '@mui/material';
-import { 
-  Plus, Trash2, Edit3, Filter, PieChart, Wallet, 
-  ShieldCheck, Trash, Brush, AlertCircle, CheckCircle, 
-  X, ChevronDown, DollarSign, Calendar, Loader2, Home, Download, ShieldAlert, BadgeCheck
+  Plus, Filter, Download, ShieldCheck, 
+  X, Loader2
 } from 'lucide-react';
 import { api } from '../services/api';
-import { EXPENSE_CATEGORIES, BUILDINGS } from '../constants';
+import { EXPENSE_CATEGORIES } from '../constants';
 import { useLanguage } from '../components/LanguageContext';
+import { motion, AnimatePresence } from 'motion/react';
 
 const Expenses: React.FC = () => {
   const { t } = useLanguage();
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [expenses, setExpenses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -88,289 +78,238 @@ const Expenses: React.FC = () => {
   const isAdmin = user?.role === 'ADMIN' || user?.role === 'COMMITTEE';
 
   return (
-    <Fade in={true}>
-      <Box sx={{ pb: 8 }}>
-        <Box sx={{ 
-          display: 'flex', 
-          flexDirection: { xs: 'column', md: 'row' }, 
-          justifyContent: 'space-between', 
-          alignItems: { md: 'flex-end' }, 
-          gap: 3, 
-          mb: 6,
-          pb: 4,
-          borderBottom: '1px solid',
-          borderColor: 'divider'
-        }}>
-          <Box>
-            <Typography variant="h4" sx={{ fontWeight: 900, tracking: '-0.04em' }}>
-              {t('saurashtra')} <Box component="span" sx={{ color: 'primary.main' }}>{t('treasury')}</Box>
-            </Typography>
-            <Typography variant="body1" sx={{ color: 'text.secondary', mt: 1, fontWeight: 500 }}>
-              {t('exp_desc')}
-            </Typography>
-          </Box>
-          <Stack direction="row" spacing={2}>
-            <Button 
-              variant="outlined" 
-              color="inherit"
-              startIcon={<Download size={16} />}
-              onClick={handleExport}
-              sx={{ 
-                borderRadius: 6, px: 3, py: 1.5, 
-                fontWeight: 900, textTransform: 'uppercase', fontSize: '0.65rem',
-                borderColor: 'divider', color: 'text.secondary',
-                '&:hover': { bgcolor: 'action.hover' }
-              }}
+    <div className="pb-12 animate-fade-in">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-8 pb-6 border-b border-slate-200 dark:border-slate-800">
+        <div>
+          <h1 className="text-4xl font-black tracking-tighter text-slate-900 dark:text-white mb-2">
+            {t('saurashtra')} <span className="text-brand-600">{t('treasury')}</span>
+          </h1>
+          <p className="text-slate-500 dark:text-slate-400 font-medium">
+            {t('exp_desc')}
+          </p>
+        </div>
+        <div className="flex gap-3">
+          <button 
+            onClick={handleExport}
+            className="flex items-center gap-2 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 px-6 py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+          >
+            <Download size={16} />
+            {t('export')}
+          </button>
+          {isAdmin && (
+            <button 
+              onClick={() => setShowAddModal(true)}
+              className="flex items-center gap-2 bg-brand-600 text-white px-6 py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-brand-700 transition-colors shadow-lg shadow-brand-600/20 active:scale-95 transform duration-100"
             >
-              {t('export')}
-            </Button>
-            {isAdmin && (
-              <Button 
-                variant="contained" 
-                startIcon={<Plus size={18} strokeWidth={3} />}
-                onClick={() => setShowAddModal(true)}
-                sx={{ 
-                  borderRadius: 6, px: 4, py: 1.5, 
-                  fontWeight: 900, textTransform: 'uppercase', fontSize: '0.7rem',
-                  boxShadow: 10,
-                  '&:active': { transform: 'scale(0.95)' }
-                }}
+              <Plus size={18} strokeWidth={3} />
+              {t('exp_log_new')}
+            </button>
+          )}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        <div className="lg:col-span-1 space-y-6">
+          <div className="bg-slate-900 dark:bg-slate-950 p-8 rounded-[2.5rem] text-white relative overflow-hidden shadow-xl">
+            <div className="absolute -top-10 -right-10 w-40 h-40 bg-brand-500 rounded-full opacity-20 blur-3xl" />
+            <div className="relative z-10">
+              <span className="text-[10px] font-black uppercase tracking-widest text-brand-300 block mb-2">
+                {t('total_exp')}
+              </span>
+              <h3 className="text-4xl font-black tracking-tighter mb-8">
+                ₹{totalExpense.toLocaleString()}
+              </h3>
+              <div className="h-px bg-white/10 mb-6" />
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{t('active_records')}</span>
+                  <span className="text-sm font-bold">{expenses.length}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{t('awaiting_appr')}</span>
+                  <span className="text-sm font-bold text-red-400">
+                    ₹{expenses.filter(e => e.status === 'Pending').reduce((s, e) => s + e.amount, 0).toLocaleString()}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-slate-900 p-6 rounded-[2rem] border border-slate-200 dark:border-slate-800">
+            <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">
+              <Filter size={14} /> {t('exp_category')}
+            </div>
+            <div className="space-y-2">
+              <button 
+                onClick={() => setFilterType('ALL')}
+                className={`w-full text-left px-4 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-colors ${
+                  filterType === 'ALL' 
+                    ? 'bg-brand-50 dark:bg-brand-900/20 text-brand-600 dark:text-brand-400' 
+                    : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'
+                }`}
               >
-                {t('exp_log_new')}
-              </Button>
-            )}
-          </Stack>
-        </Box>
+                All Categories
+              </button>
+              {EXPENSE_CATEGORIES.map(cat => (
+                <button 
+                  key={cat.id}
+                  onClick={() => setFilterType(cat.id)}
+                  className={`w-full text-left px-4 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-colors ${
+                    filterType === cat.id 
+                      ? 'bg-brand-50 dark:bg-brand-900/20 text-brand-600 dark:text-brand-400' 
+                      : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'
+                  }`}
+                >
+                  {cat.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
 
-        <Grid container spacing={4}>
-          <Grid item xs={12} lg={3}>
-            <Stack spacing={4}>
-              <Paper sx={{ 
-                p: 5, borderRadius: 10, 
-                bgcolor: 'text.primary', color: 'background.paper',
-                position: 'relative', overflow: 'hidden',
-                boxShadow: 10
-              }}>
-                <Box sx={{ 
-                  position: 'absolute', top: -40, right: -40, 
-                  width: 160, height: 160, 
-                  bgcolor: 'primary.main', borderRadius: '50%', 
-                  opacity: 0.1, filter: 'blur(40px)' 
-                }} />
-                <Box sx={{ position: 'relative', zIndex: 1 }}>
-                  <Typography variant="caption" sx={{ fontWeight: 900, textTransform: 'uppercase', letterSpacing: 2, color: 'primary.light', display: 'block', mb: 1 }}>
-                    {t('total_exp')}
-                  </Typography>
-                  <Typography variant="h3" sx={{ fontWeight: 900, tracking: '-0.04em', mb: 4 }}>
-                    ₹{totalExpense.toLocaleString()}
-                  </Typography>
-                  <Divider sx={{ borderColor: 'rgba(255,255,255,0.05)', mb: 3 }} />
-                  <Stack spacing={2}>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <Typography variant="caption" sx={{ fontWeight: 900, textTransform: 'uppercase', color: 'text.disabled', letterSpacing: 1 }}>{t('active_records')}</Typography>
-                      <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>{expenses.length}</Typography>
-                    </Box>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <Typography variant="caption" sx={{ fontWeight: 900, textTransform: 'uppercase', color: 'text.disabled', letterSpacing: 1 }}>{t('awaiting_appr')}</Typography>
-                      <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'error.light' }}>
-                        ₹{expenses.filter(e => e.status === 'Pending').reduce((s, e) => s + e.amount, 0).toLocaleString()}
-                      </Typography>
-                    </Box>
-                  </Stack>
-                </Box>
-              </Paper>
-
-              <Paper sx={{ p: 4, borderRadius: 8, border: '1px solid', borderColor: 'divider', boxShadow: 0 }}>
-                <Typography variant="caption" sx={{ fontWeight: 900, textTransform: 'uppercase', color: 'text.disabled', letterSpacing: 1.5, display: 'flex', alignItems: 'center', gap: 1, mb: 3 }}>
-                  <Filter size={14} /> {t('exp_category')}
-                </Typography>
-                <Stack spacing={1}>
-                  <Button 
-                    fullWidth
-                    onClick={() => setFilterType('ALL')}
-                    sx={{ 
-                      justifyContent: 'flex-start', px: 3, py: 1.5, 
-                      borderRadius: 3, fontWeight: 900, textTransform: 'uppercase', fontSize: '0.65rem',
-                      bgcolor: filterType === 'ALL' ? 'primary.light' : 'transparent',
-                      color: filterType === 'ALL' ? 'primary.main' : 'text.secondary',
-                      '&:hover': { bgcolor: filterType === 'ALL' ? 'primary.light' : 'action.hover' }
-                    }}
-                  >
-                    All Categories
-                  </Button>
-                  {EXPENSE_CATEGORIES.map(cat => (
-                    <Button 
-                      key={cat.id}
-                      fullWidth
-                      onClick={() => setFilterType(cat.id)}
-                      sx={{ 
-                        justifyContent: 'flex-start', px: 3, py: 1.5, 
-                        borderRadius: 3, fontWeight: 900, textTransform: 'uppercase', fontSize: '0.65rem',
-                        bgcolor: filterType === cat.id ? 'primary.light' : 'transparent',
-                        color: filterType === cat.id ? 'primary.main' : 'text.secondary',
-                        '&:hover': { bgcolor: filterType === cat.id ? 'primary.light' : 'action.hover' }
-                      }}
-                    >
-                      {cat.label}
-                    </Button>
-                  ))}
-                </Stack>
-              </Paper>
-            </Stack>
-          </Grid>
-
-          <Grid item xs={12} lg={9}>
-            <TableContainer component={Paper} sx={{ borderRadius: 10, border: '1px solid', borderColor: 'divider', boxShadow: 0, overflow: 'hidden' }}>
-              {loading ? (
-                <Box sx={{ py: 20, textAlign: 'center' }}>
-                  <CircularProgress size={40} sx={{ mb: 2 }} />
-                  <Typography variant="caption" sx={{ display: 'block', fontWeight: 900, color: 'text.secondary', textTransform: 'uppercase', letterSpacing: 2 }}>
-                    Loading Ledger...
-                  </Typography>
-                </Box>
-              ) : (
-                <Table>
-                  <TableHead sx={{ bgcolor: 'action.hover' }}>
-                    <TableRow>
-                      <TableCell sx={{ px: 5, py: 3, fontWeight: 900, textTransform: 'uppercase', fontSize: '0.6rem', color: 'text.disabled', letterSpacing: 1.5 }}>Payee</TableCell>
-                      <TableCell sx={{ px: 5, py: 3, fontWeight: 900, textTransform: 'uppercase', fontSize: '0.6rem', color: 'text.disabled', letterSpacing: 1.5 }}>Allocation</TableCell>
-                      <TableCell sx={{ px: 5, py: 3, fontWeight: 900, textTransform: 'uppercase', fontSize: '0.6rem', color: 'text.disabled', letterSpacing: 1.5 }}>{t('amount')}</TableCell>
-                      <TableCell sx={{ px: 5, py: 3, fontWeight: 900, textTransform: 'uppercase', fontSize: '0.6rem', color: 'text.disabled', letterSpacing: 1.5 }}>Workflow</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
+        <div className="lg:col-span-3">
+          <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
+            {loading ? (
+              <div className="py-20 text-center flex flex-col items-center justify-center">
+                <Loader2 size={40} className="animate-spin text-brand-600 mb-4" />
+                <span className="text-xs font-black text-slate-400 uppercase tracking-widest">
+                  Loading Ledger...
+                </span>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
+                    <tr>
+                      <th className="px-8 py-6 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Payee</th>
+                      <th className="px-8 py-6 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Allocation</th>
+                      <th className="px-8 py-6 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('amount')}</th>
+                      <th className="px-8 py-6 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Workflow</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                     {expenses.map((exp) => (
-                      <TableRow key={exp.id || exp._id} sx={{ '&:hover': { bgcolor: 'action.hover' }, transition: 'all 0.2s ease' }}>
-                        <TableCell sx={{ px: 5, py: 4 }}>
-                          <Typography variant="subtitle1" sx={{ fontWeight: 900, tracking: '-0.02em', mb: 0.5 }}>{exp.payeeName}</Typography>
-                          <Typography variant="caption" sx={{ fontWeight: 900, color: 'text.disabled', textTransform: 'uppercase', fontSize: '0.55rem', letterSpacing: 1 }}>{exp.type}</Typography>
-                        </TableCell>
-                        <TableCell sx={{ px: 5, py: 4 }}>
-                          <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary', textTransform: 'uppercase' }}>
+                      <tr key={exp.id || exp._id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                        <td className="px-8 py-6">
+                          <div className="text-sm font-black text-slate-900 dark:text-white mb-1">{exp.payeeName}</div>
+                          <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{exp.type}</div>
+                        </td>
+                        <td className="px-8 py-6">
+                          <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                             {exp.details?.buildingName ? `Wing ${exp.details.buildingName}` : 'Society Wide'}
-                          </Typography>
-                        </TableCell>
-                        <TableCell sx={{ px: 5, py: 4 }}>
-                          <Typography variant="h6" sx={{ fontWeight: 900 }}>₹{exp.amount.toLocaleString()}</Typography>
-                        </TableCell>
-                        <TableCell sx={{ px: 5, py: 4 }}>
-                          <Chip 
-                            label={exp.status} 
-                            size="small" 
-                            variant="outlined"
-                            color={exp.status === 'Paid' ? 'success' : 'error'}
-                            sx={{ fontWeight: 900, textTransform: 'uppercase', fontSize: '0.6rem', borderRadius: 2 }} 
-                          />
-                        </TableCell>
-                      </TableRow>
+                          </span>
+                        </td>
+                        <td className="px-8 py-6">
+                          <span className="text-lg font-black text-slate-900 dark:text-white">₹{exp.amount.toLocaleString()}</span>
+                        </td>
+                        <td className="px-8 py-6">
+                          <span className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest ${
+                            exp.status === 'Paid' 
+                              ? 'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400' 
+                              : 'bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400'
+                          }`}>
+                            {exp.status}
+                          </span>
+                        </td>
+                      </tr>
                     ))}
                     {expenses.length === 0 && (
-                      <TableRow>
-                        <TableCell colSpan={4} sx={{ py: 10, textAlign: 'center' }}>
-                          <Typography variant="caption" sx={{ fontWeight: 900, color: 'text.secondary', textTransform: 'uppercase' }}>
+                      <tr>
+                        <td colSpan={4} className="py-20 text-center">
+                          <span className="text-xs font-black text-slate-400 uppercase tracking-widest">
                             No payout records found
-                          </Typography>
-                        </TableCell>
-                      </TableRow>
+                          </span>
+                        </td>
+                      </tr>
                     )}
-                  </TableBody>
-                </Table>
-              )}
-            </TableContainer>
-          </Grid>
-        </Grid>
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
 
-        {/* Add Expense Modal */}
-        <Dialog 
-          open={showAddModal} 
-          onClose={() => setShowAddModal(false)}
-          maxWidth="sm"
-          fullWidth
-          PaperProps={{ sx: { borderRadius: 10, p: 0, overflow: 'hidden' } }}
-        >
-          <DialogTitle sx={{ p: 4, borderBottom: '1px solid', borderColor: 'divider', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Typography variant="h4" sx={{ fontWeight: 900, tracking: '-0.04em' }}>Log Payout</Typography>
-            <IconButton onClick={() => setShowAddModal(false)}>
-              <X size={24} />
-            </IconButton>
-          </DialogTitle>
-          <DialogContent sx={{ p: 4 }}>
-            <Stack spacing={3} component="form" onSubmit={handleAddExpense} sx={{ mt: 1 }}>
-              <FormControl fullWidth>
-                <InputLabel sx={{ fontWeight: 900, textTransform: 'uppercase', fontSize: '0.7rem', ml: 1, mt: -1 }}>Expense Category</InputLabel>
-                <Select
-                  value={formData.type}
-                  onChange={(e) => setFormData({...formData, type: e.target.value})}
-                  label="Expense Category"
-                  sx={{ borderRadius: 6, bgcolor: 'action.hover', fontWeight: 700 }}
-                >
-                  {EXPENSE_CATEGORIES.map(cat => <MenuItem key={cat.id} value={cat.id}>{cat.label}</MenuItem>)}
-                </Select>
-              </FormControl>
+      {/* Add Expense Modal */}
+      <AnimatePresence>
+        {showAddModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 20 }}
+              className="bg-white dark:bg-slate-900 w-full max-w-lg rounded-[2.5rem] shadow-2xl overflow-hidden"
+            >
+              <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-800/50">
+                <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Log Payout</h2>
+                <button onClick={() => setShowAddModal(false)} className="p-2 text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl transition-colors">
+                  <X size={24} />
+                </button>
+              </div>
+              
+              <form onSubmit={handleAddExpense} className="p-8 space-y-6">
+                <div>
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block ml-1">Expense Category</label>
+                  <select
+                    value={formData.type}
+                    onChange={(e) => setFormData({...formData, type: e.target.value})}
+                    className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-2xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-brand-500 outline-none"
+                  >
+                    {EXPENSE_CATEGORIES.map(cat => <option key={cat.id} value={cat.id}>{cat.label}</option>)}
+                  </select>
+                </div>
 
-              <TextField 
-                fullWidth 
-                label="Payee / Vendor Name"
-                placeholder="e.g. Surat Safai Agency"
-                required
-                value={formData.payeeName}
-                onChange={(e) => setFormData({...formData, payeeName: e.target.value})}
-                InputProps={{ sx: { borderRadius: 6, bgcolor: 'action.hover' } }}
-                InputLabelProps={{ sx: { fontWeight: 900, textTransform: 'uppercase', fontSize: '0.7rem' } }}
-              />
-
-              <Grid container spacing={2}>
-                <Grid item xs={6}>
-                  <TextField 
-                    fullWidth 
-                    label="Amount (₹)"
-                    type="number"
+                <div>
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block ml-1">Payee / Vendor Name</label>
+                  <input 
+                    type="text"
+                    placeholder="e.g. Surat Safai Agency"
                     required
-                    placeholder="0.00"
-                    value={formData.amount}
-                    onChange={(e) => setFormData({...formData, amount: e.target.value})}
-                    InputProps={{ sx: { borderRadius: 6, bgcolor: 'action.hover' } }}
-                    InputLabelProps={{ sx: { fontWeight: 900, textTransform: 'uppercase', fontSize: '0.7rem' } }}
+                    value={formData.payeeName}
+                    onChange={(e) => setFormData({...formData, payeeName: e.target.value})}
+                    className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-2xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-brand-500 outline-none"
                   />
-                </Grid>
-                <Grid item xs={6}>
-                  <FormControl fullWidth>
-                    <InputLabel sx={{ fontWeight: 900, textTransform: 'uppercase', fontSize: '0.7rem', ml: 1, mt: -1 }}>Wing Allocation</InputLabel>
-                    <Select
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block ml-1">Amount (₹)</label>
+                    <input 
+                      type="number"
+                      placeholder="0.00"
+                      required
+                      value={formData.amount}
+                      onChange={(e) => setFormData({...formData, amount: e.target.value})}
+                      className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-2xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-brand-500 outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block ml-1">Wing Allocation</label>
+                    <select
                       value={formData.details.buildingName}
                       onChange={(e) => setFormData({...formData, details: {...formData.details, buildingName: e.target.value}})}
-                      label="Wing Allocation"
-                      sx={{ borderRadius: 6, bgcolor: 'action.hover', fontWeight: 700 }}
+                      className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-2xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-brand-500 outline-none"
                     >
-                      <MenuItem value="">Society Wide</MenuItem>
-                      {Array.from({length: 24}, (_, i) => `A-${i+1}`).map(w => <MenuItem key={w} value={w}>Wing {w}</MenuItem>)}
-                    </Select>
-                  </FormControl>
-                </Grid>
-              </Grid>
+                      <option value="">Society Wide</option>
+                      {Array.from({length: 24}, (_, i) => `A-${i+1}`).map(w => <option key={w} value={w}>Wing {w}</option>)}
+                    </select>
+                  </div>
+                </div>
 
-              <Button 
-                fullWidth 
-                variant="contained" 
-                size="large"
-                disabled={isSubmitting}
-                type="submit"
-                startIcon={isSubmitting ? <CircularProgress size={20} color="inherit" /> : <ShieldCheck size={18} />}
-                sx={{ 
-                  borderRadius: 8, py: 2, 
-                  fontWeight: 900, textTransform: 'uppercase', 
-                  letterSpacing: 1.5,
-                  boxShadow: 10,
-                  '&:active': { transform: 'scale(0.95)' }
-                }}
-              >
-                Confirm & Log Payout
-              </Button>
-            </Stack>
-          </DialogContent>
-        </Dialog>
-      </Box>
-    </Fade>
+                <button 
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-full bg-brand-600 text-white py-4 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-brand-700 transition-colors shadow-xl shadow-brand-600/20 active:scale-95 transform duration-100 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                >
+                  {isSubmitting ? <Loader2 size={18} className="animate-spin" /> : <ShieldCheck size={18} />}
+                  Confirm & Log Payout
+                </button>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 };
 
