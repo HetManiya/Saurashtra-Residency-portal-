@@ -82,81 +82,81 @@ const VisitorPass: React.FC = () => {
   };
 
   return (
-    <div className="max-w-5xl mx-auto pb-12 animate-fade-in crt-screen">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-8 pb-6 border-b-4 border-cyan-500/30">
+    <div className="max-w-5xl mx-auto pb-12 animate-fade-in">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-8 pb-6 border-b border-slate-200 dark:border-slate-800">
         <div>
-          <h1 className="text-4xl font-black tracking-tighter text-cyan-400 mb-2 glitch-text" data-text={t('visitors')}>
+          <h1 className="text-4xl font-black tracking-tighter text-slate-900 dark:text-white mb-2">
             {t('visitors')}
           </h1>
-          <p className="text-cyan-700 font-bold font-mono uppercase text-xs">
-            {`> GENERATE_ENCRYPTED_ENTRY_KEY_v1.0`}
+          <p className="text-slate-500 dark:text-slate-400 font-medium">
+            Generate instant QR passes for your guests
           </p>
         </div>
         <button 
           onClick={() => setShowHistory(true)}
-          className="px-6 py-3 bg-black border-2 border-cyan-500 text-cyan-400 font-black text-xs uppercase tracking-widest hover:bg-cyan-500 hover:text-black transition-all flex items-center gap-2 shadow-[4px_4px_0px_#ff00ff]"
+          className="px-6 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl font-black text-xs uppercase tracking-widest text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors flex items-center gap-2"
         >
           <History size={16} /> View History
         </button>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="bg-black p-6 md:p-8 border-4 border-cyan-500 shadow-[8px_8px_0px_#ff00ff]">
+        <div className="bg-white dark:bg-slate-900 p-6 md:p-8 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 shadow-sm">
           <form onSubmit={handleGenerate} className="space-y-6">
             <div>
-              <label className="text-[10px] font-black text-cyan-700 uppercase tracking-widest mb-2 block ml-1">
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block ml-1">
                 {t('visitor_name')}
               </label>
               <div className="relative">
-                <User size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-cyan-700" />
+                <User size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                 <input 
                   type="text"
                   placeholder="Guest Full Name"
                   value={formData.name}
                   onChange={e => setFormData({...formData, name: e.target.value})}
-                  className="w-full bg-black border-2 border-cyan-500 pl-12 pr-4 py-3 text-sm font-bold text-cyan-400 placeholder:text-cyan-900 outline-none focus:border-magenta-500 transition-all"
+                  className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-2xl pl-12 pr-4 py-3 text-sm font-bold focus:ring-2 focus:ring-brand-500 outline-none"
                 />
               </div>
             </div>
 
             <div>
-              <label className="text-[10px] font-black text-cyan-700 uppercase tracking-widest mb-2 block ml-1">
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block ml-1">
                 {t('visitor_phone')}
               </label>
               <div className="relative">
-                <Phone size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-cyan-700" />
+                <Phone size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                 <input 
                   type="text"
                   placeholder="+91 00000 00000"
                   value={formData.phone}
                   onChange={e => setFormData({...formData, phone: e.target.value})}
-                  className="w-full bg-black border-2 border-cyan-500 pl-12 pr-4 py-3 text-sm font-bold text-cyan-400 placeholder:text-cyan-900 outline-none focus:border-magenta-500 transition-all"
+                  className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-2xl pl-12 pr-4 py-3 text-sm font-bold focus:ring-2 focus:ring-brand-500 outline-none"
                 />
               </div>
             </div>
 
             <div>
-              <label className="text-[10px] font-black text-cyan-700 uppercase tracking-widest mb-2 block ml-1">
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block ml-1">
                 {t('visitor_purpose')}
               </label>
               <div className="relative">
-                <ClipboardList size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-cyan-700" />
+                <ClipboardList size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                 <select
                   value={formData.purpose}
                   onChange={e => setFormData({...formData, purpose: e.target.value})}
-                  className="w-full bg-black border-2 border-cyan-500 pl-12 pr-4 py-3 text-sm font-bold text-cyan-400 outline-none focus:border-magenta-500 appearance-none transition-all"
+                  className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-2xl pl-12 pr-4 py-3 text-sm font-bold focus:ring-2 focus:ring-brand-500 outline-none appearance-none"
                 >
-                  <option value="" className="bg-black">Select Purpose</option>
-                  <option value="Personal Guest" className="bg-black">Personal Guest</option>
-                  <option value="Delivery / Courier" className="bg-black">Delivery / Courier</option>
-                  <option value="Maintenance Work" className="bg-black">Maintenance Work</option>
-                  <option value="Home Service" className="bg-black">Home Service</option>
+                  <option value="">Select Purpose</option>
+                  <option value="Personal Guest">Personal Guest</option>
+                  <option value="Delivery / Courier">Delivery / Courier</option>
+                  <option value="Maintenance Work">Maintenance Work</option>
+                  <option value="Home Service">Home Service</option>
                 </select>
               </div>
             </div>
 
             <div>
-              <label className="text-[10px] font-black text-cyan-700 uppercase tracking-widest mb-2 block ml-1">
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block ml-1">
                 {t('visitor_validity')}
               </label>
               <div className="grid grid-cols-2 gap-3">
@@ -165,10 +165,10 @@ const VisitorPass: React.FC = () => {
                     key={v}
                     type="button"
                     onClick={() => setFormData({...formData, validity: v})}
-                    className={`py-3 border-2 font-black text-[10px] uppercase tracking-widest transition-all ${
+                    className={`py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all ${
                       formData.validity === v 
-                        ? 'bg-magenta-500 text-white border-black shadow-[4px_4px_0px_#00ffff]' 
-                        : 'bg-black border-cyan-900/30 text-cyan-700 hover:border-cyan-500'
+                        ? 'bg-brand-600 text-white shadow-lg shadow-brand-600/20' 
+                        : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:border-brand-500 dark:hover:border-brand-500'
                     }`}
                   >
                     {v}
@@ -180,7 +180,7 @@ const VisitorPass: React.FC = () => {
             <button 
               type="submit"
               disabled={loading}
-              className="w-full bg-magenta-500 text-white py-4 border-2 border-black font-black text-sm uppercase tracking-widest hover:bg-black hover:text-magenta-500 hover:border-magenta-500 transition-all shadow-[6px_6px_0px_#00ffff] active:scale-95 flex items-center justify-center gap-2 disabled:opacity-70"
+              className="w-full bg-brand-600 text-white py-4 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-brand-700 transition-colors shadow-xl shadow-brand-600/20 active:scale-95 transform duration-100 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
             >
               {loading ? <Loader2 size={18} className="animate-spin" /> : <QrCode size={18} />}
               {loading ? 'Authorizing Access...' : t('visitor_generate')}
@@ -195,19 +195,19 @@ const VisitorPass: React.FC = () => {
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.9 }}
-                className="w-full max-w-md bg-black p-8 border-4 border-magenta-500 shadow-[12px_12px_0px_#00ffff] text-white relative overflow-hidden text-center"
+                className="w-full max-w-md bg-slate-900 p-8 rounded-[2.5rem] text-white shadow-2xl relative overflow-hidden text-center"
               >
-                <div className="absolute top-0 right-0 w-40 h-40 bg-magenta-500 opacity-20 rounded-full blur-3xl -mr-10 -mt-10" />
+                <div className="absolute top-0 right-0 w-40 h-40 bg-brand-500 opacity-20 rounded-full blur-3xl -mr-10 -mt-10" />
                 
                 <div className="relative z-10 space-y-6" ref={qrRef}>
-                  <div className="inline-flex items-center gap-2 px-3 py-1 bg-cyan-900/20 border-2 border-cyan-500 mx-auto">
-                    <ShieldCheck size={14} className="text-cyan-400" />
-                    <span className="text-[10px] font-black uppercase tracking-widest text-cyan-400">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 rounded-full border border-white/10 mx-auto">
+                    <ShieldCheck size={14} className="text-green-400" />
+                    <span className="text-[10px] font-black uppercase tracking-widest">
                       {t('visitor_auth')}
                     </span>
                   </div>
                   
-                  <div className="bg-white p-6 border-4 border-cyan-500 w-fit mx-auto shadow-[4px_4px_0px_#ff00ff]">
+                  <div className="bg-white p-6 rounded-[2rem] w-fit mx-auto shadow-xl">
                      <QRCodeCanvas 
                       value={JSON.stringify({ id: passData.passId, name: passData.name, expires: passData.validity })}
                       size={180}
@@ -217,44 +217,44 @@ const VisitorPass: React.FC = () => {
                   </div>
 
                   <div>
-                    <h3 className="text-3xl font-black tracking-tight mb-1 uppercase text-cyan-400">
+                    <h3 className="text-3xl font-black tracking-tight mb-1">
                       {passData.name}
                     </h3>
-                    <span className="text-xs font-black text-magenta-500 uppercase tracking-widest">
+                    <span className="text-xs font-black text-brand-400 uppercase tracking-widest">
                       {passData.passId}
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4 pt-6 border-t-2 border-cyan-900/50">
+                  <div className="grid grid-cols-2 gap-4 pt-6 border-t border-white/10">
                     <div className="text-left">
-                      <span className="text-[10px] font-black text-cyan-700 uppercase tracking-widest block mb-1">
+                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">
                         {t('visitor_purpose')}
                       </span>
-                      <span className="text-sm font-bold text-cyan-400 uppercase">
+                      <span className="text-sm font-bold">
                         {passData.purpose}
                       </span>
                     </div>
                     <div className="text-right">
-                      <span className="text-[10px] font-black text-cyan-700 uppercase tracking-widest block mb-1">
+                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">
                         Expires In
                       </span>
-                      <span className="text-sm font-bold text-magenta-500 uppercase">
+                      <span className="text-sm font-bold">
                         {passData.validity}
                       </span>
                     </div>
                   </div>
 
-                  <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                  <div className="flex gap-3 pt-2">
                     <button 
                       onClick={shareToWhatsApp}
-                      className="flex-1 py-3 border-2 border-cyan-500 bg-black text-cyan-400 hover:bg-cyan-500 hover:text-black transition-all flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest shadow-[3px_3px_0px_#ff00ff]"
+                      className="flex-1 py-3 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 transition-colors flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest"
                     >
                       <Share2 size={14} />
                       {t('visitor_share')}
                     </button>
                     <button 
                       onClick={downloadPass}
-                      className="flex-1 py-3 border-2 border-magenta-500 bg-black text-magenta-500 hover:bg-magenta-500 hover:text-white transition-all flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest shadow-[3px_3px_0px_#00ffff]"
+                      className="flex-1 py-3 rounded-xl bg-white text-slate-900 hover:bg-slate-100 transition-colors flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest"
                     >
                       <Download size={14} />
                       {t('visitor_download')}
@@ -264,14 +264,14 @@ const VisitorPass: React.FC = () => {
               </motion.div>
             ) : (
               <div className="text-center max-w-xs">
-                 <div className="w-24 h-24 bg-black border-4 border-dashed border-cyan-900/50 flex items-center justify-center text-cyan-900 mx-auto mb-6">
+                 <div className="w-24 h-24 bg-slate-50 dark:bg-slate-800 rounded-[2rem] border-4 border-dashed border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-300 dark:text-slate-600 mx-auto mb-6">
                    <ShieldCheck size={48} />
                  </div>
-                 <span className="text-[10px] font-black text-cyan-700 uppercase tracking-widest block mb-2">
+                 <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">
                    Awaiting Authorization
                  </span>
-                 <p className="text-cyan-900 font-bold font-mono uppercase text-xs leading-relaxed">
-                   {`> Fill guest details to generate an encrypted digital entry key.`}
+                 <p className="text-slate-500 dark:text-slate-400 font-medium leading-relaxed">
+                   Fill guest details to generate an encrypted digital entry key.
                  </p>
               </div>
             )}
@@ -286,68 +286,68 @@ const VisitorPass: React.FC = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-sm"
           >
             <motion.div 
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-black w-full max-w-4xl border-4 border-cyan-500 shadow-[12px_12px_0px_#ff00ff] overflow-hidden flex flex-col max-h-[90vh]"
+              className="bg-white dark:bg-slate-900 w-full max-w-4xl rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
             >
-              <div className="p-6 md:p-8 border-b-2 border-cyan-900/50 flex justify-between items-center shrink-0">
-                <h2 className="text-2xl font-black text-cyan-400 flex items-center gap-3 uppercase tracking-tight">
-                  <History className="text-magenta-500" /> Visitor History
+              <div className="p-6 md:p-8 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center shrink-0">
+                <h2 className="text-2xl font-black text-slate-900 dark:text-white flex items-center gap-3">
+                  <History className="text-brand-600" /> Visitor History
                 </h2>
                 <button 
                   onClick={() => setShowHistory(false)}
-                  className="p-2 border-2 border-cyan-500 text-cyan-400 hover:bg-magenta-500 hover:text-white hover:border-magenta-500 transition-all"
+                  className="p-2 bg-slate-100 dark:bg-slate-800 rounded-full hover:bg-rose-50 hover:text-rose-600 transition-colors"
                 >
                   <X size={20} />
                 </button>
               </div>
 
-              <div className="p-6 md:p-8 border-b-2 border-cyan-900/50 bg-cyan-900/10 shrink-0">
+              <div className="p-6 md:p-8 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 shrink-0">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="relative">
-                    <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-cyan-700" />
+                    <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                     <input 
                       type="text"
                       placeholder="Search name, phone..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-full pl-12 pr-4 py-3 bg-black border-2 border-cyan-500 text-cyan-400 font-bold outline-none focus:border-magenta-500 transition-all"
+                      className="w-full pl-12 pr-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-brand-500 outline-none"
                     />
                   </div>
                   <div className="relative">
-                    <Calendar size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-cyan-700" />
+                    <Calendar size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                     <input 
                       type="date"
                       value={startDate}
                       onChange={(e) => setStartDate(e.target.value)}
-                      className="w-full pl-12 pr-4 py-3 bg-black border-2 border-cyan-500 text-cyan-400 font-bold outline-none focus:border-magenta-500 transition-all"
+                      className="w-full pl-12 pr-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-brand-500 outline-none"
                     />
                   </div>
                   <div className="relative">
-                    <Calendar size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-cyan-700" />
+                    <Calendar size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                     <input 
                       type="date"
                       value={endDate}
                       onChange={(e) => setEndDate(e.target.value)}
-                      className="w-full pl-12 pr-4 py-3 bg-black border-2 border-cyan-500 text-cyan-400 font-bold outline-none focus:border-magenta-500 transition-all"
+                      className="w-full pl-12 pr-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-brand-500 outline-none"
                     />
                   </div>
                 </div>
               </div>
 
-              <div className="flex-1 overflow-y-auto p-6 md:p-8 custom-scrollbar">
+              <div className="flex-1 overflow-y-auto p-6 md:p-8">
                 {historyLoading ? (
                   <div className="flex justify-center py-12">
-                    <Loader2 className="animate-spin text-magenta-500" size={32} />
+                    <Loader2 className="animate-spin text-brand-600" size={32} />
                   </div>
                 ) : history.length === 0 ? (
                   <div className="text-center py-12">
-                    <History size={48} className="mx-auto text-cyan-900 mb-4" />
-                    <p className="text-cyan-700 font-bold uppercase tracking-widest text-xs">No visitor history found.</p>
+                    <History size={48} className="mx-auto text-slate-200 dark:text-slate-700 mb-4" />
+                    <p className="text-slate-500 dark:text-slate-400 font-bold">No visitor history found.</p>
                   </div>
                 ) : (
                   <div className="space-y-4">
@@ -355,24 +355,24 @@ const VisitorPass: React.FC = () => {
                       <div 
                         key={v._id} 
                         onClick={() => setSelectedVisitor(selectedVisitor?._id === v._id ? null : v)}
-                        className="p-6 bg-black border-2 border-cyan-900/30 hover:border-cyan-500 transition-colors cursor-pointer"
+                        className="p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl hover:border-brand-500 transition-colors cursor-pointer"
                       >
                         <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
                           <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 border-2 border-cyan-900/30 flex items-center justify-center text-cyan-700">
+                            <div className="w-12 h-12 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-500">
                               <User size={20} />
                             </div>
                             <div>
-                              <h4 className="font-black text-cyan-400 text-lg uppercase tracking-tight">{v.name}</h4>
-                              <p className="text-xs font-bold text-cyan-700">{v.phone}</p>
+                              <h4 className="font-black text-slate-900 dark:text-white text-lg">{v.name}</h4>
+                              <p className="text-xs font-bold text-slate-500">{v.phone}</p>
                             </div>
                           </div>
-                          <div className="flex items-center gap-4 text-sm font-bold">
-                            <span className="px-3 py-1 border border-cyan-900/50 text-cyan-700 uppercase tracking-widest text-[10px]">{v.type}</span>
-                            <span className={`px-3 py-1 border text-[10px] font-black uppercase tracking-widest ${
-                              v.status === 'IN' ? 'bg-cyan-900/20 border-cyan-500 text-cyan-400' :
-                              v.status === 'OUT' ? 'bg-black border-cyan-900/50 text-cyan-700' :
-                              'bg-magenta-900/20 border-magenta-500 text-magenta-500'
+                          <div className="flex items-center gap-4 text-sm font-bold text-slate-600 dark:text-slate-400">
+                            <span className="px-3 py-1 bg-slate-100 dark:bg-slate-800 rounded-lg">{v.type}</span>
+                            <span className={`px-3 py-1 rounded-lg ${
+                              v.status === 'IN' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' :
+                              v.status === 'OUT' ? 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400' :
+                              'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
                             }`}>
                               {v.status}
                             </span>
@@ -387,30 +387,30 @@ const VisitorPass: React.FC = () => {
                               exit={{ height: 0, opacity: 0 }}
                               className="overflow-hidden"
                             >
-                              <div className="mt-6 pt-6 border-t-2 border-cyan-900/30 grid grid-cols-2 md:grid-cols-4 gap-6">
+                              <div className="mt-6 pt-6 border-t border-slate-100 dark:border-slate-800 grid grid-cols-2 md:grid-cols-4 gap-6">
                                 <div>
-                                  <p className="text-[10px] font-black uppercase tracking-widest text-cyan-700 mb-1">Pass ID</p>
-                                  <p className="font-bold text-cyan-400 uppercase text-xs">{v.passId}</p>
+                                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Pass ID</p>
+                                  <p className="font-bold text-slate-900 dark:text-white">{v.passId}</p>
                                 </div>
                                 <div>
-                                  <p className="text-[10px] font-black uppercase tracking-widest text-cyan-700 mb-1">Destination</p>
-                                  <p className="font-bold text-cyan-400 uppercase text-xs">{v.flatId || 'N/A'}</p>
+                                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Destination</p>
+                                  <p className="font-bold text-slate-900 dark:text-white">{v.flatId || 'N/A'}</p>
                                 </div>
                                 <div>
-                                  <p className="text-[10px] font-black uppercase tracking-widest text-cyan-700 mb-1">Check In</p>
-                                  <p className="font-bold text-cyan-400 uppercase text-xs">
+                                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Check In</p>
+                                  <p className="font-bold text-slate-900 dark:text-white">
                                     {v.checkInTime ? new Date(v.checkInTime).toLocaleString() : '--'}
                                   </p>
                                 </div>
                                 <div>
-                                  <p className="text-[10px] font-black uppercase tracking-widest text-cyan-700 mb-1">Check Out</p>
-                                  <p className="font-bold text-cyan-400 uppercase text-xs">
+                                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Check Out</p>
+                                  <p className="font-bold text-slate-900 dark:text-white">
                                     {v.checkOutTime ? new Date(v.checkOutTime).toLocaleString() : '--'}
                                   </p>
                                 </div>
                                 <div className="col-span-2 md:col-span-4">
-                                  <p className="text-[10px] font-black uppercase tracking-widest text-cyan-700 mb-1">Purpose</p>
-                                  <p className="font-bold text-cyan-400 uppercase text-xs">{v.purpose || 'N/A'}</p>
+                                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Purpose</p>
+                                  <p className="font-bold text-slate-900 dark:text-white">{v.purpose || 'N/A'}</p>
                                 </div>
                               </div>
                             </motion.div>

@@ -142,11 +142,7 @@ const SidebarContent: React.FC<{
           className="p-4 rounded-[2rem] bg-slate-50 dark:bg-slate-800/40 flex items-center gap-3 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all border border-transparent hover:border-brand-600/20 group"
         >
           <div className="w-10 h-10 rounded-xl overflow-hidden bg-white shadow-sm ring-2 ring-slate-100 dark:ring-slate-700 shrink-0 group-hover:scale-110 transition-transform">
-            <img 
-              src={user?.profilePictureUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.profilePictureUrl || user?.email || 'guest'}`} 
-              alt="User" 
-              className="w-full h-full object-cover"
-            />
+            <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.name || 'guest'}`} alt="User" />
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-xs font-black truncate dark:text-white mb-0 group-hover:text-brand-600 transition-colors">{user?.name || 'Resident'}</p>
@@ -180,22 +176,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   useEffect(() => {
     const timer = setInterval(() => setTime(new Date()), 1000);
-    
-    const syncUser = () => {
-      const storedUser = localStorage.getItem('sr_user');
-      if (storedUser) {
-        setUser(JSON.parse(storedUser));
-      }
-    };
-
-    syncUser();
-    loadNotifications();
-
-    window.addEventListener('storage', syncUser);
-    return () => {
-      clearInterval(timer);
-      window.removeEventListener('storage', syncUser);
-    };
+    const storedUser = localStorage.getItem('sr_user');
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+      loadNotifications();
+    }
+    return () => clearInterval(timer);
   }, []);
 
   const loadNotifications = async () => {
@@ -363,14 +349,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 </div>
               )}
             </div>
-
-            <Link to="/profile" className="w-10 h-10 rounded-xl overflow-hidden bg-white shadow-sm ring-2 ring-slate-100 dark:ring-slate-700 shrink-0 hover:scale-110 transition-transform ml-2">
-              <img 
-                src={user?.profilePictureUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.profilePictureUrl || user?.email || 'guest'}`} 
-                alt="User" 
-                className="w-full h-full object-cover"
-              />
-            </Link>
           </div>
         </header>
 

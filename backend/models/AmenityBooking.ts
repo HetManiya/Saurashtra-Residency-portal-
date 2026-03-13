@@ -10,7 +10,6 @@ const amenityBookingSchema = new mongoose.Schema({
   duration: { type: Number }, // Duration in hours
   purpose: { type: String },
   status: { type: String, enum: ['PENDING', 'APPROVED', 'REJECTED', 'CANCELLED'], default: 'PENDING' },
-  priority: { type: String, enum: ['High', 'Medium', 'Low'], default: 'Medium' },
   totalAmount: { type: Number, default: 0 }
 }, { 
   timestamps: true,

@@ -20,7 +20,6 @@ const userSchema = new mongoose.Schema({
     default: 'PENDING' 
   },
   fcmToken: { type: String }, // For Firebase Cloud Messaging (Android)
-  profilePictureUrl: { type: String },
   stripeCustomerId: { type: String },
   subscriptionId: { type: String },
   isRecurringEnabled: { type: Boolean, default: false },

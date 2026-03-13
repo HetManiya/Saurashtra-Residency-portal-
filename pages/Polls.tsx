@@ -86,19 +86,19 @@ const Polls: React.FC = () => {
   };
 
   return (
-    <div className="pb-12 animate-fade-in max-w-4xl mx-auto crt-screen">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-8 pb-6 border-b-4 border-cyan-500/30">
+    <div className="pb-12 animate-fade-in max-w-4xl mx-auto">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-8 pb-6 border-b border-slate-200 dark:border-slate-800">
         <div>
-          <h1 className="text-4xl font-black tracking-tighter text-cyan-400 mb-2 glitch-text" data-text="Community Polls">
-            Community <span className="text-magenta-500">Polls</span>
+          <h1 className="text-4xl font-black tracking-tighter text-slate-900 dark:text-white mb-2">
+            Community <span className="text-brand-600">Polls</span>
           </h1>
-          <p className="text-cyan-700 font-bold font-mono uppercase text-xs">
-            {`> YOUR_VOICE_MATTERS // VOTE_ON_SOCIETY_DECISIONS`}
+          <p className="text-slate-500 dark:text-slate-400 font-medium">
+            Your voice matters. Vote on society decisions.
           </p>
         </div>
         <button 
           onClick={() => setShowModal(true)}
-          className="flex items-center gap-2 bg-magenta-500 text-white px-6 py-3 border-2 border-black font-black text-xs uppercase tracking-widest hover:bg-black hover:text-magenta-500 hover:border-magenta-500 transition-all shadow-[6px_6px_0px_#00ffff] active:scale-95 transform duration-100"
+          className="flex items-center gap-2 bg-brand-600 text-white px-6 py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-brand-700 transition-colors shadow-lg shadow-brand-600/20 active:scale-95 transform duration-100"
         >
           <Plus size={18} strokeWidth={3} />
           Create Poll
@@ -109,29 +109,29 @@ const Polls: React.FC = () => {
         {polls.map((poll) => (
           <div 
             key={poll.id} 
-            className={`bg-black p-8 border-4 transition-all duration-300 relative overflow-hidden group ${
+            className={`bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] border transition-all duration-300 relative overflow-hidden group ${
               poll.status === 'Closed' 
-                ? 'border-cyan-900/30 opacity-60' 
-                : 'border-cyan-500/30 hover:border-magenta-500 hover:shadow-[10px_10px_0px_#00ffff]'
+                ? 'border-slate-200 dark:border-slate-800 opacity-70' 
+                : 'border-slate-200 dark:border-slate-800 hover:border-brand-500 hover:shadow-xl'
             }`}
           >
             {poll.status === 'Closed' && (
-              <div className="absolute top-6 right-6 flex items-center gap-2 px-3 py-1 bg-black border-2 border-cyan-900/30">
-                <Lock size={12} className="text-cyan-900" />
-                <span className="text-[10px] font-black uppercase tracking-widest text-cyan-900">Closed</span>
+              <div className="absolute top-6 right-6 flex items-center gap-2 px-3 py-1 bg-slate-100 dark:bg-slate-800 rounded-full border border-slate-200 dark:border-slate-700">
+                <Lock size={12} className="text-slate-400" />
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Closed</span>
               </div>
             )}
             
             <div className="mb-8">
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 border-2 border-cyan-500 flex items-center justify-center text-cyan-400">
+                <div className="w-10 h-10 rounded-xl bg-brand-50 dark:bg-brand-900/20 flex items-center justify-center text-brand-600 dark:text-brand-400">
                   <PieChart size={20} />
                 </div>
-                <span className="text-[10px] font-black uppercase tracking-widest text-cyan-700 font-mono">
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
                   #{poll.id} • {poll.totalVotes} Votes
                 </span>
               </div>
-              <h3 className="text-2xl font-black text-cyan-400 leading-tight uppercase tracking-tight group-hover:text-magenta-500 transition-colors">
+              <h3 className="text-2xl font-black text-slate-900 dark:text-white leading-tight">
                 {poll.question}
               </h3>
             </div>
@@ -146,37 +146,37 @@ const Polls: React.FC = () => {
                     key={option.id}
                     disabled={poll.status === 'Closed' || !!poll.userVoted}
                     onClick={() => handleVote(poll.id, option.id)}
-                    className={`w-full relative p-0 border-2 overflow-hidden transition-all duration-300 group/btn ${
+                    className={`w-full relative p-0 rounded-2xl border-2 overflow-hidden transition-all duration-300 group/btn ${
                       isSelected 
-                        ? 'border-magenta-500 bg-magenta-900/10 shadow-[4px_4px_0px_#00ffff]' 
-                        : 'border-cyan-900/30 bg-black hover:border-cyan-500'
+                        ? 'border-brand-500 bg-brand-50 dark:bg-brand-900/10' 
+                        : 'border-slate-200 dark:border-slate-800 bg-transparent hover:border-brand-300 dark:hover:border-brand-700'
                     }`}
                   >
                     <div 
                       className={`absolute left-0 top-0 bottom-0 transition-all duration-1000 ease-out ${
-                        isSelected ? 'bg-magenta-500/20' : 'bg-cyan-500/10'
+                        isSelected ? 'bg-brand-200/50 dark:bg-brand-900/30' : 'bg-slate-100/50 dark:bg-slate-800/50'
                       }`}
                       style={{ width: `${percentage}%` }}
                     />
                     
                     <div className="relative z-10 p-4 flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <div className={`w-6 h-6 border-2 flex items-center justify-center transition-colors ${
+                        <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${
                           isSelected 
-                            ? 'border-black bg-magenta-500 text-white' 
-                            : 'border-cyan-900/30 bg-black'
+                            ? 'border-brand-500 bg-brand-500 text-white' 
+                            : 'border-slate-300 dark:border-slate-600 bg-transparent'
                         }`}>
                           {isSelected && <CheckCircle2 size={14} />}
                         </div>
-                        <span className={`text-sm font-black uppercase tracking-tight ${
-                          isSelected ? 'text-magenta-500' : 'text-cyan-700'
+                        <span className={`text-sm font-black ${
+                          isSelected ? 'text-brand-700 dark:text-brand-300' : 'text-slate-700 dark:text-slate-300'
                         }`}>
                           {option.text}
                         </span>
                       </div>
                       <div className="flex items-center gap-3">
-                        <span className="text-[10px] font-black font-mono text-cyan-900">{option.votes}</span>
-                        <span className="text-sm font-black text-cyan-400 font-mono">{percentage}%</span>
+                        <span className="text-xs font-bold text-slate-400">{option.votes}</span>
+                        <span className="text-sm font-black text-slate-900 dark:text-white">{percentage}%</span>
                       </div>
                     </div>
                   </button>
@@ -184,9 +184,9 @@ const Polls: React.FC = () => {
               })}
             </div>
 
-            <div className="mt-8 pt-6 border-t-2 border-cyan-900/30 flex justify-between items-center">
-               <div className="flex items-center gap-2 text-[10px] font-black text-cyan-700 uppercase tracking-widest font-mono">
-                  <Clock size={14} className="text-magenta-500" />
+            <div className="mt-8 pt-6 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center">
+               <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                  <Clock size={14} />
                   Ends {new Date(poll.endDate).toLocaleDateString()}
                </div>
                <div className="flex -space-x-2">
@@ -195,7 +195,7 @@ const Polls: React.FC = () => {
                       key={i} 
                       src={`https://api.dicebear.com/7.x/avataaars/svg?seed=user${i + poll.id}`} 
                       alt="User"
-                      className="w-8 h-8 rounded-full border-2 border-black bg-cyan-900/20"
+                      className="w-8 h-8 rounded-full border-2 border-white dark:border-slate-900 bg-slate-100"
                     />
                   ))}
                </div>
@@ -207,35 +207,35 @@ const Polls: React.FC = () => {
       {/* Create Poll Modal */}
       <AnimatePresence>
         {showModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
             <motion.div 
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              className="bg-black w-full max-w-lg border-4 border-magenta-500 shadow-[12px_12px_0px_#00ffff] overflow-hidden crt-screen"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 20 }}
+              className="bg-white dark:bg-slate-900 w-full max-w-lg rounded-[2.5rem] shadow-2xl overflow-hidden"
             >
-              <div className="p-6 border-b-4 border-cyan-500/30 flex justify-between items-center bg-black">
-                <h2 className="text-2xl font-black text-cyan-400 tracking-tight uppercase glitch-text" data-text="New Poll">New Poll</h2>
-                <button onClick={() => setShowModal(false)} className="p-2 border-2 border-magenta-500 text-magenta-500 hover:bg-magenta-500 hover:text-white transition-all">
+              <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-800/50">
+                <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">New Poll</h2>
+                <button onClick={() => setShowModal(false)} className="p-2 text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl transition-colors">
                   <X size={24} />
                 </button>
               </div>
               
               <form onSubmit={handleCreatePoll} className="p-8 space-y-6">
                 <div>
-                  <label className="text-[10px] font-black text-cyan-700 uppercase tracking-widest mb-2 block ml-1">Question</label>
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block ml-1">Question</label>
                   <textarea 
                     rows={3}
                     placeholder="What would you like to ask the community?" 
                     required
                     value={newPoll.question}
                     onChange={(e) => setNewPoll({...newPoll, question: e.target.value})}
-                    className="w-full bg-black border-2 border-cyan-500 px-4 py-3 text-cyan-400 placeholder:text-cyan-900 font-bold outline-none focus:border-magenta-500 transition-all resize-none"
+                    className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-2xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-brand-500 outline-none resize-none"
                   />
                 </div>
 
                 <div>
-                  <label className="text-[10px] font-black text-cyan-700 uppercase tracking-widest mb-2 block ml-1">Options</label>
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block ml-1">Options</label>
                   <div className="space-y-3">
                     {newPoll.options.map((opt, i) => (
                       <div key={i} className="relative">
@@ -249,13 +249,13 @@ const Polls: React.FC = () => {
                             updated[i] = e.target.value;
                             setNewPoll({...newPoll, options: updated});
                           }}
-                          className="w-full bg-black border-2 border-cyan-500 px-4 py-3 text-cyan-400 placeholder:text-cyan-900 font-bold outline-none focus:border-magenta-500 transition-all pr-10"
+                          className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-2xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-brand-500 outline-none pr-10"
                         />
                         {newPoll.options.length > 2 && (
                           <button 
                             type="button"
                             onClick={() => setNewPoll({...newPoll, options: newPoll.options.filter((_, idx) => idx !== i)})}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-cyan-900 hover:text-magenta-500 transition-colors"
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 transition-colors"
                           >
                             <X size={16} />
                           </button>
@@ -265,7 +265,7 @@ const Polls: React.FC = () => {
                     <button 
                       type="button"
                       onClick={() => setNewPoll({...newPoll, options: [...newPoll.options, '']})}
-                      className="w-full border-2 border-dashed border-cyan-900/30 text-cyan-700 hover:border-cyan-500 hover:text-cyan-500 py-3 font-black text-xs uppercase tracking-widest transition-all"
+                      className="w-full border-2 border-dashed border-slate-200 dark:border-slate-700 text-slate-400 hover:border-brand-500 hover:text-brand-500 py-3 rounded-2xl font-black text-xs uppercase tracking-widest transition-colors"
                     >
                       + Add Option
                     </button>
@@ -274,7 +274,7 @@ const Polls: React.FC = () => {
 
                 <button 
                   type="submit"
-                  className="w-full bg-magenta-500 text-white py-4 border-2 border-black font-black text-sm uppercase tracking-widest hover:bg-black hover:text-magenta-500 hover:border-magenta-500 transition-all shadow-[6px_6px_0px_#00ffff] active:scale-95 transform duration-100 flex items-center justify-center gap-2"
+                  className="w-full bg-brand-600 text-white py-4 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-brand-700 transition-colors shadow-xl shadow-brand-600/20 active:scale-95 transform duration-100 flex items-center justify-center gap-2"
                 >
                   <Send size={18} />
                   Launch Community Poll
