@@ -115,4 +115,36 @@ router.patch('/bookings/:id', protect, authorize(['ADMIN', 'COMMITTEE']), async 
   }
 });
 
+// Cancel a booking (User can cancel their own)
+router.patch('/bookings/:id/cancel', protect, async (req: any, res) => {
+  try {
+    const booking = await AmenityBooking.findById(req.params.id);
+    
+    if (!booking) {
+      return res.status(404).json({ message: 'Booking not found' });
+    }
+
+    // Check if user is the owner of the booking
+    if (booking.userId.toString() !== req.user.id && req.user.role !== 'ADMIN') {
+      return res.status(403).json({ message: 'Not authorized to cancel this booking' });
+    }
+
+    booking.status = 'CANCELLED';
+    await booking.save();
+
+    // Log action
+    await AuditLog.create({
+      userId: req.user.id,
+      userName: req.user.name,
+      action: 'Cancel Booking',
+      entity: 'AmenityBooking',
+      details: `Cancelled booking ${req.params.id}`
+    });
+
+    res.json(booking);
+  } catch (error) {
+    res.status(400).json({ message: 'Error cancelling booking' });
+  }
+});
+
 export default router;

@@ -114,6 +114,7 @@ const SidebarContent: React.FC<{
                     <Link 
                       key={item.path} 
                       to={item.path} 
+                      aria-label={`Navigate to ${item.name}`}
                       onClick={() => {
                         if (window.innerWidth < 1024) setIsSidebarOpen(false);
                       }}
@@ -138,6 +139,7 @@ const SidebarContent: React.FC<{
       <div className="p-6 border-t border-slate-50 dark:border-slate-800/50 shrink-0">
         <Link 
           to="/profile"
+          aria-label={`View profile for ${user?.name || 'Resident'}`}
           onClick={() => { if (window.innerWidth < 1024) setIsSidebarOpen(false); }}
           className="p-4 rounded-[2rem] bg-slate-50 dark:bg-slate-800/40 flex items-center gap-3 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all border border-transparent hover:border-brand-600/20 group"
         >
@@ -150,7 +152,12 @@ const SidebarContent: React.FC<{
               {user?.role || 'Guest'}
             </p>
           </div>
-          <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleLogout(); }} className="p-2 text-slate-400 hover:text-rose-600 transition-colors shrink-0" title="Logout">
+          <button 
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleLogout(); }} 
+            className="p-2 text-slate-400 hover:text-rose-600 transition-colors shrink-0" 
+            title="Logout"
+            aria-label="Logout"
+          >
             <LogOut size={16} />
           </button>
         </Link>
@@ -290,6 +297,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               <button 
                 onClick={() => setIsNotificationsOpen(!isNotificationsOpen)} 
                 className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800 text-slate-500 hover:text-brand-600 transition-all relative"
+                aria-label="Notifications"
+                aria-expanded={isNotificationsOpen}
+                aria-haspopup="true"
               >
                 <Bell size={20} />
                 {notifications.filter(n => !n.read).length > 0 && (
@@ -297,11 +307,15 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 )}
               </button>
               {isNotificationsOpen && (
-                <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl shadow-2xl z-50 overflow-hidden flex flex-col max-h-96">
+                <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl shadow-2xl z-50 overflow-hidden flex flex-col max-h-96" role="menu">
                   <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-800/50">
                     <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-widest">Notifications</h3>
                     {notifications.some(n => !n.read) && (
-                      <button onClick={handleMarkAllAsRead} className="text-[10px] font-bold text-brand-600 hover:text-brand-700 uppercase tracking-widest">
+                      <button 
+                        onClick={handleMarkAllAsRead} 
+                        className="text-[10px] font-bold text-brand-600 hover:text-brand-700 uppercase tracking-widest"
+                        aria-label="Mark all as read"
+                      >
                         Mark all read
                       </button>
                     )}
@@ -313,10 +327,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                       </div>
                     ) : (
                       notifications.map(n => (
-                        <div 
+                        <button 
                           key={n.id || n._id} 
                           onClick={() => !n.read && handleMarkAsRead(n.id || n._id)}
-                          className={`p-4 border-b border-slate-50 dark:border-slate-800/50 cursor-pointer transition-colors ${n.read ? 'opacity-60 hover:bg-slate-50 dark:hover:bg-slate-800/50' : 'bg-brand-50/50 dark:bg-brand-900/10 hover:bg-brand-50 dark:hover:bg-brand-900/20'}`}
+                          className={`w-full text-left p-4 border-b border-slate-50 dark:border-slate-800/50 cursor-pointer transition-colors ${n.read ? 'opacity-60 hover:bg-slate-50 dark:hover:bg-slate-800/50' : 'bg-brand-50/50 dark:bg-brand-900/10 hover:bg-brand-50 dark:hover:bg-brand-900/20'}`}
+                          role="menuitem"
+                          aria-label={`${n.title}: ${n.message}`}
                         >
                           <div className="flex justify-between items-start mb-1">
                             <h4 className={`text-xs font-bold ${n.read ? 'text-slate-700 dark:text-slate-300' : 'text-slate-900 dark:text-white'}`}>{n.title}</h4>
@@ -327,24 +343,42 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                           <p className={`text-[11px] leading-relaxed ${n.read ? 'text-slate-500 dark:text-slate-400' : 'text-slate-600 dark:text-slate-300'}`}>
                             {n.message}
                           </p>
-                        </div>
+                        </button>
                       ))
                     )}
                   </div>
                 </div>
               )}
             </div>
-            <button onClick={() => setIsDarkMode(!isDarkMode)} className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800 text-slate-500 hover:text-brand-600 transition-all">
+            <button 
+              onClick={() => setIsDarkMode(!isDarkMode)} 
+              className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800 text-slate-500 hover:text-brand-600 transition-all"
+              aria-label={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
+            >
               {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
             </button>
             <div className="relative">
-              <button onClick={() => setIsLangMenuOpen(!isLangMenuOpen)} className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800 text-slate-500 hover:text-brand-600 flex items-center gap-2">
+              <button 
+                onClick={() => setIsLangMenuOpen(!isLangMenuOpen)} 
+                className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800 text-slate-500 hover:text-brand-600 flex items-center gap-2"
+                aria-label="Select Language"
+                aria-expanded={isLangMenuOpen}
+                aria-haspopup="true"
+              >
                 <Globe size={20} /> <span className="text-[10px] font-black uppercase hidden sm:inline">{language}</span>
               </button>
               {isLangMenuOpen && (
-                <div className="absolute right-0 mt-2 w-32 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl shadow-2xl z-50 overflow-hidden">
+                <div className="absolute right-0 mt-2 w-32 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl shadow-2xl z-50 overflow-hidden" role="menu">
                   {['en', 'gu', 'hi'].map(l => (
-                    <button key={l} onClick={() => { setLanguage(l as any); setIsLangMenuOpen(false); }} className={`w-full px-4 py-3 text-xs font-bold text-left hover:bg-slate-50 dark:hover:bg-slate-800 ${language === l ? 'text-brand-600 bg-brand-50' : 'text-slate-500'}`}>{l.toUpperCase()}</button>
+                    <button 
+                      key={l} 
+                      onClick={() => { setLanguage(l as any); setIsLangMenuOpen(false); }} 
+                      className={`w-full px-4 py-3 text-xs font-bold text-left hover:bg-slate-50 dark:hover:bg-slate-800 ${language === l ? 'text-brand-600 bg-brand-50' : 'text-slate-500'}`}
+                      role="menuitem"
+                      aria-label={`Switch to ${l.toUpperCase()}`}
+                    >
+                      {l.toUpperCase()}
+                    </button>
                   ))}
                 </div>
               )}

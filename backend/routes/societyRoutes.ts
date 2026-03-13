@@ -25,7 +25,19 @@ router.get('/buildings', protect, async (req, res) => {
 router.get('/notices', protect, async (req, res) => {
   try {
     console.log('📢 Fetching Notices...');
-    const notices = await Notice.find().sort({ date: -1 });
+    const { search } = req.query;
+    let query: any = {};
+    
+    if (search) {
+      const searchRegex = new RegExp(search as string, 'i');
+      query.$or = [
+        { title: searchRegex },
+        { content: searchRegex },
+        { category: searchRegex }
+      ];
+    }
+    
+    const notices = await Notice.find(query).sort({ date: -1 });
     res.json(notices);
   } catch (error: any) {
     console.error('📢 Fetch Notices Error:', error.message);

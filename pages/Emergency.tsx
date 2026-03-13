@@ -103,6 +103,7 @@ const Emergency: React.FC = () => {
         </div>
         <button 
           onClick={handleSOS}
+          aria-label="Trigger SOS Emergency Alert"
           className="flex items-center gap-2 bg-red-600 text-white px-8 py-3 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-red-700 transition-colors shadow-lg shadow-red-600/20 active:scale-95 transform duration-100"
         >
           <AlertTriangle size={20} fill="currentColor" />
@@ -116,6 +117,9 @@ const Emergency: React.FC = () => {
             <button
               key={idx}
               onClick={() => setActiveTab(idx)}
+              aria-label={`Switch to ${tab} tab`}
+              aria-selected={activeTab === idx}
+              role="tab"
               className={`px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
                 activeTab === idx 
                   ? 'bg-white dark:bg-slate-700 text-brand-600 dark:text-white shadow-sm' 
@@ -163,6 +167,7 @@ const Emergency: React.FC = () => {
                     
                     <a 
                       href={`tel:${contact.number.replace(/\s+/g, '')}`}
+                      aria-label={`Call ${contact.name} at ${contact.number}`}
                       className={`flex items-center gap-2 px-4 py-2 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-md transition-colors ${
                         contact.critical 
                           ? 'bg-red-600 hover:bg-red-700 text-white' 
@@ -219,6 +224,7 @@ const Emergency: React.FC = () => {
 
                 <a 
                   href={`tel:${resident.phone}`}
+                  aria-label={`Call ${resident.name} at ${resident.phone}`}
                   className="w-full bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-brand-600 hover:text-white py-3 rounded-xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 transition-colors"
                 >
                   <Phone size={14} />

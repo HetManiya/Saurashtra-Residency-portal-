@@ -86,6 +86,7 @@ const Helpdesk: React.FC = () => {
         </div>
         <button 
           onClick={() => setShowModal(true)}
+          aria-label="Raise a new support ticket"
           className="flex items-center gap-2 bg-brand-600 text-white px-6 py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-brand-700 transition-colors shadow-lg shadow-brand-600/20 active:scale-95 transform duration-100"
         >
           <Plus size={18} strokeWidth={3} />
@@ -189,21 +190,28 @@ const Helpdesk: React.FC = () => {
             >
               <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-800/50">
                 <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">New Ticket</h2>
-                <button onClick={() => setShowModal(false)} className="p-2 text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl transition-colors">
+                <button 
+                  onClick={() => setShowModal(false)} 
+                  aria-label="Close ticket form"
+                  className="p-2 text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl transition-colors"
+                >
                   <X size={24} />
                 </button>
               </div>
               
               <div className="p-8 space-y-6">
                 <div>
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block ml-1">
+                  <label htmlFor="ticket-category" className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block ml-1">
                     Issue Category
                   </label>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div id="ticket-category" className="grid grid-cols-2 gap-3" role="group" aria-label="Select issue category">
                     {['Plumbing', 'Electrical', 'Security', 'General'].map(cat => (
                       <button 
                         key={cat}
+                        type="button"
                         onClick={() => setFormData({...formData, category: cat as any})}
+                        aria-label={`Select category: ${cat}`}
+                        aria-pressed={formData.category === cat}
                         className={`py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all ${
                           formData.category === cat 
                             ? 'bg-brand-600 text-white shadow-lg shadow-brand-600/20' 
@@ -217,14 +225,17 @@ const Helpdesk: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block ml-1">
+                  <label htmlFor="ticket-priority" className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block ml-1">
                     Priority Level
                   </label>
-                  <div className="flex gap-3">
+                  <div id="ticket-priority" className="flex gap-3" role="group" aria-label="Select priority level">
                     {['Low', 'Medium', 'High'].map(p => (
                       <button 
                         key={p} 
+                        type="button"
                         onClick={() => setFormData({...formData, priority: p as any})}
+                        aria-label={`Select priority: ${p}`}
+                        aria-pressed={formData.priority === p}
                         className={`flex-1 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all ${
                           formData.priority === p 
                             ? 'bg-brand-600 text-white shadow-lg shadow-brand-600/20' 
@@ -238,12 +249,14 @@ const Helpdesk: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block ml-1">
+                  <label htmlFor="ticket-subject" className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block ml-1">
                     Subject
                   </label>
                   <input 
+                    id="ticket-subject"
                     type="text"
                     placeholder="Briefly describe the issue..."
+                    aria-label="Issue subject"
                     value={formData.title}
                     onChange={e => setFormData({...formData, title: e.target.value})}
                     className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-2xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-brand-500 outline-none"
@@ -251,12 +264,14 @@ const Helpdesk: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block ml-1">
+                  <label htmlFor="ticket-description" className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block ml-1">
                     Detailed Description
                   </label>
                   <textarea 
+                    id="ticket-description"
                     rows={4}
                     placeholder="Provide more details for the technician..."
+                    aria-label="Detailed issue description"
                     value={formData.desc}
                     onChange={e => setFormData({...formData, desc: e.target.value})}
                     className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-2xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-brand-500 outline-none resize-none"
@@ -265,6 +280,7 @@ const Helpdesk: React.FC = () => {
 
                 <button 
                   onClick={handleRaiseTicket}
+                  aria-label="Submit support ticket"
                   className="w-full bg-brand-600 text-white py-4 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-brand-700 transition-colors shadow-xl shadow-brand-600/20 active:scale-95 transform duration-100 flex items-center justify-center gap-2"
                 >
                   <Send size={18} />

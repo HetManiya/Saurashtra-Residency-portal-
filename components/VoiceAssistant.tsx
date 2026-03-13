@@ -104,60 +104,70 @@ const VoiceAssistant: React.FC = () => {
   };
 
   return (
-    <div className="fixed bottom-10 right-10 z-[100] flex flex-col items-end">
+    <div className="fixed bottom-10 right-10 z-[100] flex flex-col items-end crt-screen">
       {isOpen && (
-        <div className="mb-6 w-80 bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 shadow-2xl p-8 animate-in slide-in-from-bottom-10 duration-500 overflow-hidden">
+        <div className="mb-6 w-80 bg-black border-4 border-cyan-500 shadow-[12px_12px_0px_#ff00ff] p-8 animate-in slide-in-from-bottom-10 duration-500 overflow-hidden">
           <div className="flex justify-between items-center mb-6">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-brand-600 rounded-2xl flex items-center justify-center text-white">
+              <div className="w-10 h-10 bg-black border-2 border-magenta-500 flex items-center justify-center text-magenta-500 shadow-[2px_2px_0px_#00ffff]">
                 <BrainCircuit size={20} />
               </div>
               <div>
-                <h4 className="font-black text-sm tracking-tight dark:text-white">Community AI</h4>
-                <p className="text-[10px] font-black uppercase text-brand-600 tracking-widest">Pasodara Assistant</p>
+                <h4 className="font-black text-sm tracking-tight text-cyan-400 uppercase glitch-text" data-text="Community AI">Community AI</h4>
+                <p className="text-[10px] font-black uppercase text-cyan-700 tracking-widest font-mono">v2.0 // VOICE_LINK</p>
               </div>
             </div>
-            <button onClick={() => setIsOpen(false)} className="text-slate-300 hover:text-slate-900 dark:hover:text-white"><X size={20} /></button>
+            <button onClick={() => setIsOpen(false)} className="text-cyan-700 hover:text-magenta-500 transition-colors"><X size={24} /></button>
           </div>
 
-          <div className="bg-slate-50 dark:bg-slate-800/50 rounded-3xl p-6 min-h-[120px] mb-6 flex flex-col justify-center items-center text-center">
+          <div className="bg-black border-2 border-cyan-900/30 p-6 min-h-[140px] mb-6 flex flex-col justify-center items-center text-center">
             {isConnecting ? (
-              <Loader2 className="animate-spin text-brand-600 mb-2" />
+              <div className="flex flex-col items-center">
+                <Loader2 className="animate-spin text-cyan-400 mb-2" />
+                <span className="text-[9px] font-black text-cyan-700 uppercase tracking-[0.2em]">Establishing_Link...</span>
+              </div>
             ) : isActive ? (
               <div className="space-y-4 w-full">
-                <div className="flex justify-center gap-1 h-8 items-center">
-                  {[...Array(5)].map((_, i) => (
-                    <div key={i} className="w-1 bg-brand-600 rounded-full animate-pulse" style={{ height: `${Math.random() * 100}%`, animationDelay: `${i * 0.1}s` }} />
+                <div className="flex justify-center gap-1.5 h-10 items-center">
+                  {[...Array(8)].map((_, i) => (
+                    <div key={i} className="w-1 bg-magenta-500 shadow-[0_0_8px_#ff00ff] animate-pulse" style={{ height: `${20 + Math.random() * 80}%`, animationDelay: `${i * 0.05}s` }} />
                   ))}
                 </div>
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Listening for commands...</p>
-                {transcription && <p className="text-sm font-medium text-slate-700 dark:text-slate-300 italic">"{transcription}"</p>}
+                <p className="text-[10px] font-black text-cyan-400 uppercase tracking-widest animate-pulse">System_Listening...</p>
+                {transcription && <p className="text-xs font-bold text-magenta-500 font-mono italic leading-relaxed">"{transcription}"</p>}
               </div>
             ) : (
-              <p className="text-sm font-medium text-slate-500 italic">"What is my current balance?"<br/>"Where is Wing A-18?"</p>
+              <div className="space-y-2">
+                <p className="text-[10px] font-black text-cyan-900 uppercase tracking-widest leading-relaxed">
+                  {`> "What is my balance?"`} <br />
+                  {`> "Where is Wing A-1?"`}
+                </p>
+              </div>
             )}
           </div>
 
           <button 
             onClick={toggleAssistant}
-            className={`w-full py-4 rounded-2xl font-black uppercase tracking-widest text-xs flex items-center justify-center gap-3 transition-all ${
-              isActive ? 'bg-rose-600 text-white' : 'bg-brand-600 text-white'
+            className={`w-full py-4 border-2 font-black uppercase tracking-widest text-[11px] flex items-center justify-center gap-3 transition-all active:scale-95 shadow-[4px_4px_0px_#00ffff] ${
+              isActive 
+                ? 'bg-magenta-500 text-white border-black hover:bg-black hover:text-magenta-500 hover:border-magenta-500' 
+                : 'bg-cyan-400 text-black border-black hover:bg-black hover:text-cyan-400 hover:border-cyan-400'
             }`}
           >
             {isConnecting ? <Loader2 className="animate-spin" size={16} /> : isActive ? <MicOff size={16} /> : <Mic size={16} />}
-            {isActive ? 'Stop Assistant' : 'Start Talking'}
+            {isActive ? 'Terminate Link' : 'Initialize Uplink'}
           </button>
         </div>
       )}
 
       <button 
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-20 h-20 rounded-[2.5rem] flex items-center justify-center shadow-2xl transition-all duration-500 relative group overflow-hidden ${
-          isOpen ? 'bg-slate-900 dark:bg-slate-800' : 'bg-brand-600'
+        className={`w-20 h-20 border-4 shadow-[8px_8px_0px_#ff00ff] flex items-center justify-center transition-all duration-500 relative group overflow-hidden active:scale-90 ${
+          isOpen ? 'bg-black border-magenta-500 text-magenta-500' : 'bg-black border-cyan-500 text-cyan-400'
         }`}
       >
-        <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity" />
-        {isOpen ? <X className="text-white" size={32} /> : <Waves className="text-white animate-pulse-slow" size={32} />}
+        <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-10 transition-opacity" />
+        {isOpen ? <X size={32} /> : <Waves className="animate-pulse" size={32} />}
       </button>
     </div>
   );

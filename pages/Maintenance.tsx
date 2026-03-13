@@ -12,6 +12,7 @@ import { api } from '../services/api';
 import { useLanguage } from '../components/LanguageContext';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import Fuse from 'fuse.js';
 
 const CheckoutForm: React.FC<{ 
   clientSecret: string; 
@@ -89,6 +90,7 @@ const CheckoutForm: React.FC<{
           type="button" 
           onClick={onCancel}
           className="flex-1 py-4 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-2xl font-black uppercase tracking-widest text-[10px]"
+          aria-label="Cancel Payment"
         >
           Cancel
         </button>
@@ -96,6 +98,7 @@ const CheckoutForm: React.FC<{
           type="submit" 
           disabled={!stripe || processing}
           className="flex-1 py-4 bg-brand-600 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-lg shadow-brand-500/20 disabled:opacity-50"
+          aria-label={processing ? 'Processing Payment' : `Pay ₹${amount}`}
         >
           {processing ? 'Processing...' : `Pay ₹${amount}`}
         </button>
@@ -345,13 +348,23 @@ const Maintenance: React.FC = () => {
   };
 
   const filteredRecords = useMemo(() => {
-    const source = activeTab === 'current' ? records : historyRecords;
-    return source.filter(r => {
+    let source = activeTab === 'current' ? records : historyRecords;
+    
+    // Apply filters first
+    source = source.filter(r => {
       const matchesStatus = statusFilter === 'ALL' || r.status === statusFilter;
       const matchesOccupancy = occupancyFilter === 'ALL' || r.occupancyType === occupancyFilter;
-      const matchesSearch = r.flatId.toLowerCase().includes(searchQuery.toLowerCase());
-      return matchesStatus && matchesOccupancy && matchesSearch;
+      return matchesStatus && matchesOccupancy;
     });
+
+    if (!searchQuery.trim()) return source;
+
+    const fuse = new Fuse(source, {
+      keys: ['flatId', 'status', 'occupancyType'],
+      threshold: 0.3,
+    });
+
+    return fuse.search(searchQuery).map(result => result.item);
   }, [activeTab, records, historyRecords, statusFilter, occupancyFilter, searchQuery]);
 
   return (
@@ -370,6 +383,7 @@ const Maintenance: React.FC = () => {
             <button 
               onClick={handleGenerateMonthly}
               className="flex items-center gap-2 px-6 py-4 bg-emerald-600 text-white rounded-[1.5rem] font-black uppercase tracking-widest text-[11px] shadow-xl shadow-emerald-500/20 active:scale-95"
+              aria-label="Generate Monthly Maintenance Cycle"
             >
               <RefreshCw size={16} /> Generate Cycle
             </button>
@@ -383,6 +397,7 @@ const Maintenance: React.FC = () => {
                   ? 'bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-600 cursor-not-allowed' 
                   : 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-indigo-500/20'
               }`}
+              aria-label={isLocked ? 'Cycle is Locked' : 'Finalize and Lock Ledger'}
             >
               {isLocked ? <Lock size={16} /> : <Unlock size={16} />}
               {isLocked ? 'Cycle Locked' : 'Finalize Ledger'}
@@ -393,6 +408,7 @@ const Maintenance: React.FC = () => {
               onClick={handleSendReminders}
               disabled={isGeneratingReminders}
               className="flex items-center gap-2 px-6 py-4 bg-amber-600 text-white rounded-[1.5rem] font-black uppercase tracking-widest text-[11px] shadow-xl shadow-amber-500/20 active:scale-95 disabled:opacity-50"
+              aria-label="Send Payment Reminders to Residents"
             >
               {isGeneratingReminders ? <Loader2 size={16} className="animate-spin" /> : <BellRing size={16} />}
               Send Reminders
@@ -403,6 +419,7 @@ const Maintenance: React.FC = () => {
               onClick={handleCalculatePenalties}
               disabled={isCalculatingPenalties}
               className="flex items-center gap-2 px-6 py-4 bg-rose-600 text-white rounded-[1.5rem] font-black uppercase tracking-widest text-[11px] shadow-xl shadow-rose-500/20 active:scale-95 disabled:opacity-50"
+              aria-label="Apply Penalties to Overdue Records"
             >
               {isCalculatingPenalties ? <Loader2 size={16} className="animate-spin" /> : <Zap size={16} />}
               Apply Penalties
@@ -417,12 +434,17 @@ const Maintenance: React.FC = () => {
                   ? 'bg-emerald-100 text-emerald-600 cursor-default' 
                   : 'bg-brand-600 text-white shadow-brand-500/20'
               }`}
+              aria-label={user?.isRecurringEnabled ? 'Recurring Payments are Active' : 'Enable Recurring Payments'}
             >
               {isSettingUpRecurring ? <Loader2 size={16} className="animate-spin" /> : <RefreshCw size={16} />}
               {user?.isRecurringEnabled ? 'Recurring Active' : 'Enable Recurring'}
             </button>
           )}
-          <button onClick={handleExport} className="flex items-center gap-2 px-5 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl font-bold text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-50 transition-all">
+          <button 
+            onClick={handleExport} 
+            className="flex items-center gap-2 px-5 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl font-bold text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-50 transition-all"
+            aria-label="Export Records to CSV"
+          >
             <Download size={18} /> {t('export')}
           </button>
         </div>
@@ -436,12 +458,16 @@ const Maintenance: React.FC = () => {
                 <button 
                   onClick={() => setActiveTab('current')} 
                   className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${activeTab === 'current' ? 'bg-white dark:bg-slate-700 text-brand-600 dark:text-brand-400 shadow-xl' : 'text-slate-400 hover:text-slate-600'}`}
+                  aria-label="View Current Ledger"
+                  aria-pressed={activeTab === 'current'}
                 >
                   <Calendar size={14} /> Current Ledger
                 </button>
                 <button 
                   onClick={() => setActiveTab('history')} 
                   className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${activeTab === 'history' ? 'bg-white dark:bg-slate-700 text-brand-600 dark:text-brand-400 shadow-xl' : 'text-slate-400 hover:text-slate-600'}`}
+                  aria-label="View Payment History"
+                  aria-pressed={activeTab === 'history'}
                 >
                   <History size={14} /> History
                 </button>
@@ -465,6 +491,8 @@ const Maintenance: React.FC = () => {
                       key={o} 
                       onClick={() => setOccupancyFilter(o as any)} 
                       className={`flex-1 sm:flex-none px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${occupancyFilter === o ? 'bg-white dark:bg-slate-900 text-brand-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                      aria-label={`Filter by ${o} occupancy`}
+                      aria-pressed={occupancyFilter === o}
                     >
                       {o}
                     </button>
@@ -478,6 +506,8 @@ const Maintenance: React.FC = () => {
                         key={s} 
                         onClick={() => setStatusFilter(s as any)} 
                         className={`flex-1 sm:flex-none px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${statusFilter === s ? 'bg-white dark:bg-slate-900 text-brand-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                        aria-label={`Filter by ${s} status`}
+                        aria-pressed={statusFilter === s}
                       >
                         {s}
                       </button>
@@ -545,16 +575,23 @@ const Maintenance: React.FC = () => {
                                 <button 
                                   onClick={() => handleViewReceipt(record)}
                                   className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-brand-50 hover:text-brand-600 transition-all"
+                                  aria-label={`View Receipt for ${record.month} ${record.year}`}
                                 >
                                   <FileText size={12} /> {t('receipt')}
                                 </button>
-                                <button onClick={() => handleShareWhatsApp(record)} className="p-2 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all" title="Share">
+                                <button 
+                                  onClick={() => handleShareWhatsApp(record)} 
+                                  className="p-2 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all" 
+                                  title="Share"
+                                  aria-label={`Share Receipt for ${record.month} ${record.year} on WhatsApp`}
+                                >
                                   <Share2 size={14} />
                                 </button>
                                 <button 
                                   onClick={() => handleDisputeHelp(record)}
                                   className="p-2 text-rose-600 hover:bg-rose-50 rounded-lg transition-all" 
                                   title="AI Dispute Help"
+                                  aria-label={`Get AI Dispute Help for ${record.month} ${record.year}`}
                                 >
                                   <AlertCircle size={14} />
                                 </button>
@@ -566,6 +603,7 @@ const Maintenance: React.FC = () => {
                                     onClick={() => handlePayStripe(record)}
                                     disabled={isProcessingPayment}
                                     className="flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-brand-700 transition-all shadow-lg"
+                                    aria-label={`Pay Maintenance for ${record.month} ${record.year}`}
                                   >
                                     {isProcessingPayment ? <Loader2 size={12} className="animate-spin" /> : <CreditCard size={12} />} 
                                     {t('pay_now')}
@@ -576,6 +614,7 @@ const Maintenance: React.FC = () => {
                                     onClick={() => handleWhatsAppReminder(record)}
                                     className="p-2.5 bg-emerald-50 dark:bg-emerald-900/10 text-emerald-600 rounded-xl hover:bg-emerald-100 transition-all border border-emerald-100"
                                     title="Reminder"
+                                    aria-label={`Send WhatsApp Reminder to ${record.flatId}`}
                                   >
                                     <MessageCircle size={14} />
                                   </button>
@@ -625,7 +664,11 @@ const Maintenance: React.FC = () => {
                 <h3 className="text-2xl font-black tracking-tight dark:text-white">Checkout</h3>
                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Secure Society Payments</p>
               </div>
-              <button onClick={() => setPaymentOrder(null)} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
+              <button 
+                onClick={() => setPaymentOrder(null)} 
+                className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors"
+                aria-label="Close Checkout"
+              >
                 <X size={20} className="text-slate-400" />
               </button>
             </div>
@@ -674,7 +717,11 @@ const Maintenance: React.FC = () => {
                     <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Official Payment Receipt</p>
                   </div>
                 </div>
-                <button onClick={() => setSelectedReceipt(null)} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
+                <button 
+                  onClick={() => setSelectedReceipt(null)} 
+                  className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors"
+                  aria-label="Close Receipt"
+                >
                   <X size={20} className="text-slate-400" />
                 </button>
               </div>
@@ -732,12 +779,14 @@ const Maintenance: React.FC = () => {
                   <button 
                     onClick={() => window.print()}
                     className="flex-1 py-4 bg-slate-900 dark:bg-slate-800 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] flex items-center justify-center gap-2"
+                    aria-label="Print Receipt as PDF"
                   >
                     <Download size={14} /> Print PDF
                   </button>
                   <button 
                     onClick={() => handleShareWhatsApp({ ...selectedReceipt, amount: selectedReceipt.total } as any)}
                     className="flex-1 py-4 bg-emerald-600 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] flex items-center justify-center gap-2"
+                    aria-label="Share Receipt on WhatsApp"
                   >
                     <Share2 size={14} /> Share
                   </button>
@@ -762,7 +811,11 @@ const Maintenance: React.FC = () => {
                   <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Powered by Gemini AI</p>
                 </div>
               </div>
-              <button onClick={() => setDisputeHelp(null)} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
+              <button 
+                onClick={() => setDisputeHelp(null)} 
+                className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors"
+                aria-label="Close Dispute Help"
+              >
                 <X size={20} className="text-slate-400" />
               </button>
             </div>
@@ -777,12 +830,14 @@ const Maintenance: React.FC = () => {
               <button 
                 onClick={() => setDisputeHelp(null)}
                 className="flex-1 py-4 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-2xl font-black uppercase tracking-widest text-[10px]"
+                aria-label="Close AI Help"
               >
                 Close
               </button>
               <button 
                 onClick={() => window.location.href = 'mailto:committee@residency.com'}
                 className="flex-1 py-4 bg-brand-600 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-lg shadow-brand-500/20"
+                aria-label="Contact Committee via Email"
               >
                 Contact Committee
               </button>

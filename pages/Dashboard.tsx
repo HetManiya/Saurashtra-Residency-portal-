@@ -168,18 +168,21 @@ const Dashboard: React.FC = () => {
             <button 
               onClick={() => navigate('/registration-approvals')}
               className="bg-white text-slate-900 px-6 py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-slate-100 transition-colors"
+              aria-label="View Registration Approvals"
             >
               Approvals
             </button>
             <button 
               onClick={() => navigate('/security-gate')}
               className="bg-brand-600 text-white px-6 py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-brand-700 transition-colors shadow-lg shadow-brand-600/20"
+              aria-label="Go to Security Gate"
             >
               Security
             </button>
             <button 
               onClick={() => navigate('/audit-logs')}
               className="bg-transparent border border-white/20 text-white px-6 py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-white/5 transition-colors"
+              aria-label="View Audit Logs"
             >
               Audit
             </button>
@@ -219,12 +222,13 @@ const Dashboard: React.FC = () => {
               <h3 className="text-4xl font-black text-slate-900 dark:text-white">{adminSummary?.summary?.openComplaints ?? '02'}</h3>
             </div>
           </div>
-          <button 
-            onClick={() => navigate('/helpdesk')}
-            className="w-full bg-slate-900 dark:bg-slate-800 text-white py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-slate-800 dark:hover:bg-slate-700 transition-colors mt-4"
-          >
-            Manage Support
-          </button>
+            <button 
+              onClick={() => navigate('/helpdesk')}
+              className="w-full bg-slate-900 dark:bg-slate-800 text-white py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-slate-800 dark:hover:bg-slate-700 transition-colors mt-4"
+              aria-label="Manage Support Tickets"
+            >
+              Manage Support
+            </button>
         </div>
 
         {/* Intelligence Unit - 2x1 */}
@@ -252,6 +256,7 @@ const Dashboard: React.FC = () => {
             <button 
               onClick={() => navigate('/expenses')}
               className="text-xs font-black text-white uppercase tracking-widest hover:text-brand-400 transition-colors"
+              aria-label="View Society Forecast Details"
             >
               View Details
             </button>
@@ -313,6 +318,7 @@ const Dashboard: React.FC = () => {
                 <button 
                   onClick={() => handleResolveComplaint(complaint.id)}
                   className="w-8 h-8 rounded-full bg-white dark:bg-slate-800 flex items-center justify-center text-green-500 hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors shadow-sm"
+                  aria-label={`Resolve complaint: ${complaint.subject}`}
                 >
                   <CheckCircle2 size={16} />
                 </button>
@@ -328,6 +334,7 @@ const Dashboard: React.FC = () => {
           <button 
             onClick={() => navigate('/helpdesk')}
             className="w-full text-xs font-black text-slate-900 dark:text-white uppercase tracking-widest hover:text-brand-600 transition-colors mt-4"
+            aria-label="View All Support Issues"
           >
             View All
           </button>
@@ -363,6 +370,7 @@ const Dashboard: React.FC = () => {
             <button 
               onClick={() => navigate('/maintenance')}
               className="bg-white text-brand-600 px-6 py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-brand-50 transition-colors flex items-center gap-2"
+              aria-label={isPaid ? 'View Maintenance History' : 'Pay Maintenance Now'}
             >
               <CreditCard size={16} />
               {isPaid ? 'View History' : 'Pay Now'}
@@ -370,6 +378,7 @@ const Dashboard: React.FC = () => {
             <button 
               onClick={() => navigate('/visitor-pass')}
               className="bg-brand-800 text-white px-6 py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-brand-900 transition-colors flex items-center gap-2 shadow-lg shadow-brand-900/20"
+              aria-label="Create New Visitor Pass"
             >
               <QrCode size={16} />
               New Pass
@@ -425,6 +434,7 @@ const Dashboard: React.FC = () => {
                 key={i}
                 onClick={() => navigate(btn.path)}
                 className={`${btn.color} rounded-2xl p-3 flex flex-col items-center justify-center gap-2 transition-all active:scale-95 aspect-square`}
+                aria-label={`Open ${btn.label}`}
               >
                 <btn.icon size={20} />
                 <span className="text-[10px] font-black uppercase tracking-wider mt-1">{btn.label}</span>
@@ -473,6 +483,7 @@ const Dashboard: React.FC = () => {
           <button 
             onClick={() => navigate('/meetings')}
             className="w-full bg-indigo-600 text-white py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-indigo-700 transition-colors mt-4"
+            aria-label="View Meetings Calendar"
           >
             View Calendar
           </button>
@@ -484,15 +495,22 @@ const Dashboard: React.FC = () => {
             <h3 className="text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
               <BellRing size={20} className="text-brand-600" /> Bulletin
             </h3>
-            <button onClick={() => navigate('/notices')} className="text-xs font-bold text-brand-600 hover:underline">All</button>
+            <button 
+              onClick={() => navigate('/notices')} 
+              className="text-xs font-bold text-brand-600 hover:underline"
+              aria-label="View All Notices"
+            >
+              All
+            </button>
           </div>
           
           <div className="space-y-3 flex-1">
             {notices.slice(0, 2).map((notice, index) => (
-              <div 
+              <button 
                 key={notice.id || index} 
                 onClick={() => navigate('/notices')}
-                className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-2xl cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                className="w-full text-left p-3 bg-slate-50 dark:bg-slate-800/50 rounded-2xl cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                aria-label={`View notice: ${notice.title}`}
               >
                 <div className="flex justify-between items-center mb-1">
                   <span className={`px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider ${
@@ -505,7 +523,7 @@ const Dashboard: React.FC = () => {
                 <h4 className="text-xs font-black text-slate-900 dark:text-white truncate">
                   {notice.title}
                 </h4>
-              </div>
+              </button>
             ))}
             {notices.length === 0 && (
               <div className="text-center py-4">
@@ -517,6 +535,7 @@ const Dashboard: React.FC = () => {
           <button 
             onClick={() => navigate('/facilities')}
             className="w-full bg-slate-100 dark:bg-slate-800 text-slate-400 py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-brand-600 hover:text-white transition-colors mt-4"
+            aria-label="Book Amenities"
           >
             Book Amenities
           </button>

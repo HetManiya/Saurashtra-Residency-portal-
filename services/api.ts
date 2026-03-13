@@ -313,6 +313,14 @@ export const api = {
     return handleResponse(response);
   },
 
+  cancelAmenityBooking: async (id: string): Promise<AmenityBooking> => {
+    const response = await fetch(`/api/v1/amenities/bookings/${id}/cancel`, {
+      method: 'PATCH',
+      headers: getAuthHeader()
+    });
+    return handleResponse(response);
+  },
+
   getPendingRegistrations: async () => {
     try {
       const response = await fetch('/api/v1/admin/pending-registrations', {

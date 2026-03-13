@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { 
   ShieldCheck, Scan, Search, User, Phone, Home, Clock, 
   CheckCircle2, XCircle, LogIn, LogOut, Loader2, AlertCircle,
@@ -8,6 +8,7 @@ import {
 import { api } from '../services/api';
 import { io, Socket } from 'socket.io-client';
 import { Html5QrcodeScanner } from 'html5-qrcode';
+import Fuse from 'fuse.js';
 
 const SecurityGate: React.FC = () => {
   const [passId, setPassId] = useState('');
@@ -61,6 +62,17 @@ const SecurityGate: React.FC = () => {
       console.error(e);
     }
   };
+
+  const filteredVisitors = useMemo(() => {
+    if (!searchQuery.trim()) return activeVisitors;
+    
+    const fuse = new Fuse(activeVisitors, {
+      keys: ['name', 'phone', 'flatId', 'purpose'],
+      threshold: 0.3,
+    });
+    
+    return fuse.search(searchQuery).map(result => result.item);
+  }, [activeVisitors, searchQuery]);
 
   useEffect(() => {
     if (isScanning) {
@@ -191,6 +203,7 @@ const SecurityGate: React.FC = () => {
                   <input 
                     type="text" 
                     placeholder="e.g. ABC123XY" 
+                    aria-label="Enter Visitor Pass ID"
                     className="w-full pl-16 pr-6 py-5 bg-slate-50 dark:bg-slate-800 rounded-[2rem] outline-none font-black text-lg dark:text-white border-2 border-transparent focus:border-brand-600/20 uppercase tracking-widest"
                     value={passId}
                     onChange={(e) => setPassId(e.target.value)}
@@ -198,6 +211,7 @@ const SecurityGate: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setIsScanning(true)}
+                    aria-label="Scan QR Code"
                     className="absolute right-4 top-1/2 -translate-y-1/2 p-2 bg-slate-200 dark:bg-slate-700 rounded-xl hover:bg-brand-600 hover:text-white transition-colors"
                     title="Scan QR Code"
                   >
@@ -208,6 +222,7 @@ const SecurityGate: React.FC = () => {
               <button 
                 type="submit"
                 disabled={verifying || !passId}
+                aria-label="Verify Visitor Pass"
                 className="w-full py-5 bg-brand-600 text-white rounded-[2rem] font-black uppercase tracking-widest text-xs flex items-center justify-center gap-3 shadow-2xl shadow-brand-500/30 transition-all active:scale-95 disabled:opacity-50"
               >
                 {verifying ? <Loader2 className="animate-spin" /> : <ShieldCheck size={18} />} Verify Visitor
@@ -219,6 +234,7 @@ const SecurityGate: React.FC = () => {
                 <div className="bg-white dark:bg-slate-900 w-full max-w-md rounded-[2rem] p-6 shadow-2xl relative">
                   <button 
                     onClick={() => setIsScanning(false)}
+                    aria-label="Close QR Scanner"
                     className="absolute top-4 right-4 p-2 bg-slate-100 dark:bg-slate-800 rounded-full hover:bg-rose-50 hover:text-rose-600 transition-colors z-10"
                   >
                     <X size={20} />
@@ -277,6 +293,7 @@ const SecurityGate: React.FC = () => {
 
                 <button 
                   onClick={handleCheckIn}
+                  aria-label={`Confirm entry for ${visitor.name}`}
                   className="w-full py-5 bg-white text-brand-600 rounded-[2rem] font-black uppercase tracking-widest text-xs flex items-center justify-center gap-3 shadow-xl hover:bg-brand-50 transition-all active:scale-95"
                 >
                   <LogIn size={18} /> Confirm Entry
@@ -299,6 +316,7 @@ const SecurityGate: React.FC = () => {
                   <input 
                     type="text"
                     placeholder="Search name, phone, flat..."
+                    aria-label="Search active visitors"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border-none rounded-xl text-xs font-bold focus:ring-2 focus:ring-brand-500 outline-none"
@@ -315,21 +333,13 @@ const SecurityGate: React.FC = () => {
                 <div className="py-20 flex justify-center">
                   <Loader2 className="animate-spin text-brand-600" size={32} />
                 </div>
-              ) : activeVisitors.filter(v => 
-                  v.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                  v.phone.includes(searchQuery) || 
-                  v.flatId.toLowerCase().includes(searchQuery.toLowerCase())
-                ).length === 0 ? (
+              ) : filteredVisitors.length === 0 ? (
                 <div className="py-20 text-center">
                   <UserCheck size={48} className="mx-auto text-slate-200 mb-4" />
                   <p className="text-slate-400 font-black uppercase tracking-widest text-[10px]">No active visitors found</p>
                 </div>
               ) : (
-                activeVisitors.filter(v => 
-                  v.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                  v.phone.includes(searchQuery) || 
-                  v.flatId.toLowerCase().includes(searchQuery.toLowerCase())
-                ).map((v, i) => (
+                filteredVisitors.map((v, i) => (
                   <div key={v._id || i} className="group p-8 bg-slate-50 dark:bg-slate-800/50 rounded-[2.5rem] border border-transparent hover:border-brand-600/20 transition-all flex flex-col md:flex-row items-center justify-between gap-6">
                     <div className="flex items-center gap-6">
                       <div className="w-16 h-16 bg-white dark:bg-slate-900 rounded-2xl flex items-center justify-center text-slate-400 group-hover:text-brand-600 transition-colors shadow-sm">
@@ -348,6 +358,7 @@ const SecurityGate: React.FC = () => {
                     </div>
                     <button 
                       onClick={() => handleCheckOut(v._id)}
+                      aria-label={`Check out visitor ${v.name}`}
                       className="px-8 py-4 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-rose-50 hover:text-rose-600 transition-all border border-slate-100 dark:border-slate-700 flex items-center gap-2 shrink-0"
                     >
                       <LogOut size={14} /> Check Out

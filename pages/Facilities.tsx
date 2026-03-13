@@ -2,11 +2,12 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { 
   Sofa, TreePine, Coffee, Star, MapPin, Calendar, Clock, ChevronRight, Users, 
   X, ShieldCheck, User, Info, CheckCircle2, Ticket, PartyPopper, Clapperboard, CalendarDays,
-  History, Settings2, Trash2, Loader2, AlertCircle, Sparkles, Building, Plus, BadgeCheck
+  History, Settings2, Trash2, Loader2, AlertCircle, Sparkles, Building, Plus, BadgeCheck, Search
 } from 'lucide-react';
 import { useLanguage } from '../components/LanguageContext';
 import { api } from '../services/api';
 import { motion, AnimatePresence } from 'motion/react';
+import Fuse from 'fuse.js';
 
 const Facilities: React.FC = () => {
   const { t } = useLanguage();
@@ -20,6 +21,7 @@ const Facilities: React.FC = () => {
   const [showBookingForm, setShowBookingForm] = useState(false);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const [formData, setFormData] = useState({
     purpose: '',
@@ -52,6 +54,17 @@ const Facilities: React.FC = () => {
   };
 
   const isAdmin = user?.role === 'ADMIN' || user?.role === 'COMMITTEE';
+
+  const filteredAmenities = useMemo(() => {
+    if (!searchQuery.trim()) return amenities;
+    
+    const fuse = new Fuse(amenities, {
+      keys: ['name', 'description', 'status'],
+      threshold: 0.3,
+    });
+    
+    return fuse.search(searchQuery).map(result => result.item);
+  }, [amenities, searchQuery]);
 
   const myBookings = useMemo(() => {
     if (!user) return [];
@@ -149,10 +162,24 @@ const Facilities: React.FC = () => {
           </p>
         </div>
         <div className="flex flex-col sm:flex-row gap-4 items-center">
-          <div className="bg-slate-100 dark:bg-slate-800 p-1 rounded-2xl inline-flex">
+          <div className="relative w-full sm:w-64">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+            <input 
+              type="text"
+              placeholder="Search amenities..."
+              aria-label="Search amenities"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-12 pr-4 py-2 bg-slate-100 dark:bg-slate-800 border-none rounded-xl text-xs font-bold focus:ring-2 focus:ring-brand-500 outline-none"
+            />
+          </div>
+          <div className="bg-slate-100 dark:bg-slate-800 p-1 rounded-2xl inline-flex" role="tablist">
             {['Explore', 'My Requests', ...(isAdmin ? [`All Bookings`] : [])].map((tab, idx) => (
               <button
                 key={idx}
+                role="tab"
+                aria-selected={activeTab === idx}
+                aria-label={`View ${tab}`}
                 onClick={() => {
                   setActiveTab(idx);
                   setFilterStatus('ALL');
@@ -170,6 +197,7 @@ const Facilities: React.FC = () => {
           {(activeTab === 1 || activeTab === 2) && (
             <select
               value={filterStatus}
+              aria-label="Filter bookings by status"
               onChange={(e) => setFilterStatus(e.target.value)}
               className="bg-slate-100 dark:bg-slate-800 border-none rounded-xl px-4 py-2 text-[10px] font-black uppercase tracking-widest text-slate-700 dark:text-slate-300 focus:ring-2 focus:ring-brand-500 outline-none"
             >
@@ -186,6 +214,7 @@ const Facilities: React.FC = () => {
                 setSelectedAmenity(amenities[0] || null);
                 setShowBookingForm(true);
               }}
+              aria-label="Quick Book Amenity"
               className="bg-green-600 text-white px-6 py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-green-700 transition-colors flex items-center gap-2 shadow-lg shadow-green-600/20 active:scale-95 transform duration-100"
             >
               <Plus size={18} />
@@ -197,11 +226,18 @@ const Facilities: React.FC = () => {
 
       {activeTab === 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-          {amenities.map((item: any, index: number) => (
-            <div 
-              key={item.id || item._id || index}
-              className="group bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-2 flex flex-col h-full"
-            >
+          {filteredAmenities.length === 0 ? (
+            <div className="col-span-full text-center py-20 bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 border-dashed">
+              <Building size={48} className="mx-auto text-slate-300 mb-4" />
+              <h3 className="text-xl font-black text-slate-900 dark:text-white mb-1">No Amenities Found</h3>
+              <p className="text-slate-500 dark:text-slate-400 text-sm">Try adjusting your search query.</p>
+            </div>
+          ) : (
+            filteredAmenities.map((item: any, index: number) => (
+              <div 
+                key={item.id || item._id || index}
+                className="group bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-2 flex flex-col h-full"
+              >
               <div className="relative h-60 overflow-hidden">
                 <img 
                   src={item.photoUrl || item.image || `https://picsum.photos/seed/${item.name}/800/600`} 
@@ -240,13 +276,14 @@ const Facilities: React.FC = () => {
 
                 <button 
                   onClick={() => setSelectedAmenity(item)}
+                  aria-label={`View details for ${item.name}`}
                   className="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 py-4 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-brand-600 dark:hover:bg-brand-400 hover:text-white transition-colors flex items-center justify-center gap-2 group-hover:shadow-lg"
                 >
                   View Details <ChevronRight size={16} />
                 </button>
               </div>
             </div>
-          ))}
+          )))}
         </div>
       )}
 
@@ -273,9 +310,29 @@ const Facilities: React.FC = () => {
                     </div>
                   </div>
                 </div>
-                <span className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest ${getStatusColor(booking.status)}`}>
-                  {booking.status}
-                </span>
+                <div className="flex flex-col items-end gap-3">
+                  <span className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest ${getStatusColor(booking.status)}`}>
+                    {booking.status}
+                  </span>
+                  {(booking.status === 'PENDING' || booking.status === 'APPROVED') && (
+                    <button 
+                      onClick={async () => {
+                        if (window.confirm("Are you sure you want to cancel this booking?")) {
+                          try {
+                            await api.cancelAmenityBooking(booking._id);
+                            loadData();
+                          } catch (e) {
+                            alert("Failed to cancel booking.");
+                          }
+                        }
+                      }}
+                      aria-label={`Cancel booking for ${booking.purpose}`}
+                      className="text-[10px] font-black text-red-500 uppercase tracking-widest hover:text-red-600 transition-colors"
+                    >
+                      Cancel Booking
+                    </button>
+                  )}
+                </div>
               </div>
             ))
           )}
@@ -328,12 +385,14 @@ const Facilities: React.FC = () => {
                     <>
                       <button 
                         onClick={() => handleStatusUpdate(booking._id, 'REJECTED')}
+                        aria-label={`Reject booking for ${booking.purpose}`}
                         className="flex-1 md:flex-none border border-red-200 text-red-600 hover:bg-red-50 px-6 py-3 rounded-xl font-black text-xs uppercase tracking-widest transition-colors"
                       >
                         Reject
                       </button>
                       <button 
                         onClick={() => handleStatusUpdate(booking._id, 'APPROVED')}
+                        aria-label={`Approve booking for ${booking.purpose}`}
                         className="flex-1 md:flex-none bg-green-600 text-white hover:bg-green-700 px-6 py-3 rounded-xl font-black text-xs uppercase tracking-widest transition-colors shadow-lg shadow-green-600/20"
                       >
                         Approve
@@ -373,12 +432,17 @@ const Facilities: React.FC = () => {
                   {!isAdmin && (
                     <button 
                       onClick={() => setShowBookingForm(true)}
+                      aria-label="Open booking form"
                       className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-6 py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-brand-600 dark:hover:bg-brand-400 hover:text-white transition-colors"
                     >
                       Request Slot
                     </button>
                   )}
-                  <button onClick={() => setSelectedAmenity(null)} className="p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors">
+                  <button 
+                    onClick={() => setSelectedAmenity(null)} 
+                    aria-label="Close details"
+                    className="p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors"
+                  >
                     <X size={24} />
                   </button>
                 </div>
@@ -391,13 +455,21 @@ const Facilities: React.FC = () => {
                       <CalendarDays size={16} /> Availability Calendar
                     </span>
                     <div className="flex items-center gap-4 bg-slate-100 dark:bg-slate-800 rounded-xl p-1">
-                      <button onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1))} className="p-2 hover:bg-white dark:hover:bg-slate-700 rounded-lg transition-colors">
+                      <button 
+                        onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1))} 
+                        aria-label="Previous Month"
+                        className="p-2 hover:bg-white dark:hover:bg-slate-700 rounded-lg transition-colors"
+                      >
                         <ChevronRight size={16} className="rotate-180" />
                       </button>
                       <span className="text-xs font-black uppercase tracking-widest min-w-[100px] text-center">
                         {currentMonth.toLocaleString('default', { month: 'long', year: 'numeric' })}
                       </span>
-                      <button onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1))} className="p-2 hover:bg-white dark:hover:bg-slate-700 rounded-lg transition-colors">
+                      <button 
+                        onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1))} 
+                        aria-label="Next Month"
+                        className="p-2 hover:bg-white dark:hover:bg-slate-700 rounded-lg transition-colors"
+                      >
                         <ChevronRight size={16} />
                       </button>
                     </div>
@@ -422,6 +494,8 @@ const Facilities: React.FC = () => {
                           <button 
                             key={day}
                             onClick={() => setSelectedDate(isSelected ? null : dateStr)}
+                            aria-label={`Select ${dateStr}`}
+                            aria-pressed={isSelected}
                             className={`aspect-square rounded-xl flex flex-col items-center justify-center border-2 transition-all ${
                               isSelected
                                 ? 'bg-brand-600 border-brand-600 text-white shadow-lg shadow-brand-600/30 scale-105 z-10'
@@ -498,15 +572,20 @@ const Facilities: React.FC = () => {
                   <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Reserve Slot</h2>
                   <p className="text-[10px] font-black text-brand-600 uppercase tracking-widest">Fill event details</p>
                 </div>
-                <button onClick={() => setShowBookingForm(false)} className="p-2 text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl transition-colors">
+                <button 
+                  onClick={() => setShowBookingForm(false)} 
+                  aria-label="Close booking form"
+                  className="p-2 text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl transition-colors"
+                >
                   <X size={24} />
                 </button>
               </div>
               
               <form onSubmit={handleBookingSubmit} className="p-8 space-y-6">
                 <div>
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block ml-1">Select Facility</label>
+                  <label htmlFor="facility-select" className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block ml-1">Select Facility</label>
                   <select
+                    id="facility-select"
                     value={formData.amenityId || selectedAmenity?._id || ''}
                     onChange={(e) => setFormData({...formData, amenityId: e.target.value})}
                     required
@@ -520,10 +599,11 @@ const Facilities: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block ml-1">Purpose</label>
+                  <label htmlFor="booking-purpose" className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block ml-1">Purpose</label>
                   <div className="relative">
                     <Star size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                     <input 
+                      id="booking-purpose"
                       type="text"
                       placeholder="e.g. Birthday Celebration"
                       required
@@ -536,8 +616,9 @@ const Facilities: React.FC = () => {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block ml-1">Date</label>
+                    <label htmlFor="booking-date" className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block ml-1">Date</label>
                     <input 
+                      id="booking-date"
                       type="date"
                       required
                       value={formData.date}
@@ -546,8 +627,9 @@ const Facilities: React.FC = () => {
                     />
                   </div>
                   <div>
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block ml-1">Start Time</label>
+                    <label htmlFor="booking-time" className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block ml-1">Start Time</label>
                     <input 
+                      id="booking-time"
                       type="time"
                       required
                       value={formData.startTime}
@@ -558,8 +640,9 @@ const Facilities: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block ml-1">Duration (Hrs)</label>
+                  <label htmlFor="booking-duration" className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block ml-1">Duration (Hrs)</label>
                   <input 
+                    id="booking-duration"
                     type="number"
                     min="1"
                     max="24"
@@ -572,6 +655,7 @@ const Facilities: React.FC = () => {
 
                 <button 
                   type="submit"
+                  aria-label="Submit Booking Request"
                   className="w-full bg-brand-600 text-white py-4 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-brand-700 transition-colors shadow-xl shadow-brand-600/20 active:scale-95 transform duration-100 flex items-center justify-center gap-2"
                 >
                   <CheckCircle2 size={18} />

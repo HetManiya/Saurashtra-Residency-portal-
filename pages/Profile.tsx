@@ -168,6 +168,7 @@ const Profile: React.FC = () => {
                     <input 
                       type="password"
                       placeholder="••••••••"
+                      aria-label="Current Password"
                       required
                       value={passForm.current}
                       onChange={(e) => setPassForm({...passForm, current: e.target.value})}
@@ -182,6 +183,7 @@ const Profile: React.FC = () => {
                     <input 
                       type="password"
                       placeholder="New Password"
+                      aria-label="New Password"
                       required
                       value={passForm.new}
                       onChange={(e) => setPassForm({...passForm, new: e.target.value})}
@@ -196,6 +198,7 @@ const Profile: React.FC = () => {
                     <input 
                       type="password"
                       placeholder="Confirm New Password"
+                      aria-label="Confirm New Password"
                       required
                       value={passForm.confirm}
                       onChange={(e) => setPassForm({...passForm, confirm: e.target.value})}
@@ -207,6 +210,7 @@ const Profile: React.FC = () => {
                 <button 
                   type="submit"
                   disabled={isUpdating}
+                  aria-label={isUpdating ? 'Updating password' : 'Update Password'}
                   className="w-full bg-white text-slate-900 py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-brand-50 transition-colors flex items-center justify-center gap-2 mt-2 disabled:opacity-70 disabled:cursor-not-allowed"
                 >
                   {isUpdating ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
@@ -325,11 +329,17 @@ const Profile: React.FC = () => {
                         </td>
                         <td className="px-6 py-4 text-right">
                           {record.status === PaymentStatus.PAID ? (
-                            <button className="p-2 bg-slate-100 dark:bg-slate-800 text-slate-400 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+                            <button 
+                              aria-label={`View details for ${record.month} ${record.year} payment`}
+                              className="p-2 bg-slate-100 dark:bg-slate-800 text-slate-400 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+                            >
                               <ArrowRight size={16} />
                             </button>
                           ) : (
-                            <button className="px-4 py-2 bg-brand-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-brand-700 transition-colors shadow-lg shadow-brand-600/20 active:scale-95 transform duration-100">
+                            <button 
+                              aria-label={`Pay maintenance for ${record.month} ${record.year}`}
+                              className="px-4 py-2 bg-brand-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-brand-700 transition-colors shadow-lg shadow-brand-600/20 active:scale-95 transform duration-100"
+                            >
                               Pay Now
                             </button>
                           )}

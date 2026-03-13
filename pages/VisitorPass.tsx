@@ -94,6 +94,7 @@ const VisitorPass: React.FC = () => {
         </div>
         <button 
           onClick={() => setShowHistory(true)}
+          aria-label="View visitor pass history"
           className="px-6 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl font-black text-xs uppercase tracking-widest text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors flex items-center gap-2"
         >
           <History size={16} /> View History
@@ -104,14 +105,16 @@ const VisitorPass: React.FC = () => {
         <div className="bg-white dark:bg-slate-900 p-6 md:p-8 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 shadow-sm">
           <form onSubmit={handleGenerate} className="space-y-6">
             <div>
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block ml-1">
+              <label htmlFor="visitor-name" className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block ml-1">
                 {t('visitor_name')}
               </label>
               <div className="relative">
                 <User size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                 <input 
+                  id="visitor-name"
                   type="text"
                   placeholder="Guest Full Name"
+                  aria-label="Guest Full Name"
                   value={formData.name}
                   onChange={e => setFormData({...formData, name: e.target.value})}
                   className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-2xl pl-12 pr-4 py-3 text-sm font-bold focus:ring-2 focus:ring-brand-500 outline-none"
@@ -120,14 +123,16 @@ const VisitorPass: React.FC = () => {
             </div>
 
             <div>
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block ml-1">
+              <label htmlFor="visitor-phone" className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block ml-1">
                 {t('visitor_phone')}
               </label>
               <div className="relative">
                 <Phone size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                 <input 
+                  id="visitor-phone"
                   type="text"
                   placeholder="+91 00000 00000"
+                  aria-label="Guest Phone Number"
                   value={formData.phone}
                   onChange={e => setFormData({...formData, phone: e.target.value})}
                   className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-2xl pl-12 pr-4 py-3 text-sm font-bold focus:ring-2 focus:ring-brand-500 outline-none"
@@ -136,13 +141,15 @@ const VisitorPass: React.FC = () => {
             </div>
 
             <div>
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block ml-1">
+              <label htmlFor="visitor-purpose" className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block ml-1">
                 {t('visitor_purpose')}
               </label>
               <div className="relative">
                 <ClipboardList size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                 <select
+                  id="visitor-purpose"
                   value={formData.purpose}
+                  aria-label="Visit Purpose"
                   onChange={e => setFormData({...formData, purpose: e.target.value})}
                   className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-2xl pl-12 pr-4 py-3 text-sm font-bold focus:ring-2 focus:ring-brand-500 outline-none appearance-none"
                 >
@@ -156,30 +163,33 @@ const VisitorPass: React.FC = () => {
             </div>
 
             <div>
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block ml-1">
+              <label htmlFor="visitor-validity" className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block ml-1">
                 {t('visitor_validity')}
               </label>
-              <div className="grid grid-cols-2 gap-3">
-                {['4 hours', '24 hours'].map(v => (
-                  <button 
-                    key={v}
-                    type="button"
-                    onClick={() => setFormData({...formData, validity: v})}
-                    className={`py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all ${
-                      formData.validity === v 
-                        ? 'bg-brand-600 text-white shadow-lg shadow-brand-600/20' 
-                        : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:border-brand-500 dark:hover:border-brand-500'
-                    }`}
-                  >
-                    {v}
-                  </button>
-                ))}
-              </div>
+                  <div id="visitor-validity" className="grid grid-cols-2 gap-3" role="group" aria-label="Select visitor pass validity">
+                    {['4 hours', '24 hours'].map(v => (
+                      <button 
+                        key={v}
+                        type="button"
+                        onClick={() => setFormData({...formData, validity: v})}
+                        aria-label={`Select validity: ${v}`}
+                        aria-pressed={formData.validity === v}
+                        className={`py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all ${
+                          formData.validity === v 
+                            ? 'bg-brand-600 text-white shadow-lg shadow-brand-600/20' 
+                            : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:border-brand-500 dark:hover:border-brand-500'
+                        }`}
+                      >
+                        {v}
+                      </button>
+                    ))}
+                  </div>
             </div>
 
             <button 
               type="submit"
               disabled={loading}
+              aria-label={loading ? 'Generating pass' : 'Generate Visitor Pass'}
               className="w-full bg-brand-600 text-white py-4 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-brand-700 transition-colors shadow-xl shadow-brand-600/20 active:scale-95 transform duration-100 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
             >
               {loading ? <Loader2 size={18} className="animate-spin" /> : <QrCode size={18} />}
@@ -247,6 +257,7 @@ const VisitorPass: React.FC = () => {
                   <div className="flex gap-3 pt-2">
                     <button 
                       onClick={shareToWhatsApp}
+                      aria-label="Share pass to WhatsApp"
                       className="flex-1 py-3 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 transition-colors flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest"
                     >
                       <Share2 size={14} />
@@ -254,6 +265,7 @@ const VisitorPass: React.FC = () => {
                     </button>
                     <button 
                       onClick={downloadPass}
+                      aria-label="Download pass as image"
                       className="flex-1 py-3 rounded-xl bg-white text-slate-900 hover:bg-slate-100 transition-colors flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest"
                     >
                       <Download size={14} />
@@ -300,6 +312,7 @@ const VisitorPass: React.FC = () => {
                 </h2>
                 <button 
                   onClick={() => setShowHistory(false)}
+                  aria-label="Close visitor history"
                   className="p-2 bg-slate-100 dark:bg-slate-800 rounded-full hover:bg-rose-50 hover:text-rose-600 transition-colors"
                 >
                   <X size={20} />
@@ -313,6 +326,7 @@ const VisitorPass: React.FC = () => {
                     <input 
                       type="text"
                       placeholder="Search name, phone..."
+                      aria-label="Search history by name or phone"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       className="w-full pl-12 pr-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-brand-500 outline-none"
@@ -322,6 +336,7 @@ const VisitorPass: React.FC = () => {
                     <Calendar size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                     <input 
                       type="date"
+                      aria-label="Start Date"
                       value={startDate}
                       onChange={(e) => setStartDate(e.target.value)}
                       className="w-full pl-12 pr-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-brand-500 outline-none"
@@ -331,6 +346,7 @@ const VisitorPass: React.FC = () => {
                     <Calendar size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                     <input 
                       type="date"
+                      aria-label="End Date"
                       value={endDate}
                       onChange={(e) => setEndDate(e.target.value)}
                       className="w-full pl-12 pr-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-brand-500 outline-none"
@@ -355,6 +371,8 @@ const VisitorPass: React.FC = () => {
                       <div 
                         key={v._id} 
                         onClick={() => setSelectedVisitor(selectedVisitor?._id === v._id ? null : v)}
+                        aria-label={`View details for visitor ${v.name}`}
+                        aria-expanded={selectedVisitor?._id === v._id}
                         className="p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl hover:border-brand-500 transition-colors cursor-pointer"
                       >
                         <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">

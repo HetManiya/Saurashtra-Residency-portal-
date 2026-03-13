@@ -74,9 +74,9 @@ const ChatAssistant: React.FC = () => {
       {/* Floating Button */}
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 w-14 h-14 bg-indigo-600 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-indigo-700 transition-all z-50"
+        className="fixed bottom-6 right-6 w-16 h-16 bg-black text-cyan-400 border-4 border-cyan-500 shadow-[4px_4px_0px_#ff00ff] flex items-center justify-center hover:bg-cyan-400 hover:text-black transition-all z-50 group active:scale-95"
       >
-        <Bot size={28} />
+        <Bot size={32} className="group-hover:animate-pulse" />
       </button>
 
       {/* Chat Window */}
@@ -86,68 +86,77 @@ const ChatAssistant: React.FC = () => {
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            className="fixed bottom-24 right-6 w-96 h-[500px] bg-white rounded-2xl shadow-2xl flex flex-col z-50 border border-slate-200 overflow-hidden"
+            className="fixed bottom-24 right-6 w-96 h-[550px] bg-black border-4 border-cyan-500 shadow-[12px_12px_0px_#ff00ff] flex flex-col z-50 overflow-hidden crt-screen"
           >
             {/* Header */}
-            <div className="bg-indigo-600 p-4 text-white flex justify-between items-center">
-              <div className="flex items-center gap-2">
-                <Bot size={24} />
+            <div className="bg-black p-5 border-b-4 border-cyan-500/30 flex justify-between items-center">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 border-2 border-magenta-500 flex items-center justify-center text-magenta-500 shadow-[2px_2px_0px_#00ffff]">
+                  <Bot size={24} />
+                </div>
                 <div>
-                  <h3 className="font-semibold text-sm">Saurashtra Bot</h3>
-                  <p className="text-[10px] opacity-80">Smart Society Assistant</p>
+                  <h3 className="font-black text-sm text-cyan-400 uppercase tracking-tighter glitch-text" data-text="Saurashtra Bot">Saurashtra Bot</h3>
+                  <p className="text-[9px] font-black text-cyan-700 uppercase tracking-widest font-mono">v1.0.4 // AI_ASSISTANT</p>
                 </div>
               </div>
-              <button onClick={() => setIsOpen(false)} className="hover:bg-indigo-500 p-1 rounded">
-                <X size={20} />
+              <button onClick={() => setIsOpen(false)} className="text-cyan-700 hover:text-magenta-500 transition-colors">
+                <X size={24} />
               </button>
             </div>
 
             {/* Messages */}
-            <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50">
+            <div ref={scrollRef} className="flex-1 overflow-y-auto p-6 space-y-6 bg-black custom-scrollbar">
               {messages.length === 0 && (
-                <div className="text-center py-10 text-slate-400">
-                  <Bot size={48} className="mx-auto mb-2 opacity-20" />
-                  <p className="text-sm">Hello! How can I help you with Saurashtra Residency today?</p>
+                <div className="text-center py-20">
+                  <Bot size={64} className="mx-auto mb-4 text-cyan-900 opacity-20 animate-pulse" />
+                  <p className="text-[10px] font-black text-cyan-900 uppercase tracking-widest leading-relaxed">
+                    {`> UPLINK_ESTABLISHED`} <br />
+                    {`> AWAITING_QUERY...`}
+                  </p>
                 </div>
               )}
               {messages.map((msg, i) => (
                 <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                  <div className={`max-w-[80%] p-3 rounded-2xl text-sm ${
+                  <div className={`max-w-[85%] p-4 border-2 font-mono text-xs leading-relaxed ${
                     msg.role === 'user' 
-                      ? 'bg-indigo-600 text-white rounded-tr-none' 
-                      : 'bg-white text-slate-800 shadow-sm border border-slate-200 rounded-tl-none'
+                      ? 'bg-magenta-500/10 border-magenta-500 text-magenta-500 shadow-[4px_4px_0px_#00ffff]' 
+                      : 'bg-cyan-500/10 border-cyan-500 text-cyan-400 shadow-[4px_4px_0px_#ff00ff]'
                   }`}>
+                    <div className="flex items-center gap-2 mb-2 opacity-50 text-[9px] font-black uppercase tracking-widest">
+                      {msg.role === 'user' ? <User size={10} /> : <Bot size={10} />}
+                      {msg.role === 'user' ? 'Resident' : 'Saurashtra_Bot'}
+                    </div>
                     {msg.text}
                   </div>
                 </div>
               ))}
               {isLoading && (
                 <div className="flex justify-start">
-                  <div className="bg-white text-slate-400 p-3 rounded-2xl shadow-sm border border-slate-200 rounded-tl-none flex items-center gap-2">
-                    <Loader2 size={16} className="animate-spin" />
-                    <span className="text-xs">Typing...</span>
+                  <div className="bg-black border-2 border-cyan-900/30 p-4 text-cyan-700 flex items-center gap-3 font-mono text-[10px] uppercase tracking-widest">
+                    <Loader2 size={14} className="animate-spin" />
+                    <span>Processing_Logic...</span>
                   </div>
                 </div>
               )}
             </div>
 
             {/* Input */}
-            <div className="p-4 border-top border-slate-100 bg-white">
-              <div className="flex gap-2">
+            <div className="p-5 border-t-4 border-cyan-500/30 bg-black">
+              <div className="flex gap-3">
                 <input
                   type="text"
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-                  placeholder="Ask about rules, dues..."
-                  className="flex-1 bg-slate-100 border-none rounded-full px-4 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                  placeholder="QUERY_SYSTEM..."
+                  className="flex-1 bg-black border-2 border-cyan-900/50 px-5 py-3 text-xs font-black text-cyan-400 placeholder:text-cyan-900 outline-none focus:border-magenta-500 transition-all uppercase tracking-widest"
                 />
                 <button
                   onClick={handleSend}
                   disabled={!input.trim() || isLoading}
-                  className="bg-indigo-600 text-white p-2 rounded-full hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="bg-magenta-500 text-white p-3 border-2 border-black shadow-[4px_4px_0px_#00ffff] hover:bg-black hover:text-magenta-500 hover:border-magenta-500 disabled:opacity-30 disabled:cursor-not-allowed transition-all active:scale-95"
                 >
-                  <Send size={18} />
+                  <Send size={20} />
                 </button>
               </div>
             </div>

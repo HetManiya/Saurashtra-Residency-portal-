@@ -7,6 +7,7 @@ import { SOCIETY_INFO, BUILDINGS as WING_CONSTANTS } from '../constants';
 import { FlatType, Building, Flat, FamilyMember, OccupancyType, PaymentStatus, MaintenanceRecord } from '../types';
 import { useLanguage } from '../components/LanguageContext';
 import SocietyMap from '../components/SocietyMap';
+import Fuse from 'fuse.js';
 
 const Buildings: React.FC = () => {
   const { t } = useLanguage();
@@ -83,11 +84,29 @@ const Buildings: React.FC = () => {
     return { report, totalVacant };
   }, [registeredUnits]);
 
-  const filteredBuildings = buildings.filter(b => {
-    const name = b.name || '';
-    const matchesSearch = name.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesSearch;
-  });
+  const filteredBuildings = useMemo(() => {
+    if (!searchTerm.trim()) return buildings;
+
+    // Prepare data for Fuse
+    const searchData = buildings.map(b => {
+      const residentsInWing = registeredUnits
+        .filter(u => u.flatId.startsWith(b.name))
+        .map(u => u.name)
+        .join(' ');
+      
+      return {
+        ...b,
+        residentNames: residentsInWing
+      };
+    });
+
+    const fuse = new Fuse(searchData, {
+      keys: ['name', 'residentNames', 'type'],
+      threshold: 0.3,
+    });
+
+    return fuse.search(searchTerm).map(result => result.item);
+  }, [buildings, registeredUnits, searchTerm]);
 
   const totalUnits = 480;
   const occupiedCount = registeredUnits.length;
@@ -113,6 +132,7 @@ const Buildings: React.FC = () => {
               <button 
                 key={unitNo}
                 onClick={() => setSelectedFlat({ unitNumber: unitNo, profile })}
+                aria-label={`Unit ${unitNo}${isOccupied ? `, Occupied by ${profile.name}` : ', Vacant'}`}
                 className={`
                   relative aspect-[16/10] rounded-2xl border-2 transition-all duration-300 overflow-hidden group/flat flex flex-col items-center justify-center
                   ${!isOccupied 
@@ -167,6 +187,16 @@ const Buildings: React.FC = () => {
         </div>
 
         <div className="flex flex-col sm:flex-row gap-6 items-center">
+          <div className="relative w-full sm:w-64">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+            <input 
+              type="text"
+              placeholder="Search wing or resident..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-12 pr-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-brand-500 outline-none transition-all"
+            />
+          </div>
           <div className="flex gap-4">
             <div className="bg-emerald-50 dark:bg-emerald-900/10 border border-emerald-100 dark:border-emerald-800 px-6 py-3 rounded-2xl text-center">
                <p className="text-[10px] font-black uppercase text-emerald-600 tracking-widest mb-1">Registered</p>
@@ -180,6 +210,8 @@ const Buildings: React.FC = () => {
           <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-xl">
             <button
               onClick={() => setViewMode('list')}
+              aria-label="Switch to List View"
+              aria-pressed={viewMode === 'list'}
               className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all ${
                 viewMode === 'list' 
                   ? 'bg-white dark:bg-slate-700 text-brand-600 shadow-sm' 
@@ -190,6 +222,8 @@ const Buildings: React.FC = () => {
             </button>
             <button
               onClick={() => setViewMode('map')}
+              aria-label="Switch to Site Map View"
+              aria-pressed={viewMode === 'map'}
               className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all ${
                 viewMode === 'map' 
                   ? 'bg-white dark:bg-slate-700 text-brand-600 shadow-sm' 
@@ -202,6 +236,7 @@ const Buildings: React.FC = () => {
           {isAdmin && (
             <button 
               onClick={() => setShowAuditModal(true)}
+              aria-label="View Vacancy Audit Report"
               className="px-6 py-4 bg-slate-900 dark:bg-slate-800 text-white rounded-3xl font-black text-xs uppercase tracking-widest flex items-center gap-2 hover:bg-brand-600 transition-all shadow-xl"
             >
               <FileText size={18} /> Vacancy Report
@@ -223,6 +258,10 @@ const Buildings: React.FC = () => {
             return (
               <div 
                 key={building.id || index} 
+                role="button"
+                tabIndex={0}
+                aria-label={`View details for Wing ${building.name}, ${wingOccupied} of 20 units registered`}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setSelectedBuilding(building); }}
                 className="group bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 overflow-hidden shadow-sm premium-card flex flex-col cursor-pointer"
                 onClick={() => setSelectedBuilding(building)}
               >
@@ -292,7 +331,7 @@ const Buildings: React.FC = () => {
                     onChange={(e) => setAuditSearch(e.target.value)}
                   />
                 </div>
-                <button onClick={() => setShowAuditModal(false)} className="p-3 text-slate-300 hover:text-slate-900 dark:hover:text-white transition-all"><X size={28} /></button>
+                <button onClick={() => setShowAuditModal(false)} aria-label="Close Vacancy Audit Modal" className="p-3 text-slate-300 hover:text-slate-900 dark:hover:text-white transition-all"><X size={28} /></button>
               </div>
             </div>
 
@@ -364,7 +403,7 @@ const Buildings: React.FC = () => {
                   <p className="text-xs font-black uppercase text-brand-600 tracking-widest">Real-Time Occupancy Map</p>
                 </div>
               </div>
-              <button onClick={() => setSelectedBuilding(null)} className="p-4 text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded-3xl transition-all"><X size={32} /></button>
+              <button onClick={() => setSelectedBuilding(null)} aria-label="Close Wing Map Modal" className="p-4 text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded-3xl transition-all"><X size={32} /></button>
             </div>
 
             <div className="flex-1 overflow-y-auto p-10 bg-slate-50/30 dark:bg-slate-900/30 space-y-12">
@@ -427,7 +466,7 @@ const Buildings: React.FC = () => {
                   </p>
                 </div>
               </div>
-              <button onClick={() => setSelectedFlat(null)} className="p-3 text-slate-300 hover:text-slate-900 dark:hover:text-white transition-all"><X size={28} /></button>
+              <button onClick={() => setSelectedFlat(null)} aria-label="Close Unit Details Modal" className="p-3 text-slate-300 hover:text-slate-900 dark:hover:text-white transition-all"><X size={28} /></button>
             </div>
 
             <div className="p-10 space-y-12 overflow-y-auto flex-1 bg-slate-50/50 dark:bg-slate-900/50">

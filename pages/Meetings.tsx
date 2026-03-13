@@ -108,6 +108,7 @@ const Meetings: React.FC = () => {
         {isAdmin && (
           <button 
             onClick={() => setShowModal(true)}
+            aria-label="Schedule a new meeting"
             className="flex items-center gap-2 bg-brand-600 text-white px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-brand-700 transition-colors shadow-lg shadow-brand-600/20 active:scale-95 transform duration-100"
           >
             <Plus size={18} />
@@ -183,6 +184,8 @@ const Meetings: React.FC = () => {
                       ) : (
                         <button 
                           onClick={() => handleRSVP(meeting.id, userRsvp?.status || 'NO')}
+                          aria-label={isAttending ? "Cancel attendance" : "Confirm attendance"}
+                          aria-pressed={isAttending}
                           className={`w-full py-3 rounded-xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 transition-all ${
                             isAttending 
                               ? 'bg-green-50 text-green-600 border-2 border-green-500 hover:bg-green-100' 
@@ -266,6 +269,7 @@ const Meetings: React.FC = () => {
               <h4 className="text-2xl font-black text-slate-900 dark:text-white">New Assembly</h4>
               <button 
                 onClick={() => setShowModal(false)}
+                aria-label="Close meeting form"
                 className="w-10 h-10 rounded-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
               >
                 <X size={20} />
@@ -275,11 +279,13 @@ const Meetings: React.FC = () => {
             <div className="p-6">
               <form onSubmit={handleSchedule} className="space-y-5">
                 <div>
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Meeting Title</span>
+                  <label htmlFor="meeting-title" className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Meeting Title</label>
                   <input 
+                    id="meeting-title"
                     type="text"
                     placeholder="e.g. Navratri Event Planning" 
                     required
+                    aria-label="Meeting Title"
                     value={formData.title}
                     onChange={(e) => setFormData({...formData, title: e.target.value})}
                     className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl px-4 py-3 text-slate-900 dark:text-white placeholder-slate-400 font-bold focus:ring-2 focus:ring-brand-500 outline-none transition-all"
@@ -288,20 +294,24 @@ const Meetings: React.FC = () => {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Date</span>
+                    <label htmlFor="meeting-date" className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Date</label>
                     <input 
+                      id="meeting-date"
                       type="date"
                       required
+                      aria-label="Meeting Date"
                       value={formData.date}
                       onChange={(e) => setFormData({...formData, date: e.target.value})}
                       className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl px-4 py-3 text-slate-900 dark:text-white font-bold focus:ring-2 focus:ring-brand-500 outline-none transition-all"
                     />
                   </div>
                   <div>
-                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Time</span>
+                    <label htmlFor="meeting-time" className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Time</label>
                     <input 
+                      id="meeting-time"
                       type="time"
                       required
+                      aria-label="Meeting Time"
                       value={formData.time}
                       onChange={(e) => setFormData({...formData, time: e.target.value})}
                       className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl px-4 py-3 text-slate-900 dark:text-white font-bold focus:ring-2 focus:ring-brand-500 outline-none transition-all"
@@ -310,11 +320,13 @@ const Meetings: React.FC = () => {
                 </div>
 
                 <div>
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Location</span>
+                  <label htmlFor="meeting-location" className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Location</label>
                   <input 
+                    id="meeting-location"
                     type="text"
                     placeholder="Club House / Main Garden" 
                     required
+                    aria-label="Meeting Location"
                     value={formData.location}
                     onChange={(e) => setFormData({...formData, location: e.target.value})}
                     className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl px-4 py-3 text-slate-900 dark:text-white placeholder-slate-400 font-bold focus:ring-2 focus:ring-brand-500 outline-none transition-all"
@@ -322,11 +334,13 @@ const Meetings: React.FC = () => {
                 </div>
 
                 <div>
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Agenda Description</span>
+                  <label htmlFor="meeting-description" className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Agenda Description</label>
                   <textarea 
+                    id="meeting-description"
                     rows={3}
                     placeholder="Briefly describe the purpose..."
                     required
+                    aria-label="Meeting Agenda Description"
                     value={formData.description}
                     onChange={(e) => setFormData({...formData, description: e.target.value})}
                     className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl px-4 py-3 text-slate-900 dark:text-white placeholder-slate-400 font-medium focus:ring-2 focus:ring-brand-500 outline-none transition-all resize-none"
@@ -336,6 +350,7 @@ const Meetings: React.FC = () => {
                 <button 
                   type="submit"
                   disabled={submitting}
+                  aria-label={submitting ? "Scheduling meeting" : "Broadcast meeting to residents"}
                   className="w-full bg-brand-600 hover:bg-brand-700 text-white font-black uppercase tracking-widest py-4 rounded-xl transition-all shadow-lg shadow-brand-600/20 active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {submitting ? (
