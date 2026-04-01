@@ -53,6 +53,9 @@ export const connectDB = async () => {
 
     try {
       if (!isValidUri(MONGODB_URI)) {
+        if (process.env.NODE_ENV === 'production' || process.env.NETLIFY) {
+          throw new Error('❌ MONGODB_URI is required in production/Netlify environment. In-memory database is only for local development.');
+        }
         console.warn('⚠️ MONGODB_URI missing or invalid. Starting In-Memory MongoDB...');
         if (!mongoServer) {
           mongoServer = await MongoMemoryServer.create();
