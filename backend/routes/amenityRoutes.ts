@@ -83,67 +83,57 @@ router.post('/bookings', protect, async (req: any, res) => {
   }
 });
 
-// Update booking status (Admin/Committee)
-router.patch('/bookings/:id', protect, authorize(['ADMIN', 'COMMITTEE']), async (req: any, res) => {
+// Update booking status (Admin/Committee can update any, Resident can only cancel their own)
+router.patch('/bookings/:id', protect, async (req: any, res) => {
   try {
     const { status } = req.body;
-    const booking = await AmenityBooking.findByIdAndUpdate(req.params.id, { status }, { new: true }).populate('amenityId');
+    const booking = await AmenityBooking.findById(req.params.id);
+
+    if (!booking) {
+      return res.status(404).json({ message: 'Booking not found' });
+    }
+
+    const isAdmin = ['ADMIN', 'COMMITTEE'].includes(req.user.role);
+    const isOwner = booking.userId.toString() === req.user.id;
+
+    // Residents can only cancel their own bookings
+    if (!isAdmin) {
+      if (!isOwner || status !== 'CANCELLED') {
+        return res.status(403).json({ message: 'Not authorized to perform this action' });
+      }
+    }
+
+    const updatedBooking = await AmenityBooking.findByIdAndUpdate(
+      req.params.id,
+      { status },
+      { new: true }
+    ).populate('amenityId');
     
-    if (booking) {
-      // Create notification for user
-      const amenityName = (booking.amenityId as any)?.name || 'Facility';
-      await Notification.create({
-        userId: booking.userId,
-        title: `Booking ${status}`,
-        message: `Your booking for ${amenityName} on ${new Date(booking.date).toLocaleDateString()} has been ${status.toLowerCase()}.`,
-        type: 'AMENITY_BOOKING'
-      });
+    if (updatedBooking) {
+      // Create notification for user if admin/committee updated it
+      if (isAdmin && !isOwner) {
+        const amenityName = (updatedBooking.amenityId as any)?.name || 'Facility';
+        await Notification.create({
+          userId: updatedBooking.userId,
+          title: `Booking ${status}`,
+          message: `Your booking for ${amenityName} on ${new Date(updatedBooking.date).toLocaleDateString()} has been ${status.toLowerCase()}.`,
+          type: 'AMENITY_BOOKING'
+        });
+      }
       
       // Log action
       await AuditLog.create({
         userId: req.user.id,
         userName: req.user.name,
-        action: 'Update Booking Status',
+        action: isAdmin ? 'Update Booking Status' : 'Cancel Booking',
         entity: 'AmenityBooking',
         details: `Status updated to ${status} for booking ${req.params.id}`
       });
     }
 
-    res.json(booking);
+    res.json(updatedBooking);
   } catch (error) {
     res.status(400).json({ message: 'Error updating booking' });
-  }
-});
-
-// Cancel a booking (User can cancel their own)
-router.patch('/bookings/:id/cancel', protect, async (req: any, res) => {
-  try {
-    const booking = await AmenityBooking.findById(req.params.id);
-    
-    if (!booking) {
-      return res.status(404).json({ message: 'Booking not found' });
-    }
-
-    // Check if user is the owner of the booking
-    if (booking.userId.toString() !== req.user.id && req.user.role !== 'ADMIN') {
-      return res.status(403).json({ message: 'Not authorized to cancel this booking' });
-    }
-
-    booking.status = 'CANCELLED';
-    await booking.save();
-
-    // Log action
-    await AuditLog.create({
-      userId: req.user.id,
-      userName: req.user.name,
-      action: 'Cancel Booking',
-      entity: 'AmenityBooking',
-      details: `Cancelled booking ${req.params.id}`
-    });
-
-    res.json(booking);
-  } catch (error) {
-    res.status(400).json({ message: 'Error cancelling booking' });
   }
 });
 

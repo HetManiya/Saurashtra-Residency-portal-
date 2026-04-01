@@ -98,10 +98,10 @@ const Meetings: React.FC = () => {
     <div className="pb-8 animate-fade-in">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-8 pb-6 border-b border-slate-200 dark:border-slate-800">
         <div>
-          <h3 className="text-4xl font-black tracking-tighter text-slate-900 dark:text-white">
+          <h3 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
             {t('meetings_title')}
           </h3>
-          <p className="text-slate-500 dark:text-slate-400 mt-2 font-medium">
+          <p className="text-slate-500 dark:text-slate-400 mt-1 font-medium text-sm">
             Coordinate community gatherings and festive planning
           </p>
         </div>
@@ -109,9 +109,9 @@ const Meetings: React.FC = () => {
           <button 
             onClick={() => setShowModal(true)}
             aria-label="Schedule a new meeting"
-            className="flex items-center gap-2 bg-brand-600 text-white px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-brand-700 transition-colors shadow-lg shadow-brand-600/20 active:scale-95 transform duration-100"
+            className="flex items-center gap-2 bg-brand-600 text-white px-6 py-3 rounded-xl font-bold text-sm transition-all shadow-lg shadow-brand-600/20 active:scale-95"
           >
-            <Plus size={18} />
+            <Plus size={18} strokeWidth={2.5} />
             New Schedule
           </button>
         )}
@@ -120,9 +120,9 @@ const Meetings: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-6">
           {upcomingMeetings.length === 0 ? (
-            <div className="py-16 text-center rounded-[2rem] border-2 border-dashed border-slate-200 dark:border-slate-800">
+            <div className="py-16 text-center rounded-[2.5rem] border-2 border-dashed border-slate-200 dark:border-slate-800">
               <CalendarDays size={48} className="mx-auto mb-4 text-slate-200 dark:text-slate-700" />
-              <h6 className="text-lg font-black text-slate-400">Clear Calendar</h6>
+              <h6 className="text-lg font-bold text-slate-400">Clear Calendar</h6>
               <p className="text-slate-400 text-sm mt-1">No society assemblies are currently scheduled.</p>
             </div>
           ) : (
@@ -133,63 +133,63 @@ const Meetings: React.FC = () => {
               return (
                 <div 
                   key={meeting.id || index} 
-                  className="group bg-white dark:bg-slate-900 p-6 md:p-8 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 transition-all duration-300 hover:border-brand-500 hover:shadow-xl"
+                  className="group bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 transition-all duration-300 hover:border-brand-500 hover:shadow-xl hover:shadow-slate-200/50 dark:hover:shadow-none"
                 >
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                     <div className="md:col-span-2">
                       <div className="flex items-center gap-3 mb-4">
-                        <span className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider border ${
+                        <span className={`px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider border ${
                           meeting.category === 'Urgent' 
-                            ? 'text-red-600 bg-red-50 border-red-200 dark:bg-red-900/20 dark:border-red-800' 
+                            ? 'text-rose-600 bg-rose-50 border-rose-200 dark:bg-rose-900/20 dark:border-rose-800' 
                             : 'text-brand-600 bg-brand-50 border-brand-200 dark:bg-brand-900/20 dark:border-brand-800'
                         }`}>
                           {meeting.category}
                         </span>
-                        <span className="px-3 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-[10px] font-black uppercase tracking-wider border border-slate-200 dark:border-slate-700">
+                        <span className="px-3 py-1 rounded-lg bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-[10px] font-bold uppercase tracking-wider border border-slate-100 dark:border-slate-700">
                           {new Date(meeting.date).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}
                         </span>
                       </div>
                       
-                      <h4 className="text-2xl font-black mb-3 text-slate-900 dark:text-white group-hover:text-brand-600 transition-colors">
+                      <h4 className="text-2xl font-bold mb-3 text-slate-900 dark:text-white group-hover:text-brand-600 transition-colors tracking-tight">
                         {meeting.title}
                       </h4>
-                      <p className="text-slate-500 dark:text-slate-400 leading-relaxed mb-6 font-medium">
+                      <p className="text-slate-500 dark:text-slate-400 leading-relaxed mb-6 text-sm font-medium">
                         {meeting.description}
                       </p>
                       
-                      <div className="flex items-center gap-6 text-slate-400 text-xs font-bold uppercase tracking-wider">
+                      <div className="flex items-center gap-6 text-slate-400 text-[10px] font-bold uppercase tracking-widest">
                         <div className="flex items-center gap-2">
-                          <Clock size={16} className="text-brand-500" />
+                          <Clock size={14} className="text-brand-500" />
                           <span>{new Date(meeting.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <MapPin size={16} className="text-brand-500" />
+                          <MapPin size={14} className="text-brand-500" />
                           <span>{meeting.location}</span>
                         </div>
                       </div>
                     </div>
                     
                     <div className="md:border-l border-slate-100 dark:border-slate-800 md:pl-8 flex flex-col justify-center items-center md:items-start">
-                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">
                         {isAdmin ? 'Total RSVPs' : 'Your Attendance'}
                       </span>
                       
                       {isAdmin ? (
                         <div className="text-center md:text-left">
-                          <h3 className="text-4xl font-black text-brand-600 mb-1">
+                          <h3 className="text-4xl font-bold text-brand-600 mb-1 tracking-tight">
                             {meeting.rsvps?.filter((r: any) => r.status === 'YES').length || 0}
                           </h3>
-                          <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Confirmations</span>
+                          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Confirmations</span>
                         </div>
                       ) : (
                         <button 
                           onClick={() => handleRSVP(meeting.id, userRsvp?.status || 'NO')}
                           aria-label={isAttending ? "Cancel attendance" : "Confirm attendance"}
                           aria-pressed={isAttending}
-                          className={`w-full py-3 rounded-xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 transition-all ${
+                          className={`w-full py-3.5 rounded-2xl font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-2 transition-all ${
                             isAttending 
-                              ? 'bg-green-50 text-green-600 border-2 border-green-500 hover:bg-green-100' 
-                              : 'bg-slate-900 text-white hover:bg-black shadow-lg shadow-slate-900/20'
+                              ? 'bg-emerald-50 text-emerald-600 border border-emerald-200 dark:bg-emerald-900/20 dark:border-emerald-800 hover:bg-emerald-100' 
+                              : 'bg-slate-900 dark:bg-slate-800 text-white hover:bg-slate-800 dark:hover:bg-slate-700 shadow-lg shadow-slate-900/20'
                           }`}
                         >
                           {isAttending && <CheckCircle size={14} />}
@@ -207,23 +207,23 @@ const Meetings: React.FC = () => {
             <div className="pt-8">
               <div className="flex items-center gap-4 mb-6">
                 <div className="h-px bg-slate-200 dark:bg-slate-800 flex-grow" />
-                <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Past Assemblies</span>
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Past Assemblies</span>
                 <div className="h-px bg-slate-200 dark:bg-slate-800 flex-grow" />
               </div>
               
-              <div className="space-y-4 opacity-60 hover:opacity-100 transition-opacity duration-300">
+              <div className="space-y-4 opacity-75 hover:opacity-100 transition-opacity duration-300">
                 {pastMeetings.map((meeting: Meeting, index: number) => (
-                  <div key={meeting.id || index} className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-3xl border border-slate-200 dark:border-slate-800">
+                  <div key={meeting.id || index} className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-100 dark:border-slate-800">
                     <div className="flex flex-col md:flex-row justify-between gap-4">
                       <div>
                         <div className="flex items-center gap-2 mb-2">
-                          <span className="px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-[10px] font-black uppercase text-slate-500 dark:text-slate-300">Concluded</span>
-                          <span className="text-[10px] font-black uppercase text-slate-400">{new Date(meeting.date).toLocaleDateString()}</span>
+                          <span className="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-[10px] font-bold uppercase text-slate-500 dark:text-slate-400">Concluded</span>
+                          <span className="text-[10px] font-bold uppercase text-slate-400">{new Date(meeting.date).toLocaleDateString()}</span>
                         </div>
-                        <h6 className="text-lg font-black text-slate-700 dark:text-slate-300">{meeting.title}</h6>
-                        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">{meeting.description}</p>
+                        <h6 className="text-lg font-bold text-slate-700 dark:text-slate-300 tracking-tight">{meeting.title}</h6>
+                        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 font-medium">{meeting.description}</p>
                       </div>
-                      <div className="flex items-center gap-4 text-slate-400 text-xs font-bold uppercase">
+                      <div className="flex items-center gap-4 text-slate-400 text-[10px] font-bold uppercase tracking-widest">
                         <div className="flex items-center gap-1">
                           <Clock size={12} />
                           <span>{new Date(meeting.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
@@ -232,7 +232,7 @@ const Meetings: React.FC = () => {
                           <MapPin size={12} />
                           <span>{meeting.location}</span>
                         </div>
-                        <div className="flex items-center gap-1 ml-2 pl-4 border-l border-slate-200 dark:border-slate-700">
+                        <div className="flex items-center gap-1 ml-2 pl-4 border-l border-slate-200 dark:border-slate-800">
                           <Users size={12} />
                           <span>{meeting.rsvps?.filter((r: any) => r.status === 'YES').length || 0} Attended</span>
                         </div>
@@ -246,13 +246,13 @@ const Meetings: React.FC = () => {
         </div>
 
         <div>
-          <div className="bg-brand-600 text-white p-8 rounded-[2.5rem] relative overflow-hidden shadow-xl sticky top-8">
+          <div className="bg-brand-600 text-white p-8 rounded-[2.5rem] relative overflow-hidden shadow-xl shadow-brand-600/20 sticky top-8">
             <div className="absolute -bottom-8 -right-8 w-32 h-32 bg-white opacity-10 rounded-full blur-2xl" />
             <div className="relative z-10">
-              <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mb-6 backdrop-blur-sm">
+              <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center mb-6 backdrop-blur-sm">
                 <BellRing size={24} className="text-white" />
               </div>
-              <h5 className="text-2xl font-black mb-2">Stay Informed</h5>
+              <h5 className="text-2xl font-bold mb-2 tracking-tight">Stay Informed</h5>
               <p className="text-brand-100 leading-relaxed text-sm font-medium">
                 All community meetings are broadcasted via WhatsApp and Email to ensure maximum participation.
               </p>
@@ -263,23 +263,26 @@ const Meetings: React.FC = () => {
 
       {/* Schedule Meeting Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-fade-in">
-          <div className="bg-white dark:bg-slate-900 w-full max-w-lg rounded-[2rem] shadow-2xl overflow-hidden animate-scale-in">
-            <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
-              <h4 className="text-2xl font-black text-slate-900 dark:text-white">New Assembly</h4>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white dark:bg-slate-900 w-full max-w-lg rounded-[2.5rem] shadow-2xl overflow-hidden animate-scale-in border border-slate-200 dark:border-slate-800">
+            <div className="p-8 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/50">
+              <div>
+                <h4 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">New Assembly</h4>
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">Schedule Community Meeting</p>
+              </div>
               <button 
                 onClick={() => setShowModal(false)}
                 aria-label="Close meeting form"
-                className="w-10 h-10 rounded-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                className="w-10 h-10 rounded-full flex items-center justify-center text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-600 dark:hover:text-slate-200 transition-all"
               >
                 <X size={20} />
               </button>
             </div>
             
-            <div className="p-6">
-              <form onSubmit={handleSchedule} className="space-y-5">
-                <div>
-                  <label htmlFor="meeting-title" className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Meeting Title</label>
+            <div className="p-8">
+              <form onSubmit={handleSchedule} className="space-y-6">
+                <div className="space-y-2">
+                  <label htmlFor="meeting-title" className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Meeting Title</label>
                   <input 
                     id="meeting-title"
                     type="text"
@@ -288,13 +291,13 @@ const Meetings: React.FC = () => {
                     aria-label="Meeting Title"
                     value={formData.title}
                     onChange={(e) => setFormData({...formData, title: e.target.value})}
-                    className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl px-4 py-3 text-slate-900 dark:text-white placeholder-slate-400 font-bold focus:ring-2 focus:ring-brand-500 outline-none transition-all"
+                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3.5 text-slate-900 dark:text-white placeholder-slate-400 font-bold outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label htmlFor="meeting-date" className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Date</label>
+                  <div className="space-y-2">
+                    <label htmlFor="meeting-date" className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Date</label>
                     <input 
                       id="meeting-date"
                       type="date"
@@ -302,11 +305,11 @@ const Meetings: React.FC = () => {
                       aria-label="Meeting Date"
                       value={formData.date}
                       onChange={(e) => setFormData({...formData, date: e.target.value})}
-                      className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl px-4 py-3 text-slate-900 dark:text-white font-bold focus:ring-2 focus:ring-brand-500 outline-none transition-all"
+                      className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3.5 text-slate-900 dark:text-white font-bold outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all"
                     />
                   </div>
-                  <div>
-                    <label htmlFor="meeting-time" className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Time</label>
+                  <div className="space-y-2">
+                    <label htmlFor="meeting-time" className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Time</label>
                     <input 
                       id="meeting-time"
                       type="time"
@@ -314,13 +317,13 @@ const Meetings: React.FC = () => {
                       aria-label="Meeting Time"
                       value={formData.time}
                       onChange={(e) => setFormData({...formData, time: e.target.value})}
-                      className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl px-4 py-3 text-slate-900 dark:text-white font-bold focus:ring-2 focus:ring-brand-500 outline-none transition-all"
+                      className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3.5 text-slate-900 dark:text-white font-bold outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all"
                     />
                   </div>
                 </div>
 
-                <div>
-                  <label htmlFor="meeting-location" className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Location</label>
+                <div className="space-y-2">
+                  <label htmlFor="meeting-location" className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Location</label>
                   <input 
                     id="meeting-location"
                     type="text"
@@ -329,12 +332,12 @@ const Meetings: React.FC = () => {
                     aria-label="Meeting Location"
                     value={formData.location}
                     onChange={(e) => setFormData({...formData, location: e.target.value})}
-                    className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl px-4 py-3 text-slate-900 dark:text-white placeholder-slate-400 font-bold focus:ring-2 focus:ring-brand-500 outline-none transition-all"
+                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3.5 text-slate-900 dark:text-white placeholder-slate-400 font-bold outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all"
                   />
                 </div>
 
-                <div>
-                  <label htmlFor="meeting-description" className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Agenda Description</label>
+                <div className="space-y-2">
+                  <label htmlFor="meeting-description" className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Agenda Description</label>
                   <textarea 
                     id="meeting-description"
                     rows={3}
@@ -343,7 +346,7 @@ const Meetings: React.FC = () => {
                     aria-label="Meeting Agenda Description"
                     value={formData.description}
                     onChange={(e) => setFormData({...formData, description: e.target.value})}
-                    className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl px-4 py-3 text-slate-900 dark:text-white placeholder-slate-400 font-medium focus:ring-2 focus:ring-brand-500 outline-none transition-all resize-none"
+                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3.5 text-slate-900 dark:text-white placeholder-slate-400 font-medium outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all resize-none"
                   />
                 </div>
 
@@ -351,7 +354,7 @@ const Meetings: React.FC = () => {
                   type="submit"
                   disabled={submitting}
                   aria-label={submitting ? "Scheduling meeting" : "Broadcast meeting to residents"}
-                  className="w-full bg-brand-600 hover:bg-brand-700 text-white font-black uppercase tracking-widest py-4 rounded-xl transition-all shadow-lg shadow-brand-600/20 active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold uppercase tracking-widest py-4 rounded-2xl transition-all shadow-lg shadow-brand-600/20 active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {submitting ? (
                     <>

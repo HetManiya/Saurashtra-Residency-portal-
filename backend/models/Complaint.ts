@@ -5,6 +5,7 @@ const complaintSchema = new mongoose.Schema({
   flatId: { type: String, required: true },
   subject: { type: String, required: true },
   description: { type: String, required: true },
+  category: { type: String, default: 'General' },
   status: { 
     type: String, 
     enum: ['OPEN', 'IN_PROGRESS', 'RESOLVED', 'CLOSED'], 

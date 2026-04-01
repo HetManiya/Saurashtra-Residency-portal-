@@ -1,7 +1,7 @@
 
 import { GoogleGenAI, Modality } from "@google/genai";
 import * as CONSTANTS from '../constants';
-import { MaintenanceRecord, PaymentStatus, Meeting, OccupancyType, AmenityBooking, AuditLogEntry, Notice } from '../types';
+import { MaintenanceRecord, PaymentStatus, Meeting, OccupancyType, AmenityBooking, AuditLogEntry, Notice, Complaint } from '../types';
 
 /**
  * Helper to manage local fallback storage for demo stability
@@ -372,6 +372,18 @@ export const api = {
     return handleResponse(response);
   },
 
+  submitManualPayment: async (maintenanceId: string, method: string, referenceNumber: string) => {
+    const response = await fetch('/api/v1/payments/manual', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthHeader()
+      },
+      body: JSON.stringify({ maintenanceId, method, referenceNumber })
+    });
+    return handleResponse(response);
+  },
+
   setupRecurringPayments: async () => {
     const response = await fetch('/api/v1/payments/setup-recurring', {
       method: 'POST',
@@ -597,6 +609,49 @@ export const api = {
 
   async getVisitorAnalytics() {
     const response = await fetch('/api/society/visitors/analytics', {
+      headers: getAuthHeader()
+    });
+    return handleResponse(response);
+  },
+
+  async getComplaints(): Promise<Complaint[]> {
+    try {
+      const response = await fetch('/api/v1/complaints', {
+        headers: getAuthHeader()
+      });
+      return await handleResponse(response);
+    } catch (e) {
+      return [];
+    }
+  },
+
+  async createComplaint(data: any) {
+    const response = await fetch('/api/v1/complaints', {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        ...getAuthHeader()
+      },
+      body: JSON.stringify(data)
+    });
+    return handleResponse(response);
+  },
+
+  async updateComplaint(id: string, status: string, priority?: string) {
+    const response = await fetch(`/api/v1/complaints/${id}`, {
+      method: 'PATCH',
+      headers: { 
+        'Content-Type': 'application/json',
+        ...getAuthHeader()
+      },
+      body: JSON.stringify({ status, priority })
+    });
+    return handleResponse(response);
+  },
+
+  async deleteComplaint(id: string) {
+    const response = await fetch(`/api/v1/complaints/${id}`, {
+      method: 'DELETE',
       headers: getAuthHeader()
     });
     return handleResponse(response);

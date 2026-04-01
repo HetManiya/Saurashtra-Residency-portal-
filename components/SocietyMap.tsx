@@ -19,57 +19,38 @@ const SocietyMap: React.FC<SocietyMapProps> = ({ buildings, registeredUnits, onB
   };
 
   const getOccupancyColor = (percentage: number) => {
-    if (percentage >= 80) return 'bg-emerald-500 border-emerald-600 text-emerald-600';
-    if (percentage >= 50) return 'bg-cyan-500 border-cyan-600 text-cyan-600';
-    if (percentage >= 20) return 'bg-magenta-500 border-magenta-600 text-magenta-600';
-    return 'bg-slate-700 border-slate-800 text-slate-800';
+    if (percentage >= 80) return 'bg-emerald-500';
+    if (percentage >= 50) return 'bg-brand-500';
+    if (percentage >= 20) return 'bg-amber-500';
+    return 'bg-slate-400';
   };
-
-  // Layout: 4 rows of 6 buildings
-  // Row 1: A-1 to A-6
-  // Row 2: A-7 to A-12
-  // -- Road --
-  // Row 3: A-13 to A-18
-  // Row 4: A-19 to A-24
 
   const row1 = buildings.slice(0, 6);
   const row2 = buildings.slice(6, 12);
   const row3 = buildings.slice(12, 18);
   const row4 = buildings.slice(18, 24);
 
-  const renderBuilding = (building: Building) => {
+  const renderBuilding = (building: Building, rowPrefix: string, index: number) => {
     const { occupied, percentage } = getOccupancyStats(building.name);
     const colorClass = getOccupancyColor(percentage);
-    const isHigh = percentage >= 80;
-    const isMed = percentage >= 50 && percentage < 80;
-    const isLow = percentage >= 20 && percentage < 50;
     
     return (
       <motion.div
-        key={building.id}
+        key={building.id || `${rowPrefix}-${index}`}
         whileHover={{ scale: 1.05, y: -5 }}
         whileTap={{ scale: 0.95 }}
         onClick={() => onBuildingClick(building)}
         className="relative cursor-pointer group flex flex-col items-center"
       >
-        <div className={`
-          w-20 h-20 md:w-24 md:h-24 border-4 transition-all duration-300
-          flex flex-col items-center justify-center relative overflow-hidden
-          bg-black ${
-            isHigh ? 'border-emerald-500 shadow-[4px_4px_0px_#00ffff]' : 
-            isMed ? 'border-cyan-500 shadow-[4px_4px_0px_#ff00ff]' : 
-            isLow ? 'border-magenta-500 shadow-[4px_4px_0px_#00ffff]' : 
-            'border-cyan-900/30'
-          }
-        `}>
-          <div className={`absolute top-0 inset-x-0 h-1 ${isHigh ? 'bg-emerald-500' : isMed ? 'bg-cyan-500' : isLow ? 'bg-magenta-500' : 'bg-cyan-900/30'}`} />
+        <div className="w-20 h-20 md:w-24 md:h-24 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm transition-all duration-300 flex flex-col items-center justify-center relative overflow-hidden group-hover:shadow-xl group-hover:shadow-slate-200/50 dark:group-hover:shadow-none">
+          <div className={`absolute top-0 inset-x-0 h-1 ${colorClass}`} />
           
-          <span className="text-[8px] font-black text-cyan-900 uppercase tracking-widest mb-0.5">Wing</span>
-          <h3 className={`text-xl font-black tracking-tighter ${isHigh ? 'text-emerald-500' : isMed ? 'text-cyan-400' : isLow ? 'text-magenta-500' : 'text-cyan-900'}`}>{building.name}</h3>
+          <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Wing</span>
+          <h3 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight group-hover:text-brand-600 transition-colors">{building.name}</h3>
           
           <div className="mt-1 flex items-center gap-1">
-            <Users size={10} className="text-cyan-900" />
-            <span className={`text-[9px] font-black font-mono ${isHigh ? 'text-emerald-500' : isMed ? 'text-cyan-400' : isLow ? 'text-magenta-500' : 'text-cyan-900'}`}>{percentage.toFixed(0)}%</span>
+            <Users size={10} className="text-slate-400" />
+            <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400">{percentage.toFixed(0)}%</span>
           </div>
         </div>
       </motion.div>
@@ -77,78 +58,79 @@ const SocietyMap: React.FC<SocietyMapProps> = ({ buildings, registeredUnits, onB
   };
 
   return (
-    <div className="bg-black p-8 md:p-12 border-4 border-cyan-500/30 overflow-hidden relative min-h-[600px] flex flex-col justify-center items-center crt-screen shadow-[8px_8px_0px_#ff00ff]">
+    <div className="bg-slate-50 dark:bg-slate-950/50 p-8 md:p-12 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 overflow-hidden relative min-h-[600px] flex flex-col justify-center items-center shadow-inner">
       
-      {/* Background Texture */}
-      <div className="absolute inset-0 opacity-10 pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
-
       {/* Main Container */}
       <div className="relative z-10 w-full max-w-6xl space-y-12">
         
         {/* Top Block (Rows 1 & 2) */}
         <div className="space-y-8">
           <div className="flex justify-center gap-4 md:gap-8 flex-wrap">
-            {row1.map(renderBuilding)}
+            {row1.map((building, idx) => renderBuilding(building, 'r1', idx))}
           </div>
           <div className="flex justify-center gap-4 md:gap-8 flex-wrap">
-            {row2.map(renderBuilding)}
+            {row2.map((building, idx) => renderBuilding(building, 'r2', idx))}
           </div>
         </div>
 
         {/* Central Road / Amenities */}
-        <div className="relative h-36 w-full bg-cyan-900/10 border-y-4 border-dashed border-cyan-500/30 flex items-center justify-center">
-           <div className="absolute inset-x-0 top-1/2 h-0.5 bg-cyan-500/10 border-t-2 border-dashed border-cyan-500/20"></div>
+        <div className="relative h-36 w-full bg-slate-200/50 dark:bg-slate-800/50 rounded-3xl border-y border-dashed border-slate-300 dark:border-slate-700 flex items-center justify-center">
+           <div className="absolute inset-x-0 top-1/2 h-px bg-slate-300 dark:bg-slate-700 border-t border-dashed border-slate-400/20"></div>
            
            {/* Central Park */}
-           <div className="bg-black border-2 border-emerald-500 px-8 py-4 flex items-center gap-4 shadow-[4px_4px_0px_#00ffff] z-10 group hover:scale-105 transition-transform">
-              <Trees className="text-emerald-500 group-hover:animate-bounce" size={28} />
+           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl px-8 py-4 flex items-center gap-4 shadow-lg shadow-slate-200/50 dark:shadow-none z-10 group hover:scale-105 transition-transform">
+              <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+                <Trees className="group-hover:animate-bounce" size={24} />
+              </div>
               <div>
-                <span className="text-[10px] font-black uppercase text-emerald-500 block tracking-[0.2em] glitch-text" data-text="CENTRAL_PARK">CENTRAL_PARK</span>
-                <span className="text-[8px] font-black text-emerald-900 uppercase tracking-widest font-mono">RECREATION_ZONE_v1</span>
+                <span className="text-xs font-bold text-slate-900 dark:text-white block tracking-tight">Central Park</span>
+                <span className="text-[10px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Recreation Zone</span>
               </div>
            </div>
 
            {/* Clubhouse (Left) */}
-           <div className="absolute left-10 bg-black border-2 border-magenta-500 p-4 shadow-[4px_4px_0px_#00ffff] hidden md:flex items-center gap-3 group hover:scale-105 transition-transform">
-              <Building2 className="text-magenta-500" size={24} />
-              <span className="text-[9px] font-black uppercase text-magenta-500 tracking-widest">CLUBHOUSE</span>
+           <div className="absolute left-10 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3 shadow-md hidden md:flex items-center gap-3 group hover:scale-105 transition-transform">
+              <div className="w-8 h-8 rounded-lg bg-brand-50 dark:bg-brand-900/20 flex items-center justify-center text-brand-600 dark:text-brand-400">
+                <Building2 size={18} />
+              </div>
+              <span className="text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Clubhouse</span>
            </div>
 
            {/* Gate (Right) */}
-           <div className="absolute right-10 bg-black border-2 border-cyan-500 p-4 shadow-[4px_4px_0px_#ff00ff] hidden md:flex items-center gap-3 group hover:scale-105 transition-transform">
-              <MapPin className="text-cyan-400" size={24} />
-              <span className="text-[9px] font-black uppercase text-cyan-400 tracking-widest">MAIN_GATE</span>
+           <div className="absolute right-10 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3 shadow-md hidden md:flex items-center gap-3 group hover:scale-105 transition-transform">
+              <div className="w-8 h-8 rounded-lg bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-400">
+                <MapPin size={18} />
+              </div>
+              <span className="text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Main Gate</span>
            </div>
         </div>
 
         {/* Bottom Block (Rows 3 & 4) */}
         <div className="space-y-8">
           <div className="flex justify-center gap-4 md:gap-8 flex-wrap">
-            {row3.map(renderBuilding)}
+            {row3.map((building, idx) => renderBuilding(building, 'r3', idx))}
           </div>
           <div className="flex justify-center gap-4 md:gap-8 flex-wrap">
-            {row4.map(renderBuilding)}
+            {row4.map((building, idx) => renderBuilding(building, 'r4', idx))}
           </div>
         </div>
 
       </div>
 
       {/* Legend */}
-      <div className="absolute bottom-8 right-8 bg-black border-2 border-cyan-900/50 p-5 shadow-[4px_4px_0px_#ff00ff] text-xs hidden lg:block">
-        <h4 className="font-black uppercase mb-4 text-cyan-700 text-[10px] tracking-widest border-b border-cyan-900/30 pb-2">OCCUPANCY_LOG</h4>
+      <div className="absolute bottom-8 right-8 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 rounded-2xl shadow-xl hidden lg:block">
+        <h4 className="font-bold uppercase mb-4 text-slate-400 text-[10px] tracking-widest border-b border-slate-100 dark:border-slate-800 pb-2">Occupancy Legend</h4>
         <div className="space-y-3">
-          <div className="flex items-center gap-3">
-            <div className="w-3 h-3 bg-emerald-500 shadow-[0_0_8px_#10b981]" />
-            <span className="text-[9px] font-black uppercase text-cyan-700 tracking-widest">HIGH_DENSITY</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="w-3 h-3 bg-cyan-400 shadow-[0_0_8px_#22d3ee]" />
-            <span className="text-[9px] font-black uppercase text-cyan-700 tracking-widest">STABLE_LINK</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="w-3 h-3 bg-magenta-500 shadow-[0_0_8px_#ff00ff]" />
-            <span className="text-[9px] font-black uppercase text-cyan-700 tracking-widest">LOW_SIGNAL</span>
-          </div>
+          {[
+            { color: 'bg-emerald-500', label: 'High Density' },
+            { color: 'bg-brand-500', label: 'Stable' },
+            { color: 'bg-amber-500', label: 'Low Density' }
+          ].map((item) => (
+            <div key={item.label} className="flex items-center gap-3">
+              <div className={`w-3 h-3 rounded-full ${item.color}`} />
+              <span className="text-[10px] font-bold uppercase text-slate-600 dark:text-slate-400 tracking-wider">{item.label}</span>
+            </div>
+          ))}
         </div>
       </div>
     </div>

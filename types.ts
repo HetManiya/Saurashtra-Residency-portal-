@@ -109,6 +109,20 @@ export interface Notice {
   category: 'Urgent' | 'General' | 'Event';
 }
 
+export interface Complaint {
+  id: string;
+  _id?: string;
+  userId: any;
+  flatId: string;
+  subject: string;
+  description: string;
+  category?: string;
+  status: 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED';
+  priority: 'LOW' | 'MEDIUM' | 'HIGH';
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface CommitteeMember {
   id: string;
   name: string;

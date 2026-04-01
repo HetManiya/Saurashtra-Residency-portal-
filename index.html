@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Saurashtra Residency - World Class Living</title>
+  <title>Saurashtra Residency Management System</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -12,61 +12,26 @@
       theme: {
         extend: {
           fontFamily: {
-            sans: ['VT323', 'monospace'],
-            mono: ['VT323', 'monospace'],
-            display: ['"Press Start 2P"', 'cursive'],
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
           },
           colors: {
             brand: {
-              50: '#fdf2f8',
-              100: '#fce7f3',
-              200: '#fbcfe8',
-              300: '#f9a8d4',
-              400: '#f472b6',
-              500: '#ec4899', // Magenta
-              600: '#db2777', 
-              700: '#be185d',
-              800: '#9d174d',
-              900: '#831843',
-            },
-            cyan: {
-              400: '#22d3ee',
-              500: '#06b6d4',
-            },
-            magenta: {
-              500: '#ec4899',
+              50: '#f0f9ff',
+              100: '#e0f2fe',
+              200: '#bae6fd',
+              300: '#7dd3fc',
+              400: '#38bdf8',
+              500: '#0ea5e9',
+              600: '#0284c7',
+              700: '#0369a1',
+              800: '#075985',
+              900: '#0c4a6e',
             }
           },
-          animation: {
-            'glitch': 'glitch 1s linear infinite',
-            'scanline': 'scanline 6s linear infinite',
-            'noise': 'noise 0.2s infinite',
-          },
-          keyframes: {
-            glitch: {
-              '0%': { transform: 'translate(0)' },
-              '20%': { transform: 'translate(-2px, 2px)' },
-              '40%': { transform: 'translate(-2px, -2px)' },
-              '60%': { transform: 'translate(2px, 2px)' },
-              '80%': { transform: 'translate(2px, -2px)' },
-              '100%': { transform: 'translate(0)' },
-            },
-            scanline: {
-              '0%': { transform: 'translateY(-100%)' },
-              '100%': { transform: 'translateY(100%)' },
-            },
-            noise: {
-              '0%, 100%': { transform: 'translate(0,0)' },
-              '10%': { transform: 'translate(-1px,-1px)' },
-              '20%': { transform: 'translate(-2px,1px)' },
-              '30%': { transform: 'translate(1px,-2px)' },
-              '40%': { transform: 'translate(-1px,2px)' },
-              '50%': { transform: 'translate(-2px,-1px)' },
-              '60%': { transform: 'translate(2px,1px)' },
-              '70%': { transform: 'translate(1px,2px)' },
-              '80%': { transform: 'translate(-1px,-2px)' },
-              '90%': { transform: 'translate(2px,-1px)' },
-            }
+          borderRadius: {
+            '4xl': '2rem',
+            '5xl': '2.5rem',
           }
         }
       }
@@ -74,169 +39,45 @@
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=VT323&family=Press+Start+2P&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --cyan: #00ffff;
-      --magenta: #ff00ff;
-      --bg-dark: #050505;
-    }
     body { 
-      font-family: 'VT323', monospace; 
-      background-color: var(--bg-dark);
-      color: var(--cyan);
-      overflow-x: hidden;
+      font-family: 'Inter', sans-serif; 
+      background-color: #f8fafc;
+      color: #0f172a;
     }
     
-    h1, h2, h3, .font-display {
-      font-family: 'Press Start 2P', cursive;
-      text-transform: uppercase;
+    .dark body {
+      background-color: #020617;
+      color: #f8fafc;
     }
 
-    /* Glitch Text Effect */
-    .glitch-text {
-      position: relative;
-      display: inline-block;
-    }
-    .glitch-text::before,
-    .glitch-text::after {
-      content: attr(data-text);
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: var(--bg-dark);
-    }
-    .glitch-text::before {
-      left: 2px;
-      text-shadow: -2px 0 var(--magenta);
-      clip: rect(44px, 450px, 56px, 0);
-      animation: glitch-anim 5s infinite linear alternate-reverse;
-    }
-    .glitch-text::after {
-      left: -2px;
-      text-shadow: -2px 0 var(--cyan);
-      clip: rect(44px, 450px, 56px, 0);
-      animation: glitch-anim2 5s infinite linear alternate-reverse;
+    .premium-shadow {
+      box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
     }
 
-    @keyframes glitch-anim {
-      0% { clip: rect(31px, 9999px, 94px, 0); }
-      20% { clip: rect(62px, 9999px, 42px, 0); }
-      40% { clip: rect(16px, 9999px, 78px, 0); }
-      60% { clip: rect(81px, 9999px, 13px, 0); }
-      80% { clip: rect(54px, 9999px, 33px, 0); }
-      100% { clip: rect(92px, 9999px, 90px, 0); }
-    }
-    @keyframes glitch-anim2 {
-      0% { clip: rect(65px, 9999px, 100px, 0); }
-      20% { clip: rect(12px, 9999px, 56px, 0); }
-      40% { clip: rect(87px, 9999px, 23px, 0); }
-      60% { clip: rect(44px, 9999px, 89px, 0); }
-      80% { clip: rect(21px, 9999px, 45px, 0); }
-      100% { clip: rect(78px, 9999px, 12px, 0); }
+    .page-transition {
+      animation: fadeIn 0.4s ease-out;
     }
 
-    /* Scanline Effect */
-    body::after {
-      content: " ";
-      display: block;
-      position: fixed;
-      top: 0;
-      left: 0;
-      bottom: 0;
-      right: 0;
-      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-      z-index: 9999;
-      background-size: 100% 2px, 3px 100%;
-      pointer-events: none;
-    }
-
-    /* CRT Flicker */
-    @keyframes flicker {
-      0% { opacity: 0.27861; }
-      5% { opacity: 0.34769; }
-      10% { opacity: 0.23604; }
-      15% { opacity: 0.90626; }
-      20% { opacity: 0.18128; }
-      25% { opacity: 0.83891; }
-      30% { opacity: 0.65583; }
-      35% { opacity: 0.57807; }
-      40% { opacity: 0.26559; }
-      45% { opacity: 0.84693; }
-      50% { opacity: 0.96019; }
-      55% { opacity: 0.08523; }
-      60% { opacity: 0.71056; }
-      65% { opacity: 0.73437; }
-      70% { opacity: 0.28574; }
-      75% { opacity: 0.96387; }
-      80% { opacity: 0.11453; }
-      85% { opacity: 0.33341; }
-      90% { opacity: 0.2942; }
-      95% { opacity: 0.44127; }
-      100% { opacity: 0.16661; }
-    }
-
-    .crt-screen {
-      position: relative;
-    }
-    .crt-screen::before {
-      content: " ";
-      display: block;
-      position: absolute;
-      top: 0;
-      left: 0;
-      bottom: 0;
-      right: 0;
-      background: rgba(18, 16, 16, 0.1);
-      opacity: 0;
-      z-index: 2;
-      pointer-events: none;
-      animation: flicker 0.15s infinite;
-    }
-
-    /* Jarring Contrast Buttons */
-    .btn-glitch {
-      background: var(--magenta);
-      color: white;
-      border: 4px solid var(--cyan);
-      padding: 10px 20px;
-      font-family: 'Press Start 2P', cursive;
-      font-size: 12px;
-      cursor: pointer;
-      position: relative;
-      transition: all 0.1s;
-    }
-    .btn-glitch:hover {
-      background: var(--cyan);
-      color: black;
-      border-color: var(--magenta);
-      box-shadow: 5px 5px 0px var(--magenta);
-      transform: translate(-2px, -2px);
-    }
-    .btn-glitch:active {
-      transform: translate(0, 0);
-      box-shadow: none;
-    }
-
-    /* Cyber Borders */
-    .cyber-border {
-      border: 2px solid var(--cyan);
-      box-shadow: 4px 4px 0px var(--magenta);
-      background: rgba(0, 0, 0, 0.8);
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     /* Custom Scrollbar */
-    ::-webkit-scrollbar { width: 10px; }
-    ::-webkit-scrollbar-track { background: var(--bg-dark); }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { 
-      background: var(--magenta); 
-      border: 2px solid var(--cyan);
+      background: #cbd5e1; 
+      border-radius: 10px;
+    }
+    .dark ::-webkit-scrollbar-thumb {
+      background: #334155;
     }
   </style>
 </head>
-<body class="bg-[#fcfdfe] text-slate-900 dark:bg-[#020617] dark:text-slate-100 selection:bg-brand-100 selection:text-brand-900">
+<body class="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-50 antialiased">
   <div id="root"></div>
   <script type="module" src="/index.tsx"></script>
 </body>

@@ -19,32 +19,52 @@ const CheckoutForm: React.FC<{
   onSuccess: (id: string) => void; 
   onCancel: () => void;
   amount: number;
-}> = ({ clientSecret, onSuccess, onCancel, amount }) => {
+  recordId: string;
+}> = ({ clientSecret, onSuccess, onCancel, amount, recordId }) => {
+  const { t } = useLanguage();
   const stripe = useStripe();
   const elements = useElements();
   const [error, setError] = useState<string | null>(null);
   const [processing, setProcessing] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<'stripe' | 'upi' | 'bank'>('stripe');
+  const [referenceNumber, setReferenceNumber] = useState('');
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    if (!stripe || !elements) return;
-
-    setProcessing(true);
     
-    const result = await stripe.confirmPayment({
-      elements,
-      confirmParams: {
-        return_url: `${window.location.origin}/#/maintenance?payment_success=true`,
-      },
-      redirect: 'if_required',
-    });
+    if (paymentMethod === 'stripe') {
+      if (!stripe || !elements) return;
 
-    if (result.error) {
-      setError(result.error.message || 'Payment failed');
-      setProcessing(false);
+      setProcessing(true);
+      
+      const result = await stripe.confirmPayment({
+        elements,
+        confirmParams: {
+          return_url: `${window.location.origin}/#/maintenance?payment_success=true`,
+        },
+        redirect: 'if_required',
+      });
+
+      if (result.error) {
+        setError(result.error.message || t('payment_failed'));
+        setProcessing(false);
+      } else {
+        if (result.paymentIntent?.status === 'succeeded') {
+          onSuccess(result.paymentIntent.id);
+        }
+      }
     } else {
-      if (result.paymentIntent?.status === 'succeeded') {
-        onSuccess(result.paymentIntent.id);
+      if (!referenceNumber.trim()) {
+        setError('Reference number is required');
+        return;
+      }
+      setProcessing(true);
+      try {
+        await api.submitManualPayment(recordId, paymentMethod === 'upi' ? 'UPI' : 'BANK_TRANSFER', referenceNumber);
+        onSuccess('manual');
+      } catch (err: any) {
+        setError(err.message || 'Payment submission failed');
+        setProcessing(false);
       }
     }
   };
@@ -52,55 +72,106 @@ const CheckoutForm: React.FC<{
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="mb-6">
-        <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-4">Select Payment Method</p>
+        <p className="text-[10px] font-bold text-slate-400 tracking-wider mb-4">{t('select_payment_method')}</p>
         <div className="flex items-center gap-4 mb-4 overflow-x-auto pb-2 custom-scrollbar">
-          <div className="flex flex-col items-center gap-1 min-w-[60px]">
-            <div className="w-10 h-10 bg-slate-50 dark:bg-slate-800 rounded-xl flex items-center justify-center border border-slate-200 dark:border-slate-700">
-              <img src="https://www.vectorlogo.zone/logos/google_pay/google_pay-icon.svg" className="w-6 h-6" alt="GPay" />
+          <button 
+            type="button"
+            onClick={() => setPaymentMethod('stripe')}
+            className={`flex flex-col items-center gap-1 min-w-[60px] ${paymentMethod === 'stripe' ? 'opacity-100' : 'opacity-50'}`}
+          >
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center border ${paymentMethod === 'stripe' ? 'bg-brand-50 border-brand-500 text-brand-600' : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700'}`}>
+              <CreditCard size={20} />
             </div>
-            <span className="text-[8px] font-black uppercase text-slate-400">GPay</span>
-          </div>
-          <div className="flex flex-col items-center gap-1 min-w-[60px]">
-            <div className="w-10 h-10 bg-slate-50 dark:bg-slate-800 rounded-xl flex items-center justify-center border border-slate-200 dark:border-slate-700">
-              <img src="https://www.vectorlogo.zone/logos/paytm/paytm-icon.svg" className="w-6 h-6" alt="Paytm" />
-            </div>
-            <span className="text-[8px] font-black uppercase text-slate-400">Paytm</span>
-          </div>
-          <div className="flex flex-col items-center gap-1 min-w-[60px]">
-            <div className="w-10 h-10 bg-slate-50 dark:bg-slate-800 rounded-xl flex items-center justify-center border border-slate-200 dark:border-slate-700">
+            <span className="text-[8px] font-bold text-slate-500">Cards</span>
+          </button>
+          <button 
+            type="button"
+            onClick={() => setPaymentMethod('upi')}
+            className={`flex flex-col items-center gap-1 min-w-[60px] ${paymentMethod === 'upi' ? 'opacity-100' : 'opacity-50'}`}
+          >
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center border ${paymentMethod === 'upi' ? 'bg-brand-50 border-brand-500 text-brand-600' : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700'}`}>
               <img src="https://www.vectorlogo.zone/logos/npci_upi/npci_upi-icon.svg" className="w-6 h-6" alt="UPI" />
             </div>
-            <span className="text-[8px] font-black uppercase text-slate-400">UPI</span>
-          </div>
-          <div className="flex flex-col items-center gap-1 min-w-[60px]">
-            <div className="w-10 h-10 bg-slate-50 dark:bg-slate-800 rounded-xl flex items-center justify-center border border-slate-200 dark:border-slate-700">
-              <CreditCard size={20} className="text-slate-400" />
+            <span className="text-[8px] font-bold text-slate-500">UPI</span>
+          </button>
+          <button 
+            type="button"
+            onClick={() => setPaymentMethod('bank')}
+            className={`flex flex-col items-center gap-1 min-w-[60px] ${paymentMethod === 'bank' ? 'opacity-100' : 'opacity-50'}`}
+          >
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center border ${paymentMethod === 'bank' ? 'bg-brand-50 border-brand-500 text-brand-600' : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700'}`}>
+              <Home size={20} />
             </div>
-            <span className="text-[8px] font-black uppercase text-slate-400">Cards</span>
-          </div>
+            <span className="text-[8px] font-bold text-slate-500">Bank</span>
+          </button>
         </div>
       </div>
 
-      <div className="p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700">
-        <PaymentElement />
-      </div>
-      {error && <div className="text-rose-600 text-xs font-bold">{error}</div>}
+      {paymentMethod === 'stripe' && (
+        <div className="p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700">
+          <PaymentElement />
+        </div>
+      )}
+
+      {paymentMethod === 'upi' && (
+        <div className="p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-4">
+          <div className="flex justify-center">
+            <div className="w-32 h-32 bg-white rounded-xl border-2 border-slate-200 flex items-center justify-center">
+              <span className="text-xs font-bold text-slate-400">QR Code</span>
+            </div>
+          </div>
+          <p className="text-center text-xs font-bold text-slate-500">UPI ID: saurashtra@upi</p>
+          <div>
+            <label className="text-[10px] font-bold text-slate-400 tracking-wider mb-2 block">Reference Number (UTR)</label>
+            <input 
+              type="text" 
+              value={referenceNumber}
+              onChange={(e) => setReferenceNumber(e.target.value)}
+              placeholder="e.g. 123456789012"
+              className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none"
+            />
+          </div>
+        </div>
+      )}
+
+      {paymentMethod === 'bank' && (
+        <div className="p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-4">
+          <div className="space-y-2 text-sm">
+            <div className="flex justify-between"><span className="text-slate-500">Bank Name:</span><span className="font-bold">HDFC Bank</span></div>
+            <div className="flex justify-between"><span className="text-slate-500">Account Name:</span><span className="font-bold">Saurashtra Residency</span></div>
+            <div className="flex justify-between"><span className="text-slate-500">Account No:</span><span className="font-bold">50100123456789</span></div>
+            <div className="flex justify-between"><span className="text-slate-500">IFSC Code:</span><span className="font-bold">HDFC0001234</span></div>
+          </div>
+          <div className="pt-4 border-t border-slate-200 dark:border-slate-700">
+            <label className="text-[10px] font-bold text-slate-400 tracking-wider mb-2 block">Transaction Reference Number</label>
+            <input 
+              type="text" 
+              value={referenceNumber}
+              onChange={(e) => setReferenceNumber(e.target.value)}
+              placeholder="e.g. IMPS/NEFT Ref No"
+              className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none"
+            />
+          </div>
+        </div>
+      )}
+
+      {error && <div className="text-red-500 text-[10px] font-bold tracking-wider">{error}</div>}
       <div className="flex gap-3">
         <button 
           type="button" 
           onClick={onCancel}
-          className="flex-1 py-4 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-2xl font-black uppercase tracking-widest text-[10px]"
-          aria-label="Cancel Payment"
+          className="flex-1 py-4 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 rounded-2xl font-bold tracking-wider text-[10px] hover:bg-slate-50 dark:hover:bg-slate-700 transition-all"
+          aria-label={t('cancel')}
         >
-          Cancel
+          {t('cancel')}
         </button>
         <button 
           type="submit" 
-          disabled={!stripe || processing}
-          className="flex-1 py-4 bg-brand-600 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-lg shadow-brand-500/20 disabled:opacity-50"
-          aria-label={processing ? 'Processing Payment' : `Pay ₹${amount}`}
+          disabled={(paymentMethod === 'stripe' && !stripe) || processing}
+          className="flex-1 py-4 bg-brand-600 text-white rounded-2xl font-bold tracking-wider text-[10px] shadow-lg shadow-brand-600/20 hover:bg-brand-700 transition-all disabled:opacity-50"
+          aria-label={processing ? t('processing') : `${t('pay_now')} ₹${amount}`}
         >
-          {processing ? 'Processing...' : `Pay ₹${amount}`}
+          {processing ? t('processing') : `${t('pay_now')} ₹${amount}`}
         </button>
       </div>
     </form>
@@ -164,9 +235,9 @@ const Maintenance: React.FC = () => {
     // Only update user if it changed to prevent re-renders
     if (JSON.stringify(parsedUser) !== JSON.stringify(user)) {
       setUser(parsedUser);
-      if (parsedUser) loadAllData(parsedUser);
-    } else if (!records.length && parsedUser) {
-      // If user is same but no records, load data (e.g. initial load or refresh)
+    }
+    
+    if (parsedUser) {
       loadAllData(parsedUser);
     }
 
@@ -203,7 +274,7 @@ const Maintenance: React.FC = () => {
       setStripePromise(loadStripe(order.publishableKey));
       setPaymentOrder({ ...order, recordId: record.id });
     } catch (e) {
-      alert("Payment initialization failed. Please check your connection.");
+      alert(t('payment_init_failed'));
     } finally {
       setIsProcessingPayment(false);
     }
@@ -212,16 +283,18 @@ const Maintenance: React.FC = () => {
   const handlePaymentSuccess = async (paymentIntentId: string) => {
     if (!paymentOrder) return;
     try {
-      await api.verifyPayment(paymentIntentId);
+      if (paymentIntentId !== 'manual') {
+        await api.verifyPayment(paymentIntentId);
+      }
       if (user) await loadAllData(user);
       setPaymentOrder(null);
-      alert("Payment Successful! Your record has been updated.");
+      alert(t('payment_success_msg'));
     } catch (e: any) {
       console.error("Verification error:", e);
       // Even if verification fails here, the webhook should handle it eventually.
       if (user) await loadAllData(user);
       setPaymentOrder(null);
-      alert("Payment processed. Your record will be updated shortly.");
+      alert(t('payment_processed_shortly'));
     }
   };
 
@@ -340,10 +413,10 @@ const Maintenance: React.FC = () => {
 
   const getStatusStyle = (status: PaymentStatus) => {
     switch (status) {
-      case PaymentStatus.PAID: return 'bg-emerald-50 dark:bg-emerald-900/10 text-emerald-600 dark:text-emerald-400 border-emerald-100/50 dark:border-emerald-900/20';
-      case PaymentStatus.PENDING: return 'bg-amber-50 dark:bg-amber-900/10 text-amber-600 dark:text-amber-400 border-amber-100/50 dark:border-amber-900/20';
-      case PaymentStatus.OVERDUE: return 'bg-rose-50 dark:bg-rose-900/10 text-rose-600 dark:text-rose-400 border-rose-100/50 dark:border-rose-900/20';
-      default: return 'bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-100/50 dark:border-slate-700';
+      case PaymentStatus.PAID: return 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800';
+      case PaymentStatus.PENDING: return 'bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-800';
+      case PaymentStatus.OVERDUE: return 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border-red-200 dark:border-red-800';
+      default: return 'bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700';
     }
   };
 
@@ -371,79 +444,77 @@ const Maintenance: React.FC = () => {
     <div className="space-y-10 animate-fade-up">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-8 border-b border-slate-200 dark:border-slate-800">
         <div>
-          <h1 className="text-4xl font-extrabold text-slate-900 dark:text-white tracking-tighter">{t('finance_hub')}</h1>
-          <p className="text-slate-500 dark:text-slate-400 mt-2 font-medium">
-            {activeTab === 'current' 
-              ? `Cycle: ${currentMonth} ${currentYear} • Total Units: ${records.length}` 
-              : 'Audit & Historical Payment Logs'}
+          <h1 className="text-4xl font-bold text-slate-900 dark:text-white tracking-tight">{t('bills')}</h1>
+          <p className="text-brand-600 mt-2 font-bold tracking-wider text-xs uppercase">
+            {t('finance_hub')}
           </p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-3">
           {isAdmin && activeTab === 'current' && records.length === 0 && (
             <button 
               onClick={handleGenerateMonthly}
-              className="flex items-center gap-2 px-6 py-4 bg-emerald-600 text-white rounded-[1.5rem] font-black uppercase tracking-widest text-[11px] shadow-xl shadow-emerald-500/20 active:scale-95"
-              aria-label="Generate Monthly Maintenance Cycle"
+              className="flex items-center gap-2 px-6 py-4 bg-emerald-600 text-white rounded-2xl font-bold tracking-wider text-[11px] shadow-lg shadow-emerald-600/20 hover:bg-emerald-700 transition-all"
+              aria-label={t('generate_cycle')}
             >
-              <RefreshCw size={16} /> Generate Cycle
+              <RefreshCw size={16} /> {t('generate_cycle')}
             </button>
           )}
           {isAdmin && activeTab === 'current' && records.length > 0 && (
             <button 
               onClick={handleLockMonth}
               disabled={isLocked}
-              className={`flex items-center gap-2 px-6 py-4 rounded-[1.5rem] font-black uppercase tracking-widest text-[11px] transition-all shadow-xl ${
+              className={`flex items-center gap-2 px-6 py-4 rounded-2xl font-bold tracking-wider text-[11px] transition-all ${
                 isLocked 
-                  ? 'bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-600 cursor-not-allowed' 
-                  : 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-indigo-500/20'
+                  ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 border border-slate-200 dark:border-slate-700 cursor-not-allowed' 
+                  : 'bg-brand-600 text-white shadow-lg shadow-brand-600/20 hover:bg-brand-700'
               }`}
-              aria-label={isLocked ? 'Cycle is Locked' : 'Finalize and Lock Ledger'}
+              aria-label={isLocked ? t('lock_month') : t('lock_month')}
             >
               {isLocked ? <Lock size={16} /> : <Unlock size={16} />}
-              {isLocked ? 'Cycle Locked' : 'Finalize Ledger'}
+              {isLocked ? t('lock_month') : t('lock_month')}
             </button>
           )}
           {isAdmin && activeTab === 'current' && records.length > 0 && (
             <button 
               onClick={handleSendReminders}
               disabled={isGeneratingReminders}
-              className="flex items-center gap-2 px-6 py-4 bg-amber-600 text-white rounded-[1.5rem] font-black uppercase tracking-widest text-[11px] shadow-xl shadow-amber-500/20 active:scale-95 disabled:opacity-50"
-              aria-label="Send Payment Reminders to Residents"
+              className="flex items-center gap-2 px-6 py-4 bg-amber-500 text-white rounded-2xl font-bold tracking-wider text-[11px] shadow-lg shadow-amber-500/20 hover:bg-amber-600 transition-all disabled:opacity-50"
+              aria-label={t('send_reminders')}
             >
               {isGeneratingReminders ? <Loader2 size={16} className="animate-spin" /> : <BellRing size={16} />}
-              Send Reminders
+              {t('send_reminders')}
             </button>
           )}
           {isAdmin && activeTab === 'current' && records.length > 0 && (
             <button 
               onClick={handleCalculatePenalties}
               disabled={isCalculatingPenalties}
-              className="flex items-center gap-2 px-6 py-4 bg-rose-600 text-white rounded-[1.5rem] font-black uppercase tracking-widest text-[11px] shadow-xl shadow-rose-500/20 active:scale-95 disabled:opacity-50"
-              aria-label="Apply Penalties to Overdue Records"
+              className="flex items-center gap-2 px-6 py-4 bg-red-500 text-white rounded-2xl font-bold tracking-wider text-[11px] shadow-lg shadow-red-500/20 hover:bg-red-600 transition-all disabled:opacity-50"
+              aria-label={t('apply_penalties')}
             >
               {isCalculatingPenalties ? <Loader2 size={16} className="animate-spin" /> : <Zap size={16} />}
-              Apply Penalties
+              {t('apply_penalties')}
             </button>
           )}
           {!isAdmin && (
             <button 
               onClick={handleSetupRecurring}
               disabled={isSettingUpRecurring || user?.isRecurringEnabled}
-              className={`flex items-center gap-2 px-6 py-4 rounded-[1.5rem] font-black uppercase tracking-widest text-[11px] shadow-xl transition-all active:scale-95 disabled:opacity-50 ${
+              className={`flex items-center gap-2 px-6 py-4 rounded-2xl font-bold tracking-wider text-[11px] transition-all disabled:opacity-50 ${
                 user?.isRecurringEnabled 
-                  ? 'bg-emerald-100 text-emerald-600 cursor-default' 
-                  : 'bg-brand-600 text-white shadow-brand-500/20'
+                  ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20 cursor-default' 
+                  : 'bg-brand-600 text-white shadow-lg shadow-brand-600/20 hover:bg-brand-700'
               }`}
-              aria-label={user?.isRecurringEnabled ? 'Recurring Payments are Active' : 'Enable Recurring Payments'}
+              aria-label={user?.isRecurringEnabled ? t('recurring_active') : t('enable_recurring')}
             >
               {isSettingUpRecurring ? <Loader2 size={16} className="animate-spin" /> : <RefreshCw size={16} />}
-              {user?.isRecurringEnabled ? 'Recurring Active' : 'Enable Recurring'}
+              {user?.isRecurringEnabled ? t('recurring_active') : t('enable_recurring')}
             </button>
           )}
           <button 
             onClick={handleExport} 
-            className="flex items-center gap-2 px-5 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl font-bold text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-50 transition-all"
-            aria-label="Export Records to CSV"
+            className="flex items-center gap-2 px-5 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl font-bold text-[10px] tracking-wider text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all"
+            aria-label={t('export')}
           >
             <Download size={18} /> {t('export')}
           </button>
@@ -452,24 +523,24 @@ const Maintenance: React.FC = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
         <div className="lg:col-span-4 space-y-8">
-          <div className="bg-white dark:bg-slate-900 rounded-[3rem] border border-slate-100 dark:border-slate-800 premium-shadow overflow-hidden">
-            <div className="p-8 border-b border-slate-50 dark:border-slate-800/50 flex flex-col xl:flex-row justify-between items-center gap-6">
-              <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-2xl w-full xl:w-auto overflow-x-auto shrink-0">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl shadow-slate-200 dark:shadow-none overflow-hidden">
+            <div className="p-8 border-b border-slate-100 dark:border-slate-800 flex flex-col xl:flex-row justify-between items-center gap-6">
+              <div className="flex bg-slate-50 dark:bg-slate-800 p-1 rounded-2xl w-full xl:w-auto overflow-x-auto shrink-0">
                 <button 
                   onClick={() => setActiveTab('current')} 
-                  className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${activeTab === 'current' ? 'bg-white dark:bg-slate-700 text-brand-600 dark:text-brand-400 shadow-xl' : 'text-slate-400 hover:text-slate-600'}`}
-                  aria-label="View Current Ledger"
+                  className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-[10px] font-bold tracking-wider transition-all whitespace-nowrap ${activeTab === 'current' ? 'bg-white dark:bg-slate-700 text-brand-600 shadow-sm' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'}`}
+                  aria-label={t('current_ledger')}
                   aria-pressed={activeTab === 'current'}
                 >
-                  <Calendar size={14} /> Current Ledger
+                  <Calendar size={14} /> {t('current_ledger')}
                 </button>
                 <button 
                   onClick={() => setActiveTab('history')} 
-                  className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${activeTab === 'history' ? 'bg-white dark:bg-slate-700 text-brand-600 dark:text-brand-400 shadow-xl' : 'text-slate-400 hover:text-slate-600'}`}
-                  aria-label="View Payment History"
+                  className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-[10px] font-bold tracking-wider transition-all whitespace-nowrap ${activeTab === 'history' ? 'bg-white dark:bg-slate-700 text-brand-600 shadow-sm' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'}`}
+                  aria-label={t('history')}
                   aria-pressed={activeTab === 'history'}
                 >
-                  <History size={14} /> History
+                  <History size={14} /> {t('history')}
                 </button>
               </div>
 
@@ -478,38 +549,38 @@ const Maintenance: React.FC = () => {
                   <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
                   <input 
                     type="text" 
-                    placeholder="Search Flat (e.g. A-1-101)..."
-                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-brand-500/20"
+                    placeholder={t('search_unit')}
+                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-[10px] font-bold tracking-wider text-slate-900 dark:text-white outline-none focus:border-brand-500 placeholder:text-slate-400"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
                 </div>
 
-                <div className="flex bg-slate-50 dark:bg-slate-800/50 p-1 rounded-2xl border border-slate-100 dark:border-slate-800 w-full sm:w-auto">
+                <div className="flex bg-slate-50 dark:bg-slate-800 p-1 rounded-2xl border border-slate-200 dark:border-slate-700 w-full sm:w-auto">
                   {['ALL', OccupancyType.OWNER, OccupancyType.TENANT].map((o) => (
                     <button 
                       key={o} 
                       onClick={() => setOccupancyFilter(o as any)} 
-                      className={`flex-1 sm:flex-none px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${occupancyFilter === o ? 'bg-white dark:bg-slate-900 text-brand-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
-                      aria-label={`Filter by ${o} occupancy`}
+                      className={`flex-1 sm:flex-none px-4 py-2 rounded-xl text-[9px] font-bold tracking-wider transition-all whitespace-nowrap ${occupancyFilter === o ? 'bg-white dark:bg-slate-700 text-brand-600 shadow-sm' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'}`}
+                      aria-label={`${t('filter_by')} ${o}`}
                       aria-pressed={occupancyFilter === o}
                     >
-                      {o}
+                      {o === 'ALL' ? t('all') : o === OccupancyType.OWNER ? t('owner') : t('tenant')}
                     </button>
                   ))}
                 </div>
 
                 {activeTab === 'current' && (
-                  <div className="flex bg-slate-50 dark:bg-slate-800/50 p-1 rounded-2xl border border-slate-100 dark:border-slate-800 w-full sm:w-auto">
+                  <div className="flex bg-slate-50 dark:bg-slate-800 p-1 rounded-2xl border border-slate-200 dark:border-slate-700 w-full sm:w-auto">
                     {['ALL', PaymentStatus.PAID, PaymentStatus.PENDING, PaymentStatus.OVERDUE].map((s) => (
                       <button 
                         key={s} 
                         onClick={() => setStatusFilter(s as any)} 
-                        className={`flex-1 sm:flex-none px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${statusFilter === s ? 'bg-white dark:bg-slate-900 text-brand-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
-                        aria-label={`Filter by ${s} status`}
+                        className={`flex-1 sm:flex-none px-4 py-2 rounded-xl text-[9px] font-bold tracking-wider transition-all whitespace-nowrap ${statusFilter === s ? 'bg-white dark:bg-slate-700 text-brand-600 shadow-sm' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'}`}
+                        aria-label={`${t('filter_by')} ${s}`}
                         aria-pressed={statusFilter === s}
                       >
-                        {s}
+                        {s === 'ALL' ? t('all') : s === PaymentStatus.PAID ? t('paid') : s === PaymentStatus.PENDING ? t('pending') : t('overdue')}
                       </button>
                     ))}
                   </div>
@@ -519,54 +590,56 @@ const Maintenance: React.FC = () => {
 
             <div className="overflow-x-auto max-h-[600px] custom-scrollbar">
               {loading ? (
-                <div className="py-20 flex flex-col items-center justify-center"><Loader2 className="animate-spin text-brand-600 mb-2" /><p className="text-[10px] font-black uppercase text-slate-400">Loading Cloud Data...</p></div>
+                <div className="py-20 flex flex-col items-center justify-center"><Loader2 className="animate-spin text-brand-600 mb-2" /><p className="text-[10px] font-bold text-slate-400 tracking-wider">{t('fetching_data')}</p></div>
               ) : (
                 <table className="w-full text-left">
-                  <thead className="sticky top-0 z-20 bg-slate-50 dark:bg-slate-800">
+                  <thead className="sticky top-0 z-20 bg-slate-50 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
                     <tr>
-                      <th className="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('unit')}</th>
-                      <th className="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Type</th>
-                      {activeTab === 'history' && <th className="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Period</th>}
-                      <th className="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('amount')}</th>
-                      <th className="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</th>
-                      <th className="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">{t('actions')}</th>
+                      <th className="px-10 py-6 text-[10px] font-bold text-slate-400 tracking-wider">{t('unit')}</th>
+                      <th className="px-10 py-6 text-[10px] font-bold text-slate-400 tracking-wider">{t('type')}</th>
+                      {activeTab === 'history' && <th className="px-10 py-6 text-[10px] font-bold text-slate-400 tracking-wider">{t('period')}</th>}
+                      <th className="px-10 py-6 text-[10px] font-bold text-slate-400 tracking-wider">{t('amount')}</th>
+                      <th className="px-10 py-6 text-[10px] font-bold text-slate-400 tracking-wider">{t('status')}</th>
+                      <th className="px-10 py-6 text-[10px] font-bold text-slate-400 tracking-wider text-right">{t('actions')}</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-50 dark:divide-slate-800/50">
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                     {filteredRecords.map((record) => (
-                      <tr key={record.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors group">
+                      <tr key={record.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors group">
                         <td className="px-10 py-6">
                           <div className="flex items-center gap-4">
-                            <div className="w-10 h-10 rounded-xl bg-brand-50 dark:bg-brand-900/10 text-brand-600 flex items-center justify-center font-black text-sm">{record.flatId.split('-').pop()}</div>
-                            <span className="font-black text-slate-800 dark:text-slate-200 tracking-tight">{record.flatId}</span>
+                            <div className="w-10 h-10 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 flex items-center justify-center font-bold text-sm">{record.flatId.split('-').pop()}</div>
+                            <span className="font-bold text-slate-900 dark:text-white tracking-tight">{record.flatId}</span>
                           </div>
                         </td>
                         <td className="px-10 py-6">
                           <div className="flex items-center gap-2">
                              {record.occupancyType === OccupancyType.OWNER ? <Key size={12} className="text-emerald-500" /> : <Users size={12} className="text-blue-500" />}
-                             <span className={`text-[10px] font-black uppercase tracking-widest ${record.occupancyType === OccupancyType.OWNER ? 'text-emerald-600' : 'text-blue-600'}`}>
-                               {record.occupancyType}
+                             <span className={`text-[10px] font-bold tracking-wider ${record.occupancyType === OccupancyType.OWNER ? 'text-emerald-500' : 'text-blue-500'}`}>
+                               {record.occupancyType === OccupancyType.OWNER ? t('owner') : t('tenant')}
                              </span>
                           </div>
                         </td>
                         {activeTab === 'history' && (
                           <td className="px-10 py-6">
                             <div className="flex flex-col">
-                              <span className="font-bold text-sm text-slate-700 dark:text-slate-300">{record.month} {record.year}</span>
-                              {record.paidDate && <span className="text-[10px] text-slate-400 font-medium">{new Date(record.paidDate).toLocaleDateString()}</span>}
+                              <span className="font-bold text-[10px] text-slate-600 dark:text-slate-400">{record.month} {record.year}</span>
+                              {record.paidDate && <span className="text-[8px] text-slate-400 font-bold tracking-wider">{new Date(record.paidDate).toLocaleDateString()}</span>}
                             </div>
                           </td>
                         )}
-                        <td className="px-10 py-6 font-black text-slate-900 dark:text-white">
+                        <td className="px-10 py-6 font-bold text-slate-900 dark:text-white">
                           <div className="flex flex-col">
-                            <span>₹{record.amount}</span>
+                            <span className="text-sm">₹{record.amount}</span>
                             {record.penaltyAmount > 0 && (
-                              <span className="text-[9px] text-rose-500 font-black uppercase tracking-widest">+ ₹{record.penaltyAmount} Penalty</span>
+                              <span className="text-[9px] text-red-500 font-bold tracking-wider">+ ₹{record.penaltyAmount} {t('penalty')}</span>
                             )}
                           </div>
                         </td>
                         <td className="px-10 py-6">
-                          <span className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest border-2 ${getStatusStyle(record.status)}`}>{record.status}</span>
+                          <span className={`px-4 py-1.5 rounded-full text-[9px] font-bold tracking-wider border ${getStatusStyle(record.status)}`}>
+                            {record.status === PaymentStatus.PAID ? t('paid') : record.status === PaymentStatus.PENDING ? t('pending') : t('overdue')}
+                          </span>
                         </td>
                         <td className="px-10 py-6">
                           <div className="flex items-center justify-end gap-2">
@@ -574,24 +647,24 @@ const Maintenance: React.FC = () => {
                               <div className="flex gap-2">
                                 <button 
                                   onClick={() => handleViewReceipt(record)}
-                                  className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-brand-50 hover:text-brand-600 transition-all"
-                                  aria-label={`View Receipt for ${record.month} ${record.year}`}
+                                  className="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 rounded-xl text-[9px] font-bold tracking-wider hover:bg-slate-50 dark:hover:bg-slate-700 transition-all"
+                                  aria-label={`${t('receipt')}: ${record.month} ${record.year}`}
                                 >
                                   <FileText size={12} /> {t('receipt')}
                                 </button>
                                 <button 
                                   onClick={() => handleShareWhatsApp(record)} 
-                                  className="p-2 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all" 
-                                  title="Share"
-                                  aria-label={`Share Receipt for ${record.month} ${record.year} on WhatsApp`}
+                                  className="p-2 text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-xl transition-all" 
+                                  title={t('share')}
+                                  aria-label={`${t('share')} ${t('receipt')} ${record.month} ${record.year}`}
                                 >
                                   <Share2 size={14} />
                                 </button>
                                 <button 
                                   onClick={() => handleDisputeHelp(record)}
-                                  className="p-2 text-rose-600 hover:bg-rose-50 rounded-lg transition-all" 
-                                  title="AI Dispute Help"
-                                  aria-label={`Get AI Dispute Help for ${record.month} ${record.year}`}
+                                  className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-all" 
+                                  title={t('support')}
+                                  aria-label={`${t('support')} ${record.month} ${record.year}`}
                                 >
                                   <AlertCircle size={14} />
                                 </button>
@@ -602,8 +675,8 @@ const Maintenance: React.FC = () => {
                                   <button 
                                     onClick={() => handlePayStripe(record)}
                                     disabled={isProcessingPayment}
-                                    className="flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-brand-700 transition-all shadow-lg"
-                                    aria-label={`Pay Maintenance for ${record.month} ${record.year}`}
+                                    className="flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-xl text-[9px] font-bold tracking-wider hover:bg-brand-700 transition-all shadow-lg shadow-brand-600/20"
+                                    aria-label={`${t('pay_now')}: ${record.month} ${record.year}`}
                                   >
                                     {isProcessingPayment ? <Loader2 size={12} className="animate-spin" /> : <CreditCard size={12} />} 
                                     {t('pay_now')}
@@ -612,11 +685,12 @@ const Maintenance: React.FC = () => {
                                 {isAdmin && (
                                   <button 
                                     onClick={() => handleWhatsAppReminder(record)}
-                                    className="p-2.5 bg-emerald-50 dark:bg-emerald-900/10 text-emerald-600 rounded-xl hover:bg-emerald-100 transition-all border border-emerald-100"
-                                    title="Reminder"
-                                    aria-label={`Send WhatsApp Reminder to ${record.flatId}`}
+                                    className="flex items-center gap-2 px-4 py-2 bg-emerald-500 text-white rounded-xl text-[9px] font-bold tracking-wider hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-500/20"
+                                    title={t('whatsapp_reminder')}
+                                    aria-label={`${t('whatsapp_reminder')} ${record.flatId}`}
                                   >
-                                    <MessageCircle size={14} />
+                                    <MessageCircle size={12} />
+                                    {t('whatsapp_reminder')}
                                   </button>
                                 )}
                               </div>
@@ -630,26 +704,26 @@ const Maintenance: React.FC = () => {
               )}
               {!loading && filteredRecords.length === 0 && (
                 <div className="p-20 text-center">
-                   <AlertCircle className="w-12 h-12 text-slate-200 mx-auto mb-4" />
-                   <p className="text-slate-400 font-bold text-sm">No records found matching your filters.</p>
+                   <AlertCircle className="w-12 h-12 text-slate-200 dark:text-slate-800 mx-auto mb-4" />
+                   <p className="text-slate-400 font-bold tracking-wider text-[10px]">{t('no_records_found')}</p>
                 </div>
               )}
             </div>
             
             <div className="p-6 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center">
-               <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">
-                 Showing {filteredRecords.length} units
-               </p>
-               <div className="flex gap-4">
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
-                    <span className="text-[9px] font-black uppercase text-slate-500">Paid: {filteredRecords.filter(r => r.status === PaymentStatus.PAID).length}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-amber-500"></div>
-                    <span className="text-[9px] font-black uppercase text-slate-500">Pending: {filteredRecords.filter(r => r.status === PaymentStatus.PENDING).length}</span>
-                  </div>
-               </div>
+              <p className="text-[10px] font-bold text-slate-400 tracking-wider">
+                {t('showing')} {filteredRecords.length} {t('units')}
+              </p>
+              <div className="flex gap-4">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
+                  <span className="text-[9px] font-bold text-slate-500">{t('paid')}: {filteredRecords.filter(r => r.status === PaymentStatus.PAID).length}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-amber-500"></div>
+                  <span className="text-[9px] font-bold text-slate-500">{t('pending')}: {filteredRecords.filter(r => r.status === PaymentStatus.PENDING).length}</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -658,25 +732,25 @@ const Maintenance: React.FC = () => {
       {paymentOrder && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setPaymentOrder(null)} />
-          <div className="relative bg-white dark:bg-slate-900 w-full max-w-md rounded-[2.5rem] p-8 shadow-2xl border border-slate-100 dark:border-slate-800 animate-in zoom-in-95 duration-200">
+          <div className="relative bg-white dark:bg-slate-900 w-full max-w-md rounded-3xl p-8 shadow-2xl border border-slate-200 dark:border-slate-800 animate-in zoom-in-95 duration-200">
             <div className="flex justify-between items-start mb-6">
               <div>
-                <h3 className="text-2xl font-black tracking-tight dark:text-white">Checkout</h3>
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Secure Society Payments</p>
+                <h3 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">{t('checkout')}</h3>
+                <p className="text-[10px] font-bold text-brand-600 tracking-wider">{t('secure_payment')}</p>
               </div>
               <button 
                 onClick={() => setPaymentOrder(null)} 
-                className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors"
-                aria-label="Close Checkout"
+                className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors"
+                aria-label={t('close_checkout')}
               >
                 <X size={20} className="text-slate-400" />
               </button>
             </div>
 
-            <div className="p-4 bg-brand-50 dark:bg-brand-900/10 rounded-2xl border border-brand-100 dark:border-brand-900/20 mb-8">
+            <div className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700 mb-8">
               <div className="flex justify-between items-center">
-                <span className="text-xs font-bold text-slate-500 dark:text-slate-400">Total Amount</span>
-                <span className="text-xl font-black text-brand-600">₹{paymentOrder.amount}</span>
+                <span className="text-[10px] font-bold text-slate-400 tracking-wider">{t('total_amount')}</span>
+                <span className="text-xl font-bold text-slate-900 dark:text-white">₹{paymentOrder.amount}</span>
               </div>
             </div>
             
@@ -685,13 +759,14 @@ const Maintenance: React.FC = () => {
                 <CheckoutForm 
                   clientSecret={paymentOrder.clientSecret} 
                   amount={paymentOrder.amount}
+                  recordId={paymentOrder.recordId}
                   onSuccess={handlePaymentSuccess}
                   onCancel={() => setPaymentOrder(null)}
                 />
               </Elements>
             )}
 
-            <div className="mt-8 pt-6 border-t border-slate-100 dark:border-slate-800 flex items-center justify-center gap-4 opacity-50 grayscale">
+            <div className="mt-8 pt-6 border-t border-slate-100 dark:border-slate-800 flex items-center justify-center gap-4 opacity-50">
               <img src="https://www.vectorlogo.zone/logos/visa/visa-icon.svg" className="h-4" alt="Visa" />
               <img src="https://www.vectorlogo.zone/logos/mastercard/mastercard-icon.svg" className="h-4" alt="Mastercard" />
               <img src="https://www.vectorlogo.zone/logos/npci_upi/npci_upi-icon.svg" className="h-4" alt="UPI" />
@@ -703,92 +778,92 @@ const Maintenance: React.FC = () => {
       {selectedReceipt && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setSelectedReceipt(null)} />
-          <div className="relative bg-white dark:bg-slate-900 w-full max-w-lg rounded-[2.5rem] p-10 shadow-2xl border border-slate-100 dark:border-slate-800 animate-in zoom-in-95 duration-200 overflow-hidden">
+          <div className="relative bg-white dark:bg-slate-900 w-full max-w-lg rounded-3xl p-10 shadow-2xl border border-slate-200 dark:border-slate-800 animate-in zoom-in-95 duration-200 overflow-hidden">
             <div className="absolute top-0 right-0 w-40 h-40 bg-brand-500/5 rounded-full blur-3xl -mr-20 -mt-20" />
             
             <div className="relative z-10">
               <div className="flex justify-between items-start mb-10">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-brand-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-brand-500/20">
+                  <div className="w-12 h-12 bg-brand-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-brand-600/20">
                     <ShieldCheck size={24} />
                   </div>
                   <div>
-                    <h3 className="text-xl font-black tracking-tighter dark:text-white">{selectedReceipt.societyName}</h3>
-                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Official Payment Receipt</p>
+                    <h3 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">{selectedReceipt.societyName}</h3>
+                    <p className="text-[9px] font-bold text-brand-600 tracking-wider">{t('payment_receipt')}</p>
                   </div>
                 </div>
                 <button 
                   onClick={() => setSelectedReceipt(null)} 
-                  className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors"
-                  aria-label="Close Receipt"
+                  className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors"
+                  aria-label={t('close_receipt')}
                 >
                   <X size={20} className="text-slate-400" />
                 </button>
               </div>
 
               <div className="space-y-6">
-                <div className="flex justify-between items-center pb-6 border-b border-slate-50 dark:border-slate-800">
+                <div className="flex justify-between items-center pb-6 border-b border-slate-100 dark:border-slate-800">
                   <div>
-                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Receipt No</p>
-                    <p className="text-sm font-black text-slate-900 dark:text-white">{selectedReceipt.receiptNo}</p>
+                    <p className="text-[9px] font-bold text-slate-400 tracking-wider mb-1">{t('receipt_no')}</p>
+                    <p className="text-sm font-bold text-slate-900 dark:text-white">{selectedReceipt.receiptNo}</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Date</p>
-                    <p className="text-sm font-black text-slate-900 dark:text-white">{new Date(selectedReceipt.paidDate).toLocaleDateString()}</p>
+                    <p className="text-[9px] font-bold text-slate-400 tracking-wider mb-1">{t('date')}</p>
+                    <p className="text-sm font-bold text-slate-900 dark:text-white">{new Date(selectedReceipt.paidDate).toLocaleDateString()}</p>
                   </div>
                 </div>
 
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
-                    <span className="text-xs font-bold text-slate-500">Unit Number</span>
-                    <span className="text-xs font-black text-slate-900 dark:text-white">{selectedReceipt.flatId}</span>
+                    <span className="text-[10px] font-bold text-slate-400 tracking-wider">{t('unit_number')}</span>
+                    <span className="text-[10px] font-bold text-slate-900 dark:text-white">{selectedReceipt.flatId}</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-xs font-bold text-slate-500">Billing Period</span>
-                    <span className="text-xs font-black text-slate-900 dark:text-white">{selectedReceipt.period}</span>
+                    <span className="text-[10px] font-bold text-slate-400 tracking-wider">{t('billing_period')}</span>
+                    <span className="text-[10px] font-bold text-slate-900 dark:text-white">{selectedReceipt.period}</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-xs font-bold text-slate-500">Base Amount</span>
-                    <span className="text-xs font-black text-slate-900 dark:text-white">₹{selectedReceipt.amount}</span>
+                    <span className="text-[10px] font-bold text-slate-400 tracking-wider">{t('base_amount')}</span>
+                    <span className="text-[10px] font-bold text-slate-900 dark:text-white">₹{selectedReceipt.amount}</span>
                   </div>
                   {selectedReceipt.penalty > 0 && (
                     <div className="flex justify-between items-center">
-                      <span className="text-xs font-bold text-slate-500">Penalty Charges</span>
-                      <span className="text-xs font-black text-rose-500">₹{selectedReceipt.penalty}</span>
+                      <span className="text-[10px] font-bold text-slate-400 tracking-wider">{t('penalty_charges')}</span>
+                      <span className="text-[10px] font-bold text-red-500">₹{selectedReceipt.penalty}</span>
                     </div>
                   )}
                 </div>
 
-                <div className="mt-8 p-6 bg-slate-50 dark:bg-slate-800/50 rounded-[2rem] border border-slate-100 dark:border-slate-800">
+                <div className="mt-8 p-6 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700">
                   <div className="flex justify-between items-center">
-                    <span className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">Total Paid</span>
-                    <span className="text-2xl font-black text-brand-600 tracking-tighter">₹{selectedReceipt.total}</span>
+                    <span className="text-sm font-bold text-brand-600 tracking-wider">{t('total_paid')}</span>
+                    <span className="text-2xl font-bold text-brand-600 tracking-tight">₹{selectedReceipt.total}</span>
                   </div>
                 </div>
 
                 <div className="pt-6 text-center">
-                  <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-emerald-50 dark:bg-emerald-900/10 rounded-full text-[10px] font-black uppercase tracking-widest text-emerald-600 border border-emerald-100 dark:border-emerald-900/20">
-                    <CheckCircle size={14} /> Payment Verified
+                  <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-emerald-50 dark:bg-emerald-900/20 rounded-full text-[10px] font-bold tracking-wider text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
+                    <CheckCircle size={14} /> {t('payment_verified')}
                   </div>
-                  <p className="mt-4 text-[9px] text-slate-400 font-medium max-w-[200px] mx-auto">
-                    This is a computer-generated receipt and does not require a physical signature.
+                  <p className="mt-4 text-[8px] text-slate-400 font-bold tracking-wider max-w-[200px] mx-auto">
+                    {t('receipt_footer')}
                   </p>
                 </div>
 
                 <div className="mt-8 flex gap-3">
                   <button 
                     onClick={() => window.print()}
-                    className="flex-1 py-4 bg-slate-900 dark:bg-slate-800 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] flex items-center justify-center gap-2"
-                    aria-label="Print Receipt as PDF"
+                    className="flex-1 py-4 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 rounded-2xl font-bold tracking-wider text-[10px] flex items-center justify-center gap-2 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all"
+                    aria-label={t('print_pdf_aria')}
                   >
-                    <Download size={14} /> Print PDF
+                    <Download size={14} /> {t('print_pdf')}
                   </button>
                   <button 
                     onClick={() => handleShareWhatsApp({ ...selectedReceipt, amount: selectedReceipt.total } as any)}
-                    className="flex-1 py-4 bg-emerald-600 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] flex items-center justify-center gap-2"
-                    aria-label="Share Receipt on WhatsApp"
+                    className="flex-1 py-4 bg-emerald-600 text-white rounded-2xl font-bold tracking-wider text-[10px] flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/20 hover:bg-emerald-700 transition-all"
+                    aria-label={t('share_whatsapp_aria')}
                   >
-                    <Share2 size={14} /> Share
+                    <Share2 size={14} /> {t('share')}
                   </button>
                 </div>
               </div>
@@ -800,28 +875,28 @@ const Maintenance: React.FC = () => {
       {disputeHelp && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setDisputeHelp(null)} />
-          <div className="relative bg-white dark:bg-slate-900 w-full max-w-2xl rounded-[2.5rem] p-8 shadow-2xl border border-slate-100 dark:border-slate-800 animate-in zoom-in-95 duration-200">
+          <div className="relative bg-white dark:bg-slate-900 w-full max-w-2xl rounded-3xl p-8 shadow-2xl border border-rose-200 dark:border-rose-800 animate-in zoom-in-95 duration-200">
             <div className="flex justify-between items-start mb-6">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-rose-50 dark:bg-rose-900/10 rounded-2xl flex items-center justify-center text-rose-600">
+                <div className="w-12 h-12 bg-rose-50 dark:bg-rose-900/20 rounded-2xl border border-rose-200 dark:border-rose-800 flex items-center justify-center text-rose-600 shadow-sm">
                   <Zap size={24} />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-black tracking-tight dark:text-white">AI Dispute Resolution</h3>
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Powered by Gemini AI</p>
+                  <h3 className="text-2xl font-bold tracking-tight text-red-600">{t('ai_dispute_resolution')}</h3>
+                  <p className="text-[10px] font-bold text-slate-400 tracking-wider">{t('powered_by_gemini')}</p>
                 </div>
               </div>
               <button 
                 onClick={() => setDisputeHelp(null)} 
-                className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors"
-                aria-label="Close Dispute Help"
+                className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors"
+                aria-label={t('close_dispute_help')}
               >
                 <X size={20} className="text-slate-400" />
               </button>
             </div>
 
-            <div className="prose prose-slate dark:prose-invert max-w-none">
-              <div className="p-6 bg-slate-50 dark:bg-slate-800 rounded-3xl border border-slate-100 dark:border-slate-700 text-sm leading-relaxed whitespace-pre-wrap">
+            <div className="prose prose-invert max-w-none">
+              <div className="p-6 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700 text-[11px] font-bold tracking-wider leading-relaxed text-slate-700 dark:text-slate-300 whitespace-pre-wrap">
                 {disputeHelp.advice}
               </div>
             </div>
@@ -829,17 +904,17 @@ const Maintenance: React.FC = () => {
             <div className="mt-8 flex gap-3">
               <button 
                 onClick={() => setDisputeHelp(null)}
-                className="flex-1 py-4 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-2xl font-black uppercase tracking-widest text-[10px]"
-                aria-label="Close AI Help"
+                className="flex-1 py-4 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 rounded-2xl font-bold tracking-wider text-[10px] hover:bg-slate-50 dark:hover:bg-slate-700 transition-all"
+                aria-label={t('close_ai_help')}
               >
-                Close
+                {t('close')}
               </button>
               <button 
                 onClick={() => window.location.href = 'mailto:committee@residency.com'}
-                className="flex-1 py-4 bg-brand-600 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-lg shadow-brand-500/20"
-                aria-label="Contact Committee via Email"
+                className="flex-1 py-4 bg-red-500 text-white rounded-2xl font-bold tracking-wider text-[10px] shadow-lg shadow-red-500/20 hover:bg-red-600 transition-all"
+                aria-label={t('contact_committee_email')}
               >
-                Contact Committee
+                {t('contact_committee')}
               </button>
             </div>
           </div>

@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import mongoose from 'mongoose';
+import User from '../models/User';
 
 // Define the permissions mapping for each role
 export const ROLE_PERMISSIONS: Record<string, string[]> = {
@@ -11,7 +12,7 @@ export const ROLE_PERMISSIONS: Record<string, string[]> = {
   RESIDENT: ['view_personal_dashboard', 'pay_maintenance', 'book_amenities', 'raise_complaint']
 };
 
-export const protect = (req: any, res: Response, next: NextFunction) => {
+export const protect = async (req: any, res: Response, next: NextFunction) => {
   let token;
   if (req.headers?.authorization?.startsWith('Bearer')) {
     token = req.headers.authorization.split(' ')[1];
@@ -29,7 +30,22 @@ export const protect = (req: any, res: Response, next: NextFunction) => {
       return res.status(401).json({ message: 'Invalid session. Please log in again.' });
     }
 
-    req.user = decoded; // { id, role, permissions }
+    // Fetch user to ensure we have the latest data including flatId
+    const user = await User.findById(decoded.id).select('-password');
+    
+    if (!user) {
+      return res.status(401).json({ message: 'User no longer exists' });
+    }
+
+    req.user = {
+      id: user._id.toString(),
+      role: user.role,
+      permissions: user.permissions,
+      flatId: user.flatId,
+      name: user.name,
+      email: user.email
+    };
+    
     next();
   } catch (error: any) {
     console.error('🔒 Auth Middleware Error:', error.message);

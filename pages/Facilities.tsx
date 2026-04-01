@@ -152,16 +152,16 @@ const Facilities: React.FC = () => {
 
   return (
     <div className="pb-12 animate-fade-in">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-8 pb-6 border-b border-slate-200 dark:border-slate-800">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8 pb-6 border-b border-slate-200 dark:border-slate-800">
         <div>
-          <h1 className="text-4xl font-black tracking-tighter text-slate-900 dark:text-white mb-2">
-            Community <span className="text-brand-600">Amenities</span>
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white uppercase mb-1">
+            Community <span className="text-brand-600 dark:text-brand-400">Amenities</span>
           </h1>
-          <p className="text-slate-500 dark:text-slate-400 font-medium">
-            Book premium society facilities and view public events
+          <p className="text-slate-500 text-sm font-medium uppercase tracking-wider">
+            Access premium society facilities and public events
           </p>
         </div>
-        <div className="flex flex-col sm:flex-row gap-4 items-center">
+        <div className="flex flex-col sm:flex-row gap-4 items-center w-full md:w-auto">
           <div className="relative w-full sm:w-64">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
             <input 
@@ -170,10 +170,10 @@ const Facilities: React.FC = () => {
               aria-label="Search amenities"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-12 pr-4 py-2 bg-slate-100 dark:bg-slate-800 border-none rounded-xl text-xs font-bold focus:ring-2 focus:ring-brand-500 outline-none"
+              className="w-full pl-12 pr-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none transition-all"
             />
           </div>
-          <div className="bg-slate-100 dark:bg-slate-800 p-1 rounded-2xl inline-flex" role="tablist">
+          <div className="bg-slate-100 dark:bg-slate-800 p-1 rounded-2xl inline-flex w-full sm:w-auto" role="tablist">
             {['Explore', 'My Requests', ...(isAdmin ? [`All Bookings`] : [])].map((tab, idx) => (
               <button
                 key={idx}
@@ -184,10 +184,10 @@ const Facilities: React.FC = () => {
                   setActiveTab(idx);
                   setFilterStatus('ALL');
                 }}
-                className={`px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                className={`flex-1 sm:flex-none px-6 py-2 text-[10px] font-bold uppercase tracking-widest transition-all rounded-xl ${
                   activeTab === idx 
-                    ? 'bg-white dark:bg-slate-700 text-brand-600 dark:text-white shadow-sm' 
-                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+                    ? 'bg-white dark:bg-slate-700 text-brand-600 dark:text-brand-400 shadow-sm' 
+                    : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
                 }`}
               >
                 {tab}
@@ -199,7 +199,7 @@ const Facilities: React.FC = () => {
               value={filterStatus}
               aria-label="Filter bookings by status"
               onChange={(e) => setFilterStatus(e.target.value)}
-              className="bg-slate-100 dark:bg-slate-800 border-none rounded-xl px-4 py-2 text-[10px] font-black uppercase tracking-widest text-slate-700 dark:text-slate-300 focus:ring-2 focus:ring-brand-500 outline-none"
+              className="w-full sm:w-auto bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-slate-700 dark:text-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none transition-all"
             >
               <option value="ALL">All Status</option>
               <option value="PENDING">Pending</option>
@@ -215,7 +215,7 @@ const Facilities: React.FC = () => {
                 setShowBookingForm(true);
               }}
               aria-label="Quick Book Amenity"
-              className="bg-green-600 text-white px-6 py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-green-700 transition-colors flex items-center gap-2 shadow-lg shadow-green-600/20 active:scale-95 transform duration-100"
+              className="w-full sm:w-auto bg-brand-600 text-white px-6 py-3 rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-brand-700 transition-all shadow-lg shadow-brand-500/20 active:scale-95 flex items-center justify-center gap-2"
             >
               <Plus size={18} />
               Quick Book
@@ -227,16 +227,16 @@ const Facilities: React.FC = () => {
       {activeTab === 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {filteredAmenities.length === 0 ? (
-            <div className="col-span-full text-center py-20 bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 border-dashed">
+            <div className="col-span-full text-center py-20 bg-white dark:bg-slate-900 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-3xl">
               <Building size={48} className="mx-auto text-slate-300 mb-4" />
-              <h3 className="text-xl font-black text-slate-900 dark:text-white mb-1">No Amenities Found</h3>
-              <p className="text-slate-500 dark:text-slate-400 text-sm">Try adjusting your search query.</p>
+              <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-1">No Amenities Found</h3>
+              <p className="text-slate-500 text-sm uppercase tracking-wider">Adjust your search query</p>
             </div>
           ) : (
             filteredAmenities.map((item: any, index: number) => (
               <div 
                 key={item.id || item._id || index}
-                className="group bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-2 flex flex-col h-full"
+                className="group bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden hover:shadow-xl transition-all duration-300 flex flex-col h-full shadow-sm"
               >
               <div className="relative h-60 overflow-hidden">
                 <img 
@@ -246,12 +246,12 @@ const Facilities: React.FC = () => {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent" />
                 <div className="absolute bottom-6 left-6 flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-md border border-white/20 flex items-center justify-center text-white">
+                  <div className="w-12 h-12 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl flex items-center justify-center text-white shadow-lg">
                     {getFacilityIcon(item.name)}
                   </div>
                   <div>
-                    <h3 className="text-xl font-black text-white leading-tight">{item.name}</h3>
-                    <span className="text-[10px] font-black text-brand-300 uppercase tracking-widest">
+                    <h3 className="text-xl font-bold text-white leading-tight uppercase tracking-tight">{item.name}</h3>
+                    <span className="text-[10px] font-bold text-brand-400 uppercase tracking-widest">
                       {item.status}
                     </span>
                   </div>
@@ -259,25 +259,25 @@ const Facilities: React.FC = () => {
               </div>
               
               <div className="p-6 flex-1 flex flex-col">
-                <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed mb-6 flex-1">
+                <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed mb-6 flex-1">
                   {item.description}
                 </p>
                 
                 <div className="grid grid-cols-2 gap-4 mb-6">
-                  <div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-700">
-                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Capacity</span>
-                    <span className="text-sm font-black text-slate-900 dark:text-white">{item.capacity} guests</span>
+                  <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-100 dark:border-slate-800">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Capacity</span>
+                    <span className="text-sm font-bold text-slate-900 dark:text-white">{item.capacity} Guests</span>
                   </div>
-                  <div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-700">
-                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Rate</span>
-                    <span className="text-sm font-black text-green-600 dark:text-green-400">₹{item.hourlyRate}/hr</span>
+                  <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-100 dark:border-slate-800">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Rate</span>
+                    <span className="text-sm font-bold text-brand-600 dark:text-brand-400">₹{item.hourlyRate}/hr</span>
                   </div>
                 </div>
 
                 <button 
                   onClick={() => setSelectedAmenity(item)}
                   aria-label={`View details for ${item.name}`}
-                  className="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 py-4 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-brand-600 dark:hover:bg-brand-400 hover:text-white transition-colors flex items-center justify-center gap-2 group-hover:shadow-lg"
+                  className="w-full bg-slate-900 dark:bg-slate-800 text-white py-4 rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-brand-600 transition-all flex items-center justify-center gap-2 active:scale-[0.98]"
                 >
                   View Details <ChevronRight size={16} />
                 </button>
@@ -290,20 +290,20 @@ const Facilities: React.FC = () => {
       {activeTab === 1 && (
         <div className="space-y-4">
           {myBookings.length === 0 ? (
-            <div className="text-center py-20 bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 border-dashed">
+            <div className="text-center py-20 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 border-dashed">
               <Ticket size={48} className="mx-auto text-slate-300 mb-4" />
-              <h3 className="text-xl font-black text-slate-900 dark:text-white mb-1">No Bookings Found</h3>
+              <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-1">No Bookings Found</h3>
               <p className="text-slate-500 dark:text-slate-400 text-sm">You haven't requested any facilities yet.</p>
             </div>
           ) : (
             myBookings.map((booking, index) => (
-              <div key={booking.id || booking._id || index} className="bg-white dark:bg-slate-900 p-6 rounded-[2rem] border border-slate-200 dark:border-slate-800 flex flex-col md:flex-row items-center justify-between gap-6 hover:shadow-md transition-shadow">
+              <div key={booking.id || booking._id || index} className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 flex flex-col md:flex-row items-center justify-between gap-6 hover:shadow-md transition-shadow shadow-sm">
                 <div className="flex items-center gap-6 w-full md:w-auto">
                   <div className="w-16 h-16 rounded-2xl bg-brand-50 dark:bg-brand-900/20 flex items-center justify-center text-brand-600 dark:text-brand-400 shrink-0">
                     {getFacilityIcon(booking.amenityId?.name || '')}
                   </div>
                   <div>
-                    <h4 className="text-lg font-black text-slate-900 dark:text-white mb-2">{booking.purpose}</h4>
+                    <h4 className="text-lg font-bold text-slate-900 dark:text-white mb-2 uppercase tracking-tight">{booking.purpose}</h4>
                     <div className="flex flex-wrap gap-4 text-xs font-bold text-slate-400 uppercase tracking-wider">
                       <span className="flex items-center gap-1"><Calendar size={14} /> {new Date(booking.date).toLocaleDateString()}</span>
                       <span className="flex items-center gap-1"><Clock size={14} /> {booking.startTime} - {booking.endTime}</span>
@@ -311,7 +311,7 @@ const Facilities: React.FC = () => {
                   </div>
                 </div>
                 <div className="flex flex-col items-end gap-3">
-                  <span className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest ${getStatusColor(booking.status)}`}>
+                  <span className={`px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest ${getStatusColor(booking.status)}`}>
                     {booking.status}
                   </span>
                   {(booking.status === 'PENDING' || booking.status === 'APPROVED') && (
@@ -327,7 +327,7 @@ const Facilities: React.FC = () => {
                         }
                       }}
                       aria-label={`Cancel booking for ${booking.purpose}`}
-                      className="text-[10px] font-black text-red-500 uppercase tracking-widest hover:text-red-600 transition-colors"
+                      className="text-[10px] font-bold text-rose-500 uppercase tracking-widest hover:text-rose-600 transition-colors"
                     >
                       Cancel Booking
                     </button>
@@ -342,22 +342,22 @@ const Facilities: React.FC = () => {
       {activeTab === 2 && (
         <div className="space-y-4">
           {adminBookings.length === 0 ? (
-            <div className="text-center py-20 bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 border-dashed">
+            <div className="text-center py-20 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 border-dashed">
               <BadgeCheck size={48} className="mx-auto text-emerald-200 mb-4" />
-              <h3 className="text-xl font-black text-slate-900 dark:text-white mb-1">Queue Clear</h3>
+              <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-1">Queue Clear</h3>
               <p className="text-slate-500 dark:text-slate-400 text-sm">No bookings found for the selected filter.</p>
             </div>
           ) : (
             adminBookings.map((booking, index) => (
-              <div key={booking.id || booking._id || index} className="bg-white dark:bg-slate-900 p-6 rounded-[2rem] border border-slate-200 dark:border-slate-800 flex flex-col md:flex-row items-center justify-between gap-6 shadow-sm hover:shadow-md transition-shadow">
+              <div key={booking.id || booking._id || index} className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 flex flex-col md:flex-row items-center justify-between gap-6 shadow-sm hover:shadow-md transition-shadow">
                 <div className="flex items-center gap-6 w-full md:w-auto">
                   <div className="w-20 h-20 rounded-2xl bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center text-amber-600 dark:text-amber-400 shrink-0">
                     {getFacilityIcon(booking.amenityId?.name || '')}
                   </div>
                   <div>
                     <div className="flex items-center gap-3 mb-2">
-                      <h4 className="text-xl font-black text-slate-900 dark:text-white">{booking.purpose}</h4>
-                      <span className="bg-slate-100 dark:bg-slate-800 text-slate-500 px-2 py-1 rounded text-[10px] font-black uppercase tracking-wider">
+                      <h4 className="text-xl font-bold text-slate-900 dark:text-white uppercase tracking-tight">{booking.purpose}</h4>
+                      <span className="bg-slate-100 dark:bg-slate-800 text-slate-500 px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider">
                         Ref: {booking._id.slice(-6)}
                       </span>
                     </div>
@@ -378,7 +378,7 @@ const Facilities: React.FC = () => {
                   </div>
                 </div>
                 <div className="flex gap-3 w-full md:w-auto items-center">
-                  <span className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest mr-4 ${getStatusColor(booking.status)}`}>
+                  <span className={`px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest mr-4 ${getStatusColor(booking.status)}`}>
                     {booking.status}
                   </span>
                   {booking.status === 'PENDING' && (
@@ -386,14 +386,14 @@ const Facilities: React.FC = () => {
                       <button 
                         onClick={() => handleStatusUpdate(booking._id, 'REJECTED')}
                         aria-label={`Reject booking for ${booking.purpose}`}
-                        className="flex-1 md:flex-none border border-red-200 text-red-600 hover:bg-red-50 px-6 py-3 rounded-xl font-black text-xs uppercase tracking-widest transition-colors"
+                        className="flex-1 md:flex-none border border-rose-200 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-widest transition-colors"
                       >
                         Reject
                       </button>
                       <button 
                         onClick={() => handleStatusUpdate(booking._id, 'APPROVED')}
                         aria-label={`Approve booking for ${booking.purpose}`}
-                        className="flex-1 md:flex-none bg-green-600 text-white hover:bg-green-700 px-6 py-3 rounded-xl font-black text-xs uppercase tracking-widest transition-colors shadow-lg shadow-green-600/20"
+                        className="flex-1 md:flex-none bg-emerald-600 text-white hover:bg-emerald-700 px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-widest transition-colors shadow-lg shadow-emerald-600/20"
                       >
                         Approve
                       </button>
@@ -409,21 +409,21 @@ const Facilities: React.FC = () => {
       {/* Amenity Detail Modal */}
       <AnimatePresence>
         {selectedAmenity && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
             <motion.div 
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-white dark:bg-slate-900 w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-[2.5rem] shadow-2xl"
+              className="bg-white dark:bg-slate-900 w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800"
             >
-              <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center sticky top-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md z-10">
+              <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center sticky top-0 bg-white dark:bg-slate-900 z-10">
                 <div className="flex items-center gap-4">
-                  <div className="w-16 h-16 rounded-2xl bg-brand-600 text-white flex items-center justify-center shadow-lg shadow-brand-600/20">
+                  <div className="w-16 h-16 bg-brand-50 dark:bg-brand-900/20 text-brand-600 dark:text-brand-400 rounded-2xl flex items-center justify-center shadow-sm">
                     {getFacilityIcon(selectedAmenity.name)}
                   </div>
                   <div>
-                    <h2 className="text-2xl font-black text-slate-900 dark:text-white leading-none mb-1">{selectedAmenity.name}</h2>
-                    <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-brand-600 dark:text-brand-400">
+                    <h2 className="text-2xl font-bold text-slate-900 dark:text-white leading-none mb-1 uppercase tracking-tight">{selectedAmenity.name}</h2>
+                    <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-slate-400">
                       <MapPin size={12} /> {selectedAmenity.status}
                     </div>
                   </div>
@@ -433,7 +433,7 @@ const Facilities: React.FC = () => {
                     <button 
                       onClick={() => setShowBookingForm(true)}
                       aria-label="Open booking form"
-                      className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-6 py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-brand-600 dark:hover:bg-brand-400 hover:text-white transition-colors"
+                      className="bg-brand-600 text-white px-6 py-3 rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-brand-700 transition-all shadow-lg shadow-brand-500/20 active:scale-95"
                     >
                       Request Slot
                     </button>
@@ -451,34 +451,34 @@ const Facilities: React.FC = () => {
               <div className="p-8 space-y-8">
                 <div>
                   <div className="flex justify-between items-center mb-6">
-                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
                       <CalendarDays size={16} /> Availability Calendar
                     </span>
-                    <div className="flex items-center gap-4 bg-slate-100 dark:bg-slate-800 rounded-xl p-1">
+                    <div className="flex items-center gap-4 bg-slate-50 dark:bg-slate-800 p-1 rounded-xl border border-slate-100 dark:border-slate-700">
                       <button 
                         onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1))} 
                         aria-label="Previous Month"
-                        className="p-2 hover:bg-white dark:hover:bg-slate-700 rounded-lg transition-colors"
+                        className="p-2 hover:bg-white dark:hover:bg-slate-700 rounded-lg text-slate-400 transition-all"
                       >
                         <ChevronRight size={16} className="rotate-180" />
                       </button>
-                      <span className="text-xs font-black uppercase tracking-widest min-w-[100px] text-center">
+                      <span className="text-xs font-bold uppercase tracking-widest min-w-[150px] text-center text-slate-700 dark:text-slate-200">
                         {currentMonth.toLocaleString('default', { month: 'long', year: 'numeric' })}
                       </span>
                       <button 
                         onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1))} 
                         aria-label="Next Month"
-                        className="p-2 hover:bg-white dark:hover:bg-slate-700 rounded-lg transition-colors"
+                        className="p-2 hover:bg-white dark:hover:bg-slate-700 rounded-lg text-slate-400 transition-all"
                       >
                         <ChevronRight size={16} />
                       </button>
                     </div>
                   </div>
 
-                  <div className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-[2rem] border border-slate-200 dark:border-slate-800">
+                  <div className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-3xl border border-slate-100 dark:border-slate-800">
                     <div className="grid grid-cols-7 gap-2 mb-4">
                       {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => (
-                        <div key={d} className="text-center text-[10px] font-black text-slate-400 uppercase tracking-widest">{d}</div>
+                        <div key={d} className="text-center text-[10px] font-bold text-slate-400 uppercase tracking-widest">{d}</div>
                       ))}
                     </div>
                     <div className="grid grid-cols-7 gap-2">
@@ -496,16 +496,16 @@ const Facilities: React.FC = () => {
                             onClick={() => setSelectedDate(isSelected ? null : dateStr)}
                             aria-label={`Select ${dateStr}`}
                             aria-pressed={isSelected}
-                            className={`aspect-square rounded-xl flex flex-col items-center justify-center border-2 transition-all ${
+                            className={`aspect-square flex flex-col items-center justify-center rounded-xl border transition-all ${
                               isSelected
-                                ? 'bg-brand-600 border-brand-600 text-white shadow-lg shadow-brand-600/30 scale-105 z-10'
+                                ? 'bg-brand-600 border-brand-600 text-white shadow-lg shadow-brand-500/20 scale-105 z-10'
                                 : isBooked 
-                                  ? 'bg-red-50 border-red-200 text-red-600 opacity-80 hover:bg-red-100' 
-                                  : 'bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700 text-slate-900 dark:text-white hover:border-brand-300'
+                                  ? 'bg-rose-50 dark:bg-rose-900/20 border-rose-100 dark:border-rose-800/50 text-rose-600 dark:text-rose-400' 
+                                  : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 hover:border-brand-500'
                             }`}
                           >
-                            <span className="text-xs font-black">{day}</span>
-                            {isBooked && <div className={`w-1.5 h-1.5 rounded-full mt-1 ${isSelected ? 'bg-white' : 'bg-red-500'}`} />}
+                            <span className="text-xs font-bold">{day}</span>
+                            {isBooked && <div className={`w-1.5 h-1.5 mt-1 rounded-full ${isSelected ? 'bg-white' : 'bg-rose-500'}`} />}
                           </button>
                         );
                       })}
@@ -514,7 +514,7 @@ const Facilities: React.FC = () => {
                 </div>
 
                 <div>
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-4">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-4">
                     {selectedDate ? `Bookings on ${new Date(selectedDate).toLocaleDateString()}` : 'All Confirmed Bookings'}
                   </span>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -528,8 +528,8 @@ const Facilities: React.FC = () => {
                         b.status === 'APPROVED' &&
                         (!selectedDate || b.date.startsWith(selectedDate))
                       ).map((booking: any, index: number) => (
-                        <div key={booking.id || booking._id || index} className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-200 dark:border-slate-800">
-                          <h5 className="text-sm font-black text-slate-900 dark:text-white mb-2">{booking.purpose}</h5>
+                        <div key={booking.id || booking._id || index} className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-100 dark:border-slate-800">
+                          <h5 className="text-sm font-bold text-slate-900 dark:text-white mb-2 uppercase tracking-tight">{booking.purpose}</h5>
                           <div className="flex gap-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
                             <span className="flex items-center gap-1"><Calendar size={12} /> {new Date(booking.date).toLocaleDateString()}</span>
                             <span className="flex items-center gap-1"><Clock size={12} /> {booking.startTime} - {booking.endTime}</span>
@@ -537,16 +537,16 @@ const Facilities: React.FC = () => {
                         </div>
                       ))
                     ) : (
-                      <div className="col-span-2 text-center py-8 text-slate-400 text-xs font-medium italic">
-                        {selectedDate ? 'No bookings for this date.' : 'No confirmed bookings for this facility.'}
+                      <div className="col-span-2 text-center py-8 text-slate-400 text-xs font-bold uppercase tracking-widest italic">
+                        {selectedDate ? 'No bookings for this date' : 'No confirmed bookings'}
                       </div>
                     )}
                   </div>
                 </div>
 
-                <div className="bg-brand-50 dark:bg-brand-900/10 p-6 rounded-[2rem] border border-brand-100 dark:border-brand-900/20">
-                  <h4 className="text-sm font-black text-brand-700 dark:text-brand-400 uppercase tracking-widest mb-2">Usage Policies</h4>
-                  <p className="text-xs font-medium text-brand-600 dark:text-brand-300 leading-relaxed">
+                <div className="bg-brand-50 dark:bg-brand-900/10 p-6 rounded-3xl border border-brand-100 dark:border-brand-800/50">
+                  <h4 className="text-sm font-bold text-brand-600 dark:text-brand-400 uppercase tracking-widest mb-2">Usage Policies</h4>
+                  <p className="text-xs font-medium text-slate-600 dark:text-slate-400 leading-relaxed uppercase tracking-wider">
                     Bookings must be made at least 48 hours in advance. Cancellation required 24 hours prior for a full deposit refund. 
                     Please ensure the area is cleaned after the event.
                   </p>
@@ -560,22 +560,22 @@ const Facilities: React.FC = () => {
       {/* Booking Form Overlay */}
       <AnimatePresence>
         {showBookingForm && (
-          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-sm">
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 20 }}
-              className="bg-white dark:bg-slate-900 w-full max-w-lg rounded-[2.5rem] shadow-2xl overflow-hidden"
+              className="bg-white dark:bg-slate-900 w-full max-w-lg rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden"
             >
-              <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-800/50">
+              <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-white dark:bg-slate-900">
                 <div>
-                  <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Reserve Slot</h2>
-                  <p className="text-[10px] font-black text-brand-600 uppercase tracking-widest">Fill event details</p>
+                  <h2 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight uppercase">Reserve Slot</h2>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Fill event details</p>
                 </div>
                 <button 
                   onClick={() => setShowBookingForm(false)} 
                   aria-label="Close booking form"
-                  className="p-2 text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl transition-colors"
+                  className="p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors"
                 >
                   <X size={24} />
                 </button>
@@ -583,25 +583,25 @@ const Facilities: React.FC = () => {
               
               <form onSubmit={handleBookingSubmit} className="p-8 space-y-6">
                 <div>
-                  <label htmlFor="facility-select" className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block ml-1">Select Facility</label>
+                  <label htmlFor="facility-select" className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block ml-1">Select Facility</label>
                   <select
                     id="facility-select"
                     value={formData.amenityId || selectedAmenity?._id || ''}
                     onChange={(e) => setFormData({...formData, amenityId: e.target.value})}
                     required
-                    className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-2xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-brand-500 outline-none"
+                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white px-4 py-3 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none transition-all appearance-none"
                   >
                     <option value="" disabled>Choose an amenity</option>
                     {amenities.map(a => (
-                      <option key={a._id} value={a._id}>{a.name}</option>
+                      <option key={a._id} value={a._id}>{a.name.toUpperCase()}</option>
                     ))}
                   </select>
                 </div>
 
                 <div>
-                  <label htmlFor="booking-purpose" className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block ml-1">Purpose</label>
+                  <label htmlFor="booking-purpose" className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block ml-1">Purpose</label>
                   <div className="relative">
-                    <Star size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                    <Star size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-brand-500" />
                     <input 
                       id="booking-purpose"
                       type="text"
@@ -609,38 +609,38 @@ const Facilities: React.FC = () => {
                       required
                       value={formData.purpose}
                       onChange={(e) => setFormData({...formData, purpose: e.target.value})}
-                      className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-2xl pl-12 pr-4 py-3 text-sm font-bold focus:ring-2 focus:ring-brand-500 outline-none"
+                      className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white pl-12 pr-4 py-3 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none transition-all"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label htmlFor="booking-date" className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block ml-1">Date</label>
+                    <label htmlFor="booking-date" className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block ml-1">Date</label>
                     <input 
                       id="booking-date"
                       type="date"
                       required
                       value={formData.date}
                       onChange={(e) => setFormData({...formData, date: e.target.value})}
-                      className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-2xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-brand-500 outline-none"
+                      className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white px-4 py-3 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none transition-all"
                     />
                   </div>
                   <div>
-                    <label htmlFor="booking-time" className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block ml-1">Start Time</label>
+                    <label htmlFor="booking-time" className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block ml-1">Start Time</label>
                     <input 
                       id="booking-time"
                       type="time"
                       required
                       value={formData.startTime}
                       onChange={(e) => setFormData({...formData, startTime: e.target.value})}
-                      className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-2xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-brand-500 outline-none"
+                      className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white px-4 py-3 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none transition-all"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label htmlFor="booking-duration" className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block ml-1">Duration (Hrs)</label>
+                  <label htmlFor="booking-duration" className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block ml-1">Duration (Hrs)</label>
                   <input 
                     id="booking-duration"
                     type="number"
@@ -649,14 +649,14 @@ const Facilities: React.FC = () => {
                     required
                     value={formData.duration}
                     onChange={(e) => setFormData({...formData, duration: parseInt(e.target.value)})}
-                    className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-2xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-brand-500 outline-none"
+                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white px-4 py-3 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none transition-all"
                   />
                 </div>
 
                 <button 
                   type="submit"
                   aria-label="Submit Booking Request"
-                  className="w-full bg-brand-600 text-white py-4 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-brand-700 transition-colors shadow-xl shadow-brand-600/20 active:scale-95 transform duration-100 flex items-center justify-center gap-2"
+                  className="w-full bg-brand-600 text-white py-4 rounded-2xl font-bold text-sm uppercase tracking-widest hover:bg-brand-700 transition-all shadow-lg shadow-brand-500/20 active:scale-95 flex items-center justify-center gap-2"
                 >
                   <CheckCircle2 size={18} />
                   Send Booking Request

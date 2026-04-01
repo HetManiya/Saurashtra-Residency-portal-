@@ -78,20 +78,20 @@ const Expenses: React.FC = () => {
   const isAdmin = user?.role === 'ADMIN' || user?.role === 'COMMITTEE';
 
   return (
-    <div className="pb-12 animate-fade-in crt-screen">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-8 pb-8 border-b-4 border-cyan-500/30">
+    <div className="pb-12 animate-fade-in">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-8 pb-8 border-b border-slate-200 dark:border-slate-800">
         <div>
-          <h1 className="text-4xl font-black text-cyan-400 tracking-tighter glitch-text mb-2" data-text={t('saurashtra') + ' ' + t('treasury')}>
-            {t('saurashtra')} <span className="text-magenta-500">{t('treasury')}</span>
+          <h1 className="text-4xl font-bold text-slate-900 dark:text-white tracking-tight mb-2">
+            Society <span className="text-brand-600">Expenses</span>
           </h1>
-          <p className="text-cyan-700 font-bold font-mono">
-            {`> ${t('exp_desc')}`}
+          <p className="text-slate-500 font-medium">
+            Manage and track society expenses
           </p>
         </div>
         <div className="flex gap-3">
           <button 
             onClick={handleExport}
-            className="flex items-center gap-2 bg-black border-2 border-cyan-500 text-cyan-400 px-6 py-3 font-black text-[10px] uppercase tracking-widest hover:bg-cyan-400 hover:text-black transition-all shadow-[4px_4px_0px_#ff00ff]"
+            className="flex items-center gap-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 px-6 py-3 rounded-2xl font-bold text-[10px] tracking-wider hover:bg-slate-50 dark:hover:bg-slate-700 transition-all shadow-sm"
           >
             <Download size={16} />
             {t('export')}
@@ -99,7 +99,7 @@ const Expenses: React.FC = () => {
           {isAdmin && (
             <button 
               onClick={() => setShowAddModal(true)}
-              className="flex items-center gap-2 bg-magenta-500 text-white border-2 border-black px-6 py-3 font-black text-[10px] uppercase tracking-widest hover:bg-black hover:text-magenta-500 hover:border-magenta-500 transition-all shadow-[4px_4px_0px_#00ffff] active:scale-95 transform duration-100"
+              className="flex items-center gap-2 bg-brand-600 text-white px-6 py-3 rounded-2xl font-bold text-[10px] tracking-wider hover:bg-brand-700 transition-all shadow-lg shadow-brand-600/20 active:scale-95 transform duration-100"
             >
               <Plus size={18} strokeWidth={3} />
               {t('exp_log_new')}
@@ -110,24 +110,24 @@ const Expenses: React.FC = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
         <div className="lg:col-span-1 space-y-6">
-          <div className="bg-black border-4 border-cyan-500 p-8 relative overflow-hidden shadow-[8px_8px_0px_#ff00ff]">
-            <div className="absolute -top-10 -right-10 w-40 h-40 bg-magenta-500 rounded-full opacity-10 blur-3xl" />
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-8 rounded-3xl relative overflow-hidden shadow-sm">
+            <div className="absolute -top-10 -right-10 w-40 h-40 bg-brand-500/5 rounded-full blur-3xl" />
             <div className="relative z-10">
-              <span className="text-[10px] font-black uppercase tracking-widest text-cyan-700 block mb-2">
-                {`> ${t('total_exp')}`}
+              <span className="text-[10px] font-bold tracking-wider text-slate-400 block mb-2">
+                Total Expenses
               </span>
-              <h3 className="text-4xl font-black tracking-tighter text-cyan-400 mb-8">
+              <h3 className="text-4xl font-bold tracking-tight text-slate-900 dark:text-white mb-8">
                 ₹{totalExpense.toLocaleString()}
               </h3>
-              <div className="h-1 bg-cyan-900/30 mb-6" />
+              <div className="h-px bg-slate-100 dark:bg-slate-800 mb-6" />
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
-                  <span className="text-[10px] font-black uppercase tracking-widest text-cyan-700">{t('active_records')}</span>
-                  <span className="text-sm font-black text-cyan-400">{expenses.length}</span>
+                  <span className="text-[10px] font-bold tracking-wider text-slate-400">Total Records</span>
+                  <span className="text-sm font-bold text-slate-900 dark:text-white">{expenses.length}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-[10px] font-black uppercase tracking-widest text-cyan-700">{t('awaiting_appr')}</span>
-                  <span className="text-sm font-black text-magenta-500 animate-pulse">
+                  <span className="text-[10px] font-bold tracking-wider text-slate-400">Pending Approval</span>
+                  <span className="text-sm font-bold text-brand-600">
                     ₹{expenses.filter(e => e.status === 'Pending').reduce((s, e) => s + e.amount, 0).toLocaleString()}
                   </span>
                 </div>
@@ -135,17 +135,17 @@ const Expenses: React.FC = () => {
             </div>
           </div>
 
-          <div className="bg-black p-6 border-4 border-cyan-500/30 shadow-[6px_6px_0px_#ff00ff]">
-            <div className="flex items-center gap-2 text-[10px] font-black text-cyan-700 uppercase tracking-widest mb-4">
-              <Filter size={14} /> {t('exp_category')}
+          <div className="bg-white dark:bg-slate-900 p-6 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-sm">
+            <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 tracking-wider mb-4">
+              <Filter size={14} /> Categories
             </div>
             <div className="space-y-2">
               <button 
                 onClick={() => setFilterType('ALL')}
-                className={`w-full text-left px-4 py-3 border-2 transition-all text-[10px] font-black uppercase tracking-widest ${
+                className={`w-full text-left px-4 py-3 rounded-2xl transition-all text-[10px] font-bold tracking-wider ${
                   filterType === 'ALL' 
-                    ? 'bg-cyan-400 text-black border-black shadow-[2px_2px_0px_#ff00ff]' 
-                    : 'text-cyan-700 border-transparent hover:border-cyan-500 hover:text-cyan-400'
+                    ? 'bg-brand-50 dark:bg-brand-900/20 text-brand-600 border border-brand-200 dark:border-brand-800' 
+                    : 'text-slate-500 border border-transparent hover:bg-slate-50 dark:hover:bg-slate-800'
                 }`}
               >
                 All Categories
@@ -154,10 +154,10 @@ const Expenses: React.FC = () => {
                 <button 
                   key={cat.id}
                   onClick={() => setFilterType(cat.id)}
-                  className={`w-full text-left px-4 py-3 border-2 transition-all text-[10px] font-black uppercase tracking-widest ${
+                  className={`w-full text-left px-4 py-3 rounded-2xl transition-all text-[10px] font-bold tracking-wider ${
                     filterType === cat.id 
-                      ? 'bg-cyan-400 text-black border-black shadow-[2px_2px_0px_#ff00ff]' 
-                      : 'text-cyan-700 border-transparent hover:border-cyan-500 hover:text-cyan-400'
+                      ? 'bg-brand-50 dark:bg-brand-900/20 text-brand-600 border border-brand-200 dark:border-brand-800' 
+                      : 'text-slate-500 border border-transparent hover:bg-slate-50 dark:hover:bg-slate-800'
                   }`}
                 >
                   {cat.label}
@@ -168,45 +168,45 @@ const Expenses: React.FC = () => {
         </div>
 
         <div className="lg:col-span-3">
-          <div className="bg-black border-4 border-cyan-500/30 overflow-hidden shadow-[8px_8px_0px_#00ffff]">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden shadow-sm">
             {loading ? (
               <div className="py-20 text-center flex flex-col items-center justify-center">
-                <Loader2 size={40} className="animate-spin text-cyan-400 mb-4" />
-                <span className="text-[10px] font-black text-cyan-700 uppercase tracking-widest">
-                  Accessing Ledger...
+                <Loader2 size={40} className="animate-spin text-brand-600 mb-4" />
+                <span className="text-[10px] font-bold text-slate-400 tracking-wider">
+                  Loading expenses...
                 </span>
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full">
-                  <thead className="bg-black border-b-4 border-cyan-500/30">
+                  <thead className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800">
                     <tr>
-                      <th className="px-8 py-6 text-left text-[10px] font-black text-cyan-700 uppercase tracking-widest">Payee</th>
-                      <th className="px-8 py-6 text-left text-[10px] font-black text-cyan-700 uppercase tracking-widest">Allocation</th>
-                      <th className="px-8 py-6 text-left text-[10px] font-black text-cyan-700 uppercase tracking-widest">{t('amount')}</th>
-                      <th className="px-8 py-6 text-left text-[10px] font-black text-cyan-700 uppercase tracking-widest">Workflow</th>
+                      <th className="px-8 py-6 text-left text-[10px] font-bold text-slate-400 tracking-wider">Payee</th>
+                      <th className="px-8 py-6 text-left text-[10px] font-bold text-slate-400 tracking-wider">Allocation</th>
+                      <th className="px-8 py-6 text-left text-[10px] font-bold text-slate-400 tracking-wider">Amount</th>
+                      <th className="px-8 py-6 text-left text-[10px] font-bold text-slate-400 tracking-wider">Status</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y-2 divide-cyan-900/10">
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                     {expenses.map((exp) => (
-                      <tr key={exp.id || exp._id} className="hover:bg-cyan-900/10 transition-colors">
+                      <tr key={exp.id || exp._id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
                         <td className="px-8 py-6">
-                          <div className="text-sm font-black text-cyan-400 mb-1">{exp.payeeName}</div>
-                          <div className="text-[10px] font-bold text-cyan-700 uppercase tracking-wider font-mono">{`> ${exp.type}`}</div>
+                          <div className="text-sm font-bold text-slate-900 dark:text-white mb-1">{exp.payeeName}</div>
+                          <div className="text-[10px] font-semibold text-slate-400 tracking-wider">{exp.type}</div>
                         </td>
                         <td className="px-8 py-6">
-                          <span className="text-[10px] font-black text-cyan-700 uppercase tracking-widest">
+                          <span className="text-[10px] font-bold text-slate-500 tracking-wider">
                             {exp.details?.buildingName ? `Wing ${exp.details.buildingName}` : 'Society Wide'}
                           </span>
                         </td>
                         <td className="px-8 py-6">
-                          <span className="text-lg font-black text-cyan-400">₹{exp.amount.toLocaleString()}</span>
+                          <span className="text-lg font-bold text-slate-900 dark:text-white">₹{exp.amount.toLocaleString()}</span>
                         </td>
                         <td className="px-8 py-6">
-                          <span className={`px-3 py-1 border-2 text-[10px] font-black uppercase tracking-widest ${
+                          <span className={`px-3 py-1 rounded-full text-[10px] font-bold tracking-wider border ${
                             exp.status === 'Paid' 
-                              ? 'bg-cyan-400 text-black border-black shadow-[2px_2px_0px_#ff00ff]' 
-                              : 'bg-magenta-500 text-white border-black shadow-[2px_2px_0px_#00ffff]'
+                              ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800' 
+                              : 'bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-800'
                           }`}>
                             {exp.status}
                           </span>
@@ -216,8 +216,8 @@ const Expenses: React.FC = () => {
                     {expenses.length === 0 && (
                       <tr>
                         <td colSpan={4} className="py-20 text-center">
-                          <span className="text-[10px] font-black text-cyan-700 uppercase tracking-widest">
-                            No payout records found
+                          <span className="text-[10px] font-bold text-slate-400 tracking-wider">
+                            No expense records found
                           </span>
                         </td>
                       </tr>
@@ -233,62 +233,63 @@ const Expenses: React.FC = () => {
       {/* Add Expense Modal */}
       <AnimatePresence>
         {showAddModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm crt-screen">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setShowAddModal(false)} />
             <motion.div 
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
-              className="bg-black w-full max-w-lg border-4 border-magenta-500 shadow-[12px_12px_0px_#00ffff] overflow-hidden"
+              className="bg-white dark:bg-slate-900 w-full max-w-lg rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden relative z-10"
             >
-              <div className="p-6 border-b-4 border-magenta-500 flex justify-between items-center bg-black">
-                <h2 className="text-2xl font-black text-cyan-400 tracking-tight glitch-text" data-text="Log Payout">Log Payout</h2>
-                <button onClick={() => setShowAddModal(false)} className="p-2 border-2 border-magenta-500 text-magenta-500 hover:bg-magenta-500 hover:text-white transition-all">
-                  <X size={24} />
+              <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
+                <h2 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Add Expense</h2>
+                <button onClick={() => setShowAddModal(false)} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors">
+                  <X size={24} className="text-slate-400" />
                 </button>
               </div>
               
               <form onSubmit={handleAddExpense} className="p-8 space-y-6">
                 <div>
-                  <label className="text-[10px] font-black text-cyan-700 uppercase tracking-widest mb-2 block ml-1">{`> Expense Category`}</label>
+                  <label className="text-[10px] font-bold text-slate-400 tracking-wider mb-2 block ml-1">Expense Category</label>
                   <select
                     value={formData.type}
                     onChange={(e) => setFormData({...formData, type: e.target.value})}
-                    className="w-full bg-black border-2 border-cyan-500 text-cyan-400 px-4 py-3 text-sm font-black focus:border-magenta-500 outline-none appearance-none"
+                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white px-4 py-3 rounded-2xl text-sm font-bold focus:border-brand-500 outline-none appearance-none"
                   >
                     {EXPENSE_CATEGORIES.map(cat => <option key={cat.id} value={cat.id}>{cat.label}</option>)}
                   </select>
                 </div>
 
                 <div>
-                  <label className="text-[10px] font-black text-cyan-700 uppercase tracking-widest mb-2 block ml-1">{`> Payee / Vendor Name`}</label>
+                  <label className="text-[10px] font-bold text-slate-400 tracking-wider mb-2 block ml-1">Payee / Vendor Name</label>
                   <input 
                     type="text"
                     placeholder="e.g. Surat Safai Agency"
                     required
                     value={formData.payeeName}
                     onChange={(e) => setFormData({...formData, payeeName: e.target.value})}
-                    className="w-full bg-black border-2 border-cyan-500 text-cyan-400 px-4 py-3 text-sm font-black focus:border-magenta-500 outline-none placeholder:text-cyan-900"
+                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white px-4 py-3 rounded-2xl text-sm font-bold focus:border-brand-500 outline-none placeholder:text-slate-400"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="text-[10px] font-black text-cyan-700 uppercase tracking-widest mb-2 block ml-1">{`> Amount (₹)`}</label>
+                    <label className="text-[10px] font-bold text-slate-400 tracking-wider mb-2 block ml-1">Amount (₹)</label>
                     <input 
                       type="number"
                       placeholder="0.00"
                       required
                       value={formData.amount}
                       onChange={(e) => setFormData({...formData, amount: e.target.value})}
-                      className="w-full bg-black border-2 border-cyan-500 text-cyan-400 px-4 py-3 text-sm font-black focus:border-magenta-500 outline-none placeholder:text-cyan-900"
+                      className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white px-4 py-3 rounded-2xl text-sm font-bold focus:border-brand-500 outline-none placeholder:text-slate-400"
                     />
                   </div>
                   <div>
-                    <label className="text-[10px] font-black text-cyan-700 uppercase tracking-widest mb-2 block ml-1">{`> Wing Allocation`}</label>
+                    <label className="text-[10px] font-bold text-slate-400 tracking-wider mb-2 block ml-1">Wing Allocation</label>
                     <select
                       value={formData.details.buildingName}
                       onChange={(e) => setFormData({...formData, details: {...formData.details, buildingName: e.target.value}})}
-                      className="w-full bg-black border-2 border-cyan-500 text-cyan-400 px-4 py-3 text-sm font-black focus:border-magenta-500 outline-none appearance-none"
+                      className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white px-4 py-3 rounded-2xl text-sm font-bold focus:border-brand-500 outline-none appearance-none"
                     >
                       <option value="">Society Wide</option>
                       {Array.from({length: 24}, (_, i) => `A-${i+1}`).map(w => <option key={w} value={w}>Wing {w}</option>)}
@@ -299,10 +300,10 @@ const Expenses: React.FC = () => {
                 <button 
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full bg-magenta-500 text-white border-2 border-black py-4 font-black text-[11px] uppercase tracking-widest hover:bg-black hover:text-magenta-500 hover:border-magenta-500 transition-all shadow-[8px_8px_0px_#00ffff] active:scale-95 transform duration-100 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                  className="w-full bg-brand-600 text-white py-4 rounded-2xl font-bold text-[11px] tracking-wider hover:bg-brand-700 transition-all shadow-lg shadow-brand-600/20 active:scale-95 transform duration-100 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
                 >
                   {isSubmitting ? <Loader2 size={18} className="animate-spin" /> : <ShieldCheck size={18} />}
-                  Confirm & Log Payout
+                  Add Expense
                 </button>
               </form>
             </motion.div>

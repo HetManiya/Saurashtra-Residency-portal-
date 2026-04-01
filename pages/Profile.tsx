@@ -69,16 +69,16 @@ const Profile: React.FC = () => {
     <div className="max-w-7xl mx-auto pb-12 animate-fade-in">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-8 pb-6 border-b border-slate-200 dark:border-slate-800">
         <div>
-          <h1 className="text-4xl font-black tracking-tighter text-slate-900 dark:text-white mb-2">
-            My <span className="text-brand-600">Identity</span>
+          <h1 className="text-4xl font-bold tracking-tight text-slate-900 dark:text-white mb-2">
+            My <span className="text-brand-600">Profile</span>
           </h1>
           <p className="text-slate-500 dark:text-slate-400 font-medium">
-            Manage your residency credentials and payment history
+            Manage your account settings and payment history
           </p>
         </div>
         <div className="flex items-center gap-2 px-3 py-1 bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-400 rounded-full">
           <BadgeCheck size={14} />
-          <span className="text-[10px] font-black uppercase tracking-widest">Verified Member</span>
+          <span className="text-[10px] font-bold tracking-wider">Verified Member</span>
         </div>
       </div>
 
@@ -97,10 +97,10 @@ const Profile: React.FC = () => {
               </div>
             </div>
             
-            <h2 className="text-2xl font-black text-slate-900 dark:text-white mb-1 tracking-tight">
+            <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-1 tracking-tight">
               {user.name}
             </h2>
-            <span className="text-[10px] font-black text-brand-600 dark:text-brand-400 uppercase tracking-widest block mb-6">
+            <span className="text-[10px] font-bold text-brand-600 dark:text-brand-400 tracking-wider block mb-6">
               {user.role}
             </span>
             
@@ -112,7 +112,7 @@ const Profile: React.FC = () => {
                   <Mail size={18} />
                 </div>
                 <div className="min-w-0">
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">Email Address</span>
+                  <span className="text-[10px] font-bold text-slate-400 tracking-wider block">Email Address</span>
                   <span className="text-sm font-bold text-slate-900 dark:text-white truncate block">{user.email}</span>
                 </div>
               </div>
@@ -122,7 +122,7 @@ const Profile: React.FC = () => {
                   <Home size={18} />
                 </div>
                 <div>
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">Property Unit</span>
+                  <span className="text-[10px] font-bold text-slate-400 tracking-wider block">Property Unit</span>
                   <span className="text-sm font-bold text-slate-900 dark:text-white">{user.flatId}</span>
                 </div>
               </div>
@@ -138,8 +138,8 @@ const Profile: React.FC = () => {
                   <Lock size={24} />
                 </div>
                 <div>
-                  <h3 className="text-lg font-black leading-tight">Security Center</h3>
-                  <span className="text-[10px] font-black text-brand-400 uppercase tracking-widest">Update Credentials</span>
+                  <h3 className="text-lg font-bold leading-tight">Security Settings</h3>
+                  <span className="text-[10px] font-bold text-brand-400 tracking-wider">Update Credentials</span>
                 </div>
               </div>
 
@@ -163,7 +163,7 @@ const Profile: React.FC = () => {
 
               <form onSubmit={handlePasswordChange} className="space-y-4">
                 <div>
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block ml-1">Current Password</label>
+                  <label className="text-[10px] font-bold text-slate-400 tracking-wider mb-2 block ml-1">Current Password</label>
                   <div className="relative">
                     <input 
                       type="password"
@@ -178,7 +178,7 @@ const Profile: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block ml-1">New Password</label>
+                  <label className="text-[10px] font-bold text-slate-400 tracking-wider mb-2 block ml-1">New Password</label>
                   <div className="relative">
                     <input 
                       type="password"
@@ -193,7 +193,7 @@ const Profile: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block ml-1">Confirm New Password</label>
+                  <label className="text-[10px] font-bold text-slate-400 tracking-wider mb-2 block ml-1">Confirm New Password</label>
                   <div className="relative">
                     <input 
                       type="password"
@@ -211,7 +211,7 @@ const Profile: React.FC = () => {
                   type="submit"
                   disabled={isUpdating}
                   aria-label={isUpdating ? 'Updating password' : 'Update Password'}
-                  className="w-full bg-white text-slate-900 py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-brand-50 transition-colors flex items-center justify-center gap-2 mt-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                  className="w-full bg-white text-slate-900 py-3 rounded-xl font-bold text-xs tracking-wider hover:bg-brand-50 transition-colors flex items-center justify-center gap-2 mt-2 disabled:opacity-70 disabled:cursor-not-allowed"
                 >
                   {isUpdating ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
                   {isUpdating ? 'Updating...' : 'Update Password'}
@@ -229,13 +229,13 @@ const Profile: React.FC = () => {
                 <div className="w-12 h-12 rounded-2xl bg-brand-100 dark:bg-brand-900/30 flex items-center justify-center text-brand-600 dark:text-brand-400">
                   <CreditCard size={24} />
                 </div>
-                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Lifetime Contributed</span>
+                <span className="text-[10px] font-bold text-slate-400 tracking-wider">Lifetime Contributed</span>
               </div>
               <div>
-                <h3 className="text-4xl font-black tracking-tighter text-slate-900 dark:text-white mb-1">
+                <h3 className="text-4xl font-bold tracking-tight text-slate-900 dark:text-white mb-1">
                   ₹{totalPaid.toLocaleString()}
                 </h3>
-                <span className="text-[10px] font-black text-green-500 uppercase tracking-widest">
+                <span className="text-[10px] font-bold text-green-500 tracking-wider">
                   Status: Regular Payer
                 </span>
               </div>
@@ -246,13 +246,13 @@ const Profile: React.FC = () => {
                 <div className="w-12 h-12 rounded-2xl bg-red-100 dark:bg-red-900/30 flex items-center justify-center text-red-600 dark:text-red-400">
                   <AlertCircle size={24} />
                 </div>
-                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Pending Records</span>
+                <span className="text-[10px] font-bold text-slate-400 tracking-wider">Pending Records</span>
               </div>
               <div>
-                <h3 className="text-4xl font-black tracking-tighter text-slate-900 dark:text-white mb-1">
+                <h3 className="text-4xl font-bold tracking-tight text-slate-900 dark:text-white mb-1">
                   {unpaidCount}
                 </h3>
-                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                <span className="text-[10px] font-bold text-slate-400 tracking-wider">
                   Current Maintenance Cycle
                 </span>
               </div>
@@ -265,8 +265,8 @@ const Profile: React.FC = () => {
                 <History size={20} />
               </div>
               <div>
-                <h3 className="text-lg font-black text-slate-900 dark:text-white leading-tight">Maintenance Ledger</h3>
-                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Historical Payment Tracking</span>
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white leading-tight">Maintenance Ledger</h3>
+                <span className="text-[10px] font-bold text-slate-400 tracking-wider">Historical Payment Tracking</span>
               </div>
             </div>
 
@@ -274,10 +274,10 @@ const Profile: React.FC = () => {
               <table className="w-full">
                 <thead className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800">
                   <tr>
-                    <th className="px-6 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Period</th>
-                    <th className="px-6 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Amount</th>
-                    <th className="px-6 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</th>
-                    <th className="px-6 py-4 text-right text-[10px] font-black text-slate-400 uppercase tracking-widest">Action</th>
+                    <th className="px-6 py-4 text-left text-[10px] font-bold text-slate-400 tracking-wider">Period</th>
+                    <th className="px-6 py-4 text-left text-[10px] font-bold text-slate-400 tracking-wider">Amount</th>
+                    <th className="px-6 py-4 text-left text-[10px] font-bold text-slate-400 tracking-wider">Status</th>
+                    <th className="px-6 py-4 text-right text-[10px] font-bold text-slate-400 tracking-wider">Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -285,7 +285,7 @@ const Profile: React.FC = () => {
                     <tr>
                       <td colSpan={4} className="py-12 text-center">
                         <Loader2 size={24} className="animate-spin text-brand-600 mx-auto mb-2" />
-                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Fetching Ledger...</span>
+                        <span className="text-[10px] font-bold text-slate-400 tracking-wider">Fetching Ledger...</span>
                       </td>
                     </tr>
                   ) : maintenance.length === 0 ? (
@@ -306,9 +306,9 @@ const Profile: React.FC = () => {
                               <Calendar size={14} />
                             </div>
                             <div>
-                              <div className="text-sm font-black text-slate-900 dark:text-white">{record.month} {record.year}</div>
+                              <div className="text-sm font-bold text-slate-900 dark:text-white">{record.month} {record.year}</div>
                               {record.paidDate && (
-                                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                                <div className="text-[10px] font-semibold text-slate-400 tracking-wider">
                                   Paid on {new Date(record.paidDate).toLocaleDateString()}
                                 </div>
                               )}
@@ -316,10 +316,10 @@ const Profile: React.FC = () => {
                           </div>
                         </td>
                         <td className="px-6 py-4">
-                          <span className="text-sm font-black text-slate-900 dark:text-white">₹{record.amount}</span>
+                          <span className="text-sm font-bold text-slate-900 dark:text-white">₹{record.amount}</span>
                         </td>
                         <td className="px-6 py-4">
-                          <span className={`px-2 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest ${
+                          <span className={`px-2 py-1 rounded-lg text-[10px] font-bold tracking-wider ${
                             record.status === PaymentStatus.PAID 
                               ? 'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400' 
                               : 'bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400'
@@ -338,7 +338,7 @@ const Profile: React.FC = () => {
                           ) : (
                             <button 
                               aria-label={`Pay maintenance for ${record.month} ${record.year}`}
-                              className="px-4 py-2 bg-brand-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-brand-700 transition-colors shadow-lg shadow-brand-600/20 active:scale-95 transform duration-100"
+                              className="px-4 py-2 bg-brand-600 text-white rounded-xl text-[10px] font-bold tracking-wider hover:bg-brand-700 transition-colors shadow-lg shadow-brand-600/20 active:scale-95 transform duration-100"
                             >
                               Pay Now
                             </button>

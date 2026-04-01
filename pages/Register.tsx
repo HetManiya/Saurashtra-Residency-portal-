@@ -59,35 +59,35 @@ const Register: React.FC = () => {
   };
 
   const roleCategories = [
-    { 
-      id: 'RESIDENT', 
-      label: 'Flat Resident', 
-      icon: Home, 
-      desc: 'Owner or tenant living in the society',
-      positions: ['Resident']
-    },
-    { 
-      id: 'COMMITTEE', 
-      label: 'Society Committee', 
-      icon: Shield, 
-      desc: 'Elected members managing the society',
-      positions: ['President', 'Secretary', 'Treasurer']
-    },
+      { 
+        id: 'RESIDENT', 
+        label: 'Resident', 
+        icon: Home, 
+        desc: 'Flat owner or tenant',
+        positions: ['Resident']
+      },
+      { 
+        id: 'COMMITTEE', 
+        label: 'Committee Member', 
+        icon: Shield, 
+        desc: 'Society management team',
+        positions: ['President', 'Secretary', 'Treasurer']
+      },
   ];
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-black relative overflow-hidden p-4 crt-screen">
+    <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950 relative overflow-hidden p-4">
       {/* Decorative Background Elements */}
-      <div className="absolute top-0 left-0 w-[600px] h-[600px] bg-magenta-500/5 rounded-full blur-[120px] -ml-24 -mt-24" />
-      <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-cyan-500/5 rounded-full blur-[120px] -mr-24 -mb-24" />
+      <div className="absolute top-0 left-0 w-[600px] h-[600px] bg-brand-500/5 rounded-full blur-[120px] -ml-24 -mt-24" />
+      <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-brand-600/5 rounded-full blur-[120px] -mr-24 -mb-24" />
 
       <div className="relative z-10 w-full max-w-lg animate-fade-in">
-        <div className="bg-black p-8 md:p-10 border-4 border-cyan-500 shadow-[12px_12px_0px_#ff00ff]">
+        <div className="bg-white dark:bg-slate-900 p-8 md:p-10 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl shadow-slate-200 dark:shadow-none">
           
           <div className="flex items-center justify-between mb-8">
             <button 
               onClick={() => step > 1 ? setStep(step - 1) : navigate('/login')}
-              className="w-10 h-10 bg-black border-2 border-cyan-500 flex items-center justify-center text-cyan-400 hover:bg-cyan-400 hover:text-black transition-all"
+              className="w-10 h-10 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl flex items-center justify-center text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all"
             >
               <ChevronLeft size={20} />
             </button>
@@ -95,8 +95,8 @@ const Register: React.FC = () => {
               {[1, 2, 3].map(s => (
                 <div 
                   key={s} 
-                  className={`h-2 w-12 transition-all duration-500 border border-cyan-900 ${
-                    step >= s ? 'bg-magenta-500 shadow-[0_0_8px_#ff00ff]' : 'bg-black'
+                  className={`h-1.5 w-12 transition-all duration-500 rounded-full ${
+                    step >= s ? 'bg-brand-600 shadow-sm' : 'bg-slate-100 dark:bg-slate-800'
                   }`} 
                 />
               ))}
@@ -104,16 +104,16 @@ const Register: React.FC = () => {
           </div>
 
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-black tracking-tighter text-cyan-400 mb-1 glitch-text" data-text="Saurashtra Membership">
-              Saurashtra <span className="text-magenta-500">Membership</span>
+            <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white mb-1">
+              Create <span className="text-brand-600">Account</span>
             </h1>
-            <p className="text-[10px] font-black text-cyan-700 uppercase tracking-widest font-mono">
-              {`> INITIALIZING_RESIDENT_UPLINK_v1.0`}
+            <p className="text-[10px] font-semibold text-slate-400 tracking-wider">
+              Join your society portal
             </p>
           </div>
 
           {error && (
-            <div className="mb-6 p-4 bg-magenta-900/20 border-2 border-magenta-500 flex items-center gap-3 text-magenta-500 font-bold text-sm">
+            <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl flex items-center gap-3 text-red-600 font-bold text-sm">
               <AlertTriangle size={20} />
               {error}
             </div>
@@ -123,11 +123,11 @@ const Register: React.FC = () => {
             {step === 1 && (
               <div className="space-y-6 animate-fade-in-right">
                 <div>
-                  <label className="text-[10px] font-black text-cyan-700 uppercase tracking-widest ml-2 mb-1 block">
+                  <label className="text-[10px] font-bold text-slate-400 tracking-wider ml-2 mb-1 block">
                     Full Name
                   </label>
                   <div className="relative">
-                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-cyan-700">
+                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
                       <User size={18} />
                     </div>
                     <input 
@@ -135,17 +135,17 @@ const Register: React.FC = () => {
                       placeholder="Full Name"
                       value={formData.name}
                       onChange={e => setFormData({...formData, name: e.target.value})}
-                      className="w-full bg-black border-2 border-cyan-500 pl-12 pr-4 py-3.5 text-cyan-400 placeholder:text-cyan-900 font-bold outline-none focus:border-magenta-500 transition-all"
+                      className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl pl-12 pr-4 py-3.5 text-slate-900 dark:text-white placeholder:text-slate-400 font-bold outline-none focus:border-brand-500 transition-all"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="text-[10px] font-black text-cyan-700 uppercase tracking-widest ml-2 mb-1 block">
+                  <label className="text-[10px] font-bold text-slate-400 tracking-wider ml-2 mb-1 block">
                     Email Address
                   </label>
                   <div className="relative">
-                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-cyan-700">
+                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
                       <Mail size={18} />
                     </div>
                     <input 
@@ -153,17 +153,17 @@ const Register: React.FC = () => {
                       placeholder="Email Address"
                       value={formData.email}
                       onChange={e => setFormData({...formData, email: e.target.value})}
-                      className="w-full bg-black border-2 border-cyan-500 pl-12 pr-4 py-3.5 text-cyan-400 placeholder:text-cyan-900 font-bold outline-none focus:border-magenta-500 transition-all"
+                      className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl pl-12 pr-4 py-3.5 text-slate-900 dark:text-white placeholder:text-slate-400 font-bold outline-none focus:border-brand-500 transition-all"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="text-[10px] font-black text-cyan-700 uppercase tracking-widest ml-2 mb-1 block">
+                  <label className="text-[10px] font-bold text-slate-400 tracking-wider ml-2 mb-1 block">
                     Password
                   </label>
                   <div className="relative">
-                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-cyan-700">
+                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
                       <Lock size={18} />
                     </div>
                     <input 
@@ -171,7 +171,7 @@ const Register: React.FC = () => {
                       placeholder="••••••••"
                       value={formData.password}
                       onChange={e => setFormData({...formData, password: e.target.value})}
-                      className="w-full bg-black border-2 border-cyan-500 pl-12 pr-4 py-3.5 text-cyan-400 placeholder:text-cyan-900 font-bold outline-none focus:border-magenta-500 transition-all"
+                      className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl pl-12 pr-4 py-3.5 text-slate-900 dark:text-white placeholder:text-slate-400 font-bold outline-none focus:border-brand-500 transition-all"
                     />
                   </div>
                 </div>
@@ -179,9 +179,9 @@ const Register: React.FC = () => {
                 <button 
                   type="button"
                   onClick={() => setStep(2)}
-                  className="w-full bg-magenta-500 hover:bg-black hover:text-magenta-500 hover:border-magenta-500 border-2 border-black text-white font-black text-lg py-3.5 mt-4 transition-all shadow-[6px_6px_0px_#00ffff] active:scale-95 flex items-center justify-center gap-2 uppercase tracking-widest"
+                  className="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold text-lg py-4 rounded-2xl mt-4 transition-all shadow-lg shadow-brand-600/20 active:scale-95 flex items-center justify-center gap-2 tracking-wider"
                 >
-                  Role Selection <ArrowRight size={18} />
+                  Continue <ArrowRight size={18} />
                 </button>
               </div>
             )}
@@ -191,8 +191,8 @@ const Register: React.FC = () => {
                 {roleCategories.map((cat) => (
                   <div key={cat.id} className="mb-6">
                     <div className="flex items-center gap-2 mb-3 ml-1">
-                      <cat.icon size={16} className="text-magenta-500" />
-                      <span className="text-[10px] font-black text-cyan-700 uppercase tracking-widest">
+                      <cat.icon size={16} className="text-brand-600" />
+                      <span className="text-[10px] font-bold text-slate-400 tracking-wider">
                         {cat.label}
                       </span>
                     </div>
@@ -201,34 +201,34 @@ const Register: React.FC = () => {
                         <div 
                           key={pos} 
                           onClick={() => setFormData({...formData, position: pos, role: cat.id})}
-                          className={`group p-4 border-2 cursor-pointer transition-all duration-300 ${
+                          className={`group p-4 rounded-2xl border cursor-pointer transition-all duration-300 ${
                             formData.position === pos 
-                              ? 'border-magenta-500 bg-magenta-900/10 shadow-[4px_4px_0px_#00ffff]' 
-                              : 'border-cyan-900/30 hover:border-cyan-500'
+                              ? 'border-brand-600 bg-brand-50 dark:bg-brand-900/10 shadow-sm' 
+                              : 'border-slate-200 dark:border-slate-800 hover:border-brand-400'
                           }`}
                         >
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-4">
-                              <div className={`w-12 h-12 border-2 flex items-center justify-center transition-all ${
+                              <div className={`w-12 h-12 rounded-xl border flex items-center justify-center transition-all ${
                                 formData.position === pos 
-                                  ? 'bg-magenta-500 text-white border-black shadow-[2px_2px_0px_#00ffff]' 
-                                  : 'bg-black text-cyan-700 border-cyan-900/30'
+                                  ? 'bg-brand-600 text-white border-brand-600 shadow-sm' 
+                                  : 'bg-slate-50 dark:bg-slate-800 text-slate-400 border-slate-200 dark:border-slate-700'
                               }`}>
                                 {pos === 'Resident' ? <Home size={20} /> : <Shield size={20} />}
                               </div>
                               <div>
-                                <h4 className={`font-black text-sm uppercase tracking-tight ${
-                                  formData.position === pos ? 'text-cyan-400' : 'text-cyan-700'
+                                <h4 className={`font-bold text-sm tracking-tight ${
+                                  formData.position === pos ? 'text-brand-600' : 'text-slate-600 dark:text-slate-400'
                                 }`}>
                                   {pos}
                                 </h4>
-                                <p className="text-[9px] font-black text-cyan-900 uppercase tracking-wider mt-0.5">
+                                <p className="text-[9px] font-semibold text-slate-400 tracking-wider mt-0.5">
                                   {cat.desc}
                                 </p>
                               </div>
                             </div>
                             {formData.position === pos && (
-                              <CheckCircle size={20} className="text-magenta-500" />
+                              <CheckCircle size={20} className="text-brand-600" />
                             )}
                           </div>
                         </div>
@@ -240,24 +240,24 @@ const Register: React.FC = () => {
                 <button 
                   type="button"
                   onClick={() => setStep(3)}
-                  className="w-full bg-magenta-500 hover:bg-black hover:text-magenta-500 hover:border-magenta-500 border-2 border-black text-white font-black text-lg py-3.5 mt-4 transition-all shadow-[6px_6px_0px_#00ffff] active:scale-95 flex items-center justify-center gap-2 uppercase tracking-widest"
+                  className="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold text-lg py-4 rounded-2xl mt-4 transition-all shadow-lg shadow-brand-600/20 active:scale-95 flex items-center justify-center gap-2 tracking-wider"
                 >
-                  Property Mapping <ArrowRight size={18} />
+                  Continue <ArrowRight size={18} />
                 </button>
               </div>
             )}
 
             {step === 3 && (
               <div className="space-y-6 animate-fade-in-right">
-                <div className="p-4 bg-cyan-900/10 border-2 border-cyan-500 flex items-center gap-4">
-                  <div className="w-12 h-12 bg-magenta-500 border-2 border-black flex items-center justify-center text-white shadow-[4px_4px_0px_#00ffff]">
+                <div className="p-4 bg-brand-50 dark:bg-brand-900/10 rounded-2xl border border-brand-200 dark:border-brand-800 flex items-center gap-4">
+                  <div className="w-12 h-12 bg-brand-600 rounded-xl flex items-center justify-center text-white shadow-sm">
                     {formData.position === 'Resident' ? <Home size={24} /> : <Shield size={24} />}
                   </div>
                   <div>
-                    <span className="text-[10px] font-black text-magenta-500 uppercase tracking-widest block mb-0.5">
-                      Identity Profile
+                    <span className="text-[10px] font-bold text-brand-600 tracking-wider block mb-0.5">
+                      Selected Role
                     </span>
-                    <h4 className="text-lg font-black text-cyan-400 uppercase tracking-tight">
+                    <h4 className="text-lg font-bold text-slate-900 dark:text-white tracking-tight">
                       {formData.position}
                     </h4>
                   </div>
@@ -265,39 +265,39 @@ const Register: React.FC = () => {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="text-[10px] font-black text-cyan-700 uppercase tracking-widest ml-2 mb-1 block">
+                    <label className="text-[10px] font-bold text-slate-400 tracking-wider ml-2 mb-1 block">
                       Building Wing
                     </label>
                     <div className="relative">
                       <select
                         value={formData.wing}
                         onChange={e => setFormData({...formData, wing: e.target.value})}
-                        className="w-full bg-black border-2 border-cyan-500 px-4 py-3.5 text-cyan-400 font-bold outline-none focus:border-magenta-500 appearance-none transition-all"
+                        className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-3.5 text-slate-900 dark:text-white font-bold outline-none focus:border-brand-500 appearance-none transition-all"
                       >
                         {wings.map(w => <option key={w} value={w}>Wing {w}</option>)}
                       </select>
-                      <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-cyan-700 pointer-events-none" />
+                      <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
                     </div>
                   </div>
                   <div>
-                    <label className="text-[10px] font-black text-cyan-700 uppercase tracking-widest ml-2 mb-1 block">
+                    <label className="text-[10px] font-bold text-slate-400 tracking-wider ml-2 mb-1 block">
                       Flat Number
                     </label>
                     <div className="relative">
                       <select
                         value={formData.flatNo}
                         onChange={e => setFormData({...formData, flatNo: e.target.value})}
-                        className="w-full bg-black border-2 border-cyan-500 px-4 py-3.5 text-cyan-400 font-bold outline-none focus:border-magenta-500 appearance-none transition-all"
+                        className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-3.5 text-slate-900 dark:text-white font-bold outline-none focus:border-brand-500 appearance-none transition-all"
                       >
                         {flats.map(f => <option key={f} value={f}>Flat {f}</option>)}
                       </select>
-                      <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-cyan-700 pointer-events-none" />
+                      <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
                     </div>
                   </div>
                 </div>
 
                 <div>
-                  <label className="text-[10px] font-black text-cyan-700 uppercase tracking-widest ml-2 mb-2 block">
+                  <label className="text-[10px] font-bold text-slate-400 tracking-wider ml-2 mb-2 block">
                     Occupancy Status
                   </label>
                   <div className="flex gap-3">
@@ -306,10 +306,10 @@ const Register: React.FC = () => {
                         key={type} 
                         type="button"
                         onClick={() => setFormData({...formData, occupancyType: type})}
-                        className={`flex-1 py-3 border-2 text-xs font-black uppercase tracking-wider transition-all ${
+                        className={`flex-1 py-3 rounded-2xl border text-xs font-bold tracking-wider transition-all ${
                           formData.occupancyType === type
-                            ? 'border-black bg-magenta-500 text-white shadow-[4px_4px_0px_#00ffff]'
-                            : 'border-cyan-900/30 text-cyan-700 hover:border-cyan-500'
+                            ? 'bg-brand-600 text-white border-brand-600 shadow-sm'
+                            : 'bg-slate-50 dark:bg-slate-800 text-slate-400 border-slate-200 dark:border-slate-700 hover:border-brand-400'
                         }`}
                       >
                         {type}
@@ -321,9 +321,9 @@ const Register: React.FC = () => {
                 <button 
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-magenta-500 hover:bg-black hover:text-magenta-500 hover:border-magenta-500 border-2 border-black text-white font-black text-lg py-3.5 mt-4 transition-all shadow-[6px_6px_0px_#00ffff] active:scale-95 flex items-center justify-center gap-2 uppercase tracking-widest"
+                  className="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold text-lg py-4 rounded-2xl mt-4 transition-all shadow-lg shadow-brand-600/20 active:scale-95 flex items-center justify-center gap-2 tracking-wider"
                 >
-                  {loading ? <Loader2 size={24} className="animate-spin" /> : 'Finalize Uplink'}
+                  {loading ? <Loader2 size={24} className="animate-spin" /> : 'Register'}
                   {!loading && <CheckCircle size={20} />}
                 </button>
               </div>

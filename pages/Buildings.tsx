@@ -179,14 +179,18 @@ const Buildings: React.FC = () => {
   }
 
   return (
-    <div className="space-y-10 animate-fade-up">
+    <div className="space-y-8 animate-fade-in">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-8 border-b border-slate-200 dark:border-slate-800">
         <div>
-          <h1 className="text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">{t('residential_infra')}</h1>
-          <p className="text-slate-500 dark:text-slate-400 mt-2 font-medium">Real-time occupancy tracking for Pasodara portal</p>
+          <h1 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
+            {t('residential_infra')}
+          </h1>
+          <p className="text-slate-500 dark:text-slate-400 mt-1">
+            Real-time occupancy tracking and wing management
+          </p>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-6 items-center">
+        <div className="flex flex-col sm:flex-row gap-4 items-center">
           <div className="relative w-full sm:w-64">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
             <input 
@@ -194,52 +198,47 @@ const Buildings: React.FC = () => {
               placeholder="Search wing or resident..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-brand-500 outline-none transition-all"
+              className="w-full pl-11 pr-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none transition-all shadow-sm"
             />
           </div>
-          <div className="flex gap-4">
-            <div className="bg-emerald-50 dark:bg-emerald-900/10 border border-emerald-100 dark:border-emerald-800 px-6 py-3 rounded-2xl text-center">
-               <p className="text-[10px] font-black uppercase text-emerald-600 tracking-widest mb-1">Registered</p>
-               <p className="text-2xl font-black text-emerald-700 dark:text-emerald-400 leading-none">{occupiedCount}</p>
+          <div className="flex gap-2">
+            <div className="bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-900/40 px-4 py-2 rounded-xl text-center">
+               <p className="text-[10px] font-bold uppercase text-emerald-600 dark:text-emerald-400 tracking-wider mb-0.5">Registered</p>
+               <p className="text-xl font-bold text-emerald-700 dark:text-emerald-300 leading-none">{occupiedCount}</p>
             </div>
-            <div className="bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 px-6 py-3 rounded-2xl text-center">
-               <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-1">Vacant</p>
-               <p className="text-2xl font-black text-slate-900 dark:text-white leading-none">{vacantCount}</p>
+            <div className="bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-4 py-2 rounded-xl text-center">
+               <p className="text-[10px] font-bold uppercase text-slate-500 dark:text-slate-400 tracking-wider mb-0.5">Vacant</p>
+               <p className="text-xl font-bold text-slate-700 dark:text-slate-300 leading-none">{vacantCount}</p>
             </div>
           </div>
           <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-xl">
             <button
               onClick={() => setViewMode('list')}
-              aria-label="Switch to List View"
-              aria-pressed={viewMode === 'list'}
-              className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all ${
+              className={`px-4 py-1.5 text-xs font-bold rounded-lg transition-all ${
                 viewMode === 'list' 
-                  ? 'bg-white dark:bg-slate-700 text-brand-600 shadow-sm' 
-                  : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
+                  ? 'bg-white dark:bg-slate-700 text-brand-600 dark:text-brand-400 shadow-sm' 
+                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
               }`}
             >
-              List View
+              List
             </button>
             <button
               onClick={() => setViewMode('map')}
-              aria-label="Switch to Site Map View"
-              aria-pressed={viewMode === 'map'}
-              className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all ${
+              className={`px-4 py-1.5 text-xs font-bold rounded-lg transition-all ${
                 viewMode === 'map' 
-                  ? 'bg-white dark:bg-slate-700 text-brand-600 shadow-sm' 
-                  : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
+                  ? 'bg-white dark:bg-slate-700 text-brand-600 dark:text-brand-400 shadow-sm' 
+                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
               }`}
             >
-              Site Map
+              Map
             </button>
           </div>
           {isAdmin && (
             <button 
               onClick={() => setShowAuditModal(true)}
-              aria-label="View Vacancy Audit Report"
-              className="px-6 py-4 bg-slate-900 dark:bg-slate-800 text-white rounded-3xl font-black text-xs uppercase tracking-widest flex items-center gap-2 hover:bg-brand-600 transition-all shadow-xl"
+              className="px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl font-bold text-sm flex items-center gap-2 transition-all shadow-lg shadow-brand-600/20 active:scale-95"
             >
-              <FileText size={18} /> Vacancy Report
+              <FileText size={18} /> Report
             </button>
           )}
         </div>
@@ -252,49 +251,45 @@ const Buildings: React.FC = () => {
           onBuildingClick={setSelectedBuilding} 
         />
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredBuildings.map((building, index: number) => {
             const wingOccupied = registeredUnits.filter(p => p.flatId.startsWith(building.name)).length;
             return (
               <div 
                 key={building.id || index} 
-                role="button"
-                tabIndex={0}
-                aria-label={`View details for Wing ${building.name}, ${wingOccupied} of 20 units registered`}
-                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setSelectedBuilding(building); }}
-                className="group bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 overflow-hidden shadow-sm premium-card flex flex-col cursor-pointer"
                 onClick={() => setSelectedBuilding(building)}
+                className="group bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm hover:shadow-xl hover:shadow-slate-200/50 dark:hover:shadow-none hover:-translate-y-1 transition-all duration-300 flex flex-col cursor-pointer overflow-hidden"
               >
-                <div className={`h-2.5 w-full transition-colors duration-500 ${building.type === '1BHK' ? 'bg-blue-500' : 'bg-indigo-600'}`} />
-                <div className="p-8 flex-1 flex flex-col">
-                  <div className="flex items-center justify-between mb-8">
-                    <div className="p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl text-slate-400 group-hover:bg-brand-600 group-hover:text-white transition-all duration-300">
-                      <Building2 size={28} />
+                <div className={`h-1.5 w-full transition-colors duration-500 ${building.type === '1BHK' ? 'bg-brand-400' : 'bg-brand-600'}`} />
+                <div className="p-6 flex-1 flex flex-col">
+                  <div className="flex items-center justify-between mb-6">
+                    <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl text-slate-400 group-hover:bg-brand-50 dark:group-hover:bg-brand-900/20 group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-all duration-300">
+                      <Building2 size={24} />
                     </div>
                     <div className="text-right">
-                      <div className="text-[10px] font-black px-3 py-1.5 rounded-full uppercase tracking-widest border border-slate-100 dark:border-slate-800 text-slate-500 mb-2">
+                      <div className="text-[10px] font-bold px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded mb-1 uppercase tracking-wider">
                         {building.type}
                       </div>
-                      <p className="text-[9px] font-black text-brand-600 uppercase tracking-widest">{wingOccupied}/20 Registered</p>
+                      <p className="text-[10px] font-bold text-brand-600 dark:text-brand-400 uppercase tracking-wider">{wingOccupied}/20 Units</p>
                     </div>
                   </div>
                   
-                  <h3 className="text-3xl font-black text-slate-900 dark:text-white mb-6 group-hover:text-brand-600 transition-colors">Wing {building.name}</h3>
+                  <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-4 group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors">Wing {building.name}</h3>
                   
-                  <div className="grid grid-cols-2 gap-4 mb-8">
-                    <div className="bg-slate-50/50 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-100 dark:border-slate-800/50">
-                      <p className="text-[10px] text-slate-400 uppercase font-black tracking-widest mb-1 flex items-center gap-1"><LayoutGrid size={10} /> Floors</p>
-                      <p className="text-xl font-black">5</p>
+                  <div className="grid grid-cols-2 gap-3 mb-6">
+                    <div className="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl border border-slate-100 dark:border-slate-800">
+                      <p className="text-[10px] text-slate-500 dark:text-slate-400 uppercase font-bold tracking-wider mb-0.5 flex items-center gap-1"><LayoutGrid size={12} /> Floors</p>
+                      <p className="text-lg font-bold text-slate-900 dark:text-white">05</p>
                     </div>
-                    <div className="bg-slate-50/50 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-100 dark:border-slate-800/50">
-                      <p className="text-[10px] text-slate-400 uppercase font-black tracking-widest mb-1 flex items-center gap-1"><Home size={10} /> Parking</p>
-                      <p className="text-xl font-black">{building.parkingSpots || 20}</p>
+                    <div className="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl border border-slate-100 dark:border-slate-800">
+                      <p className="text-[10px] text-slate-500 dark:text-slate-400 uppercase font-bold tracking-wider mb-0.5 flex items-center gap-1"><Home size={12} /> Parking</p>
+                      <p className="text-lg font-bold text-slate-900 dark:text-white">{building.parkingSpots || 20}</p>
                     </div>
                   </div>
 
-                  <button className="w-full flex items-center justify-between px-6 py-4 bg-slate-900 dark:bg-slate-800 text-white rounded-2xl font-black text-xs uppercase tracking-widest group-hover:bg-brand-600 transition-all duration-300">
+                  <button className="w-full flex items-center justify-between px-4 py-2.5 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-bold text-xs rounded-lg group-hover:bg-brand-600 group-hover:text-white transition-all duration-300">
                     {t('view_wing_mgmt')}
-                    <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                    <ChevronRight size={16} className="group-hover:translate-x-1 transition-transform" />
                   </button>
                 </div>
               </div>
@@ -306,58 +301,57 @@ const Buildings: React.FC = () => {
       {/* Vacancy Audit Modal */}
       {showAuditModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
-          <div className="absolute inset-0 bg-slate-900/80 backdrop-blur-xl animate-in fade-in duration-300" onClick={() => setShowAuditModal(false)} />
-          <div className="relative w-full max-w-4xl bg-white dark:bg-slate-900 rounded-[3.5rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 border border-slate-100 dark:border-slate-800 flex flex-col max-h-[85vh]">
-            <div className="p-10 border-b border-slate-100 dark:border-slate-800 flex flex-col md:flex-row justify-between items-center bg-white dark:bg-slate-900 sticky top-0 z-10 gap-6">
-              <div className="flex items-center gap-5">
-                <div className="w-16 h-16 bg-slate-900 dark:bg-brand-600 rounded-3xl flex items-center justify-center text-white shadow-xl">
-                  <ClipboardCheck size={32} />
+          <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300" onClick={() => setShowAuditModal(false)} />
+          <div className="relative w-full max-w-4xl bg-white dark:bg-slate-900 rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col max-h-[85vh] border border-slate-200 dark:border-slate-800">
+            <div className="p-6 border-b border-slate-200 dark:border-slate-800 flex flex-col md:flex-row justify-between items-center bg-white dark:bg-slate-900 sticky top-0 z-10 gap-6">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-brand-50 dark:bg-brand-900/20 flex items-center justify-center text-brand-600 dark:text-brand-400">
+                  <ClipboardCheck size={24} />
                 </div>
                 <div>
-                  <h3 className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter">Detailed Occupancy Audit</h3>
-                  <p className="text-[10px] font-black uppercase text-brand-600 tracking-widest">
-                    Listing {vacancyReport.totalVacant} Unregistered units across 24 wings
+                  <h3 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">Occupancy Audit</h3>
+                  <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                    Listing {vacancyReport.totalVacant} unregistered units
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3">
                 <div className="relative">
-                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
                   <input 
                     type="text" 
-                    placeholder="Search Wing..." 
-                    className="pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-xl text-xs font-bold outline-none"
+                    placeholder="Search wing..." 
+                    className="pl-9 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
                     value={auditSearch}
                     onChange={(e) => setAuditSearch(e.target.value)}
                   />
                 </div>
-                <button onClick={() => setShowAuditModal(false)} aria-label="Close Vacancy Audit Modal" className="p-3 text-slate-300 hover:text-slate-900 dark:hover:text-white transition-all"><X size={28} /></button>
+                <button onClick={() => setShowAuditModal(false)} className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-all"><X size={24} /></button>
               </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-10 bg-slate-50/50 dark:bg-slate-900/50">
-               <div className="space-y-8">
-                  {/* Fixed TypeScript error by adding explicit type annotation for entries to avoid 'unknown' flats array */}
+            <div className="flex-1 overflow-y-auto p-6 bg-slate-50 dark:bg-slate-950/50">
+               <div className="space-y-6">
                   {Object.entries(vacancyReport.report)
                     .filter(([wing]) => wing.toLowerCase().includes(auditSearch.toLowerCase()))
                     .map(([wing, flats]: [string, string[]]) => (
-                    <div key={wing} className="bg-white dark:bg-slate-800 p-8 rounded-[2.5rem] border border-slate-100 dark:border-slate-700 shadow-sm">
-                       <div className="flex items-center justify-between mb-6">
+                    <div key={wing} className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                       <div className="flex items-center justify-between mb-4">
                           <div className="flex items-center gap-3">
-                            <span className="w-10 h-10 bg-slate-100 dark:bg-slate-900 rounded-xl flex items-center justify-center font-black text-slate-400">
+                            <span className="w-8 h-8 rounded-lg bg-brand-50 dark:bg-brand-900/20 flex items-center justify-center font-bold text-brand-600 dark:text-brand-400">
                               {wing}
                             </span>
-                            <h4 className="text-xl font-black tracking-tight">Wing {wing} Vacancies</h4>
+                            <h4 className="text-base font-bold text-slate-900 dark:text-white">Wing {wing} Vacancies</h4>
                           </div>
-                          <span className="text-[10px] font-black bg-rose-50 text-rose-600 px-3 py-1 rounded-lg uppercase tracking-widest">
+                          <span className="text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 px-2 py-1 rounded uppercase tracking-wider">
                             {flats.length} Missing Profiles
                           </span>
                        </div>
-                       <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-3">
+                       <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-2">
                           {flats.map((f: string) => (
-                            <div key={f} className="flex flex-col items-center p-3 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-transparent hover:border-brand-600/30 transition-all cursor-default">
-                               <span className="text-sm font-black text-slate-400">{f}</span>
-                               <Ghost size={12} className="text-slate-300 mt-1" />
+                            <div key={f} className="flex flex-col items-center p-2 rounded-lg border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/50">
+                               <span className="text-xs font-bold text-slate-600 dark:text-slate-400">{f}</span>
+                               <Ghost size={12} className="text-slate-300 dark:text-slate-700 mt-1" />
                             </div>
                           ))}
                        </div>
@@ -366,22 +360,21 @@ const Buildings: React.FC = () => {
                </div>
             </div>
 
-            <div className="p-8 bg-slate-50 dark:bg-slate-800 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center">
-              <div className="flex items-center gap-3 text-slate-500 text-xs font-bold">
+            <div className="p-6 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 flex justify-between items-center">
+              <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs font-medium">
                 <AlertCircle size={16} className="text-amber-500" />
-                <span>Units listed here have no entry in the digital profiles table.</span>
+                <span>Units listed have no digital profiles.</span>
               </div>
               <button 
                 onClick={() => {
-                  {/* Fixed TypeScript error by adding explicit type annotation for entries */}
                   api.exportToCSV(
                     Object.entries(vacancyReport.report).flatMap(([wing, flats]: [string, string[]]) => flats.map((f: string) => ({ Wing: wing, Flat: f }))),
                     'Saurashtra_Vacancy_Report'
                   );
                 }}
-                className="px-6 py-3 bg-brand-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-lg flex items-center gap-2"
+                className="px-5 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-lg font-bold text-xs flex items-center gap-2 transition-all shadow-lg shadow-brand-600/20"
               >
-                <Download size={14} /> Download List
+                <Download size={14} /> Download CSV
               </button>
             </div>
           </div>
@@ -391,52 +384,52 @@ const Buildings: React.FC = () => {
       {/* Wing Map Modal */}
       {selectedBuilding && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-6">
-          <div className="absolute inset-0 bg-slate-900/80 backdrop-blur-xl animate-in fade-in duration-300" onClick={() => setSelectedBuilding(null)} />
-          <div className="relative w-full max-w-6xl bg-white dark:bg-slate-900 rounded-[3.5rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 border border-slate-100 dark:border-slate-800 flex flex-col max-h-[90vh]">
-            <div className="p-10 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-white dark:bg-slate-900 sticky top-0 z-10">
-              <div className="flex items-center gap-6">
-                <div className="w-16 h-16 bg-brand-600 rounded-3xl flex items-center justify-center text-white shadow-xl shadow-brand-500/20">
-                  <Building2 size={32} />
+          <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300" onClick={() => setSelectedBuilding(null)} />
+          <div className="relative w-full max-w-6xl bg-white dark:bg-slate-900 rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col max-h-[90vh] border border-slate-200 dark:border-slate-800">
+            <div className="p-6 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-white dark:bg-slate-900 sticky top-0 z-10">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-brand-50 dark:bg-brand-900/20 flex items-center justify-center text-brand-600 dark:text-brand-400">
+                  <Building2 size={24} />
                 </div>
                 <div>
-                  <h3 className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter">Wing {selectedBuilding.name}</h3>
-                  <p className="text-xs font-black uppercase text-brand-600 tracking-widest">Real-Time Occupancy Map</p>
+                  <h3 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">Wing {selectedBuilding.name}</h3>
+                  <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Real-time occupancy map</p>
                 </div>
               </div>
-              <button onClick={() => setSelectedBuilding(null)} aria-label="Close Wing Map Modal" className="p-4 text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded-3xl transition-all"><X size={32} /></button>
+              <button onClick={() => setSelectedBuilding(null)} className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-all"><X size={28} /></button>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-10 bg-slate-50/30 dark:bg-slate-900/30 space-y-12">
-              <section className="space-y-10">
+            <div className="flex-1 overflow-y-auto p-6 bg-slate-50 dark:bg-slate-950/50 space-y-8">
+              <section className="space-y-6">
                 <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-3">
-                    <LayoutGrid className="text-brand-600" size={24} />
-                    <h4 className="text-xl font-black text-slate-900 dark:text-white tracking-tight uppercase tracking-widest text-xs">{t('floor_map')}</h4>
+                  <div className="flex items-center gap-2">
+                    <LayoutGrid className="text-brand-600 dark:text-brand-400" size={20} />
+                    <h4 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider">{t('floor_map')}</h4>
                   </div>
-                  <div className="flex items-center gap-6">
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded bg-emerald-500 shadow-sm"></div>
-                      <span className="text-[9px] font-black uppercase text-slate-400 tracking-widest">Registered Owner</span>
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-2.5 h-2.5 rounded-full bg-emerald-500"></div>
+                      <span className="text-[10px] font-bold uppercase text-slate-500 dark:text-slate-400 tracking-wider">Owner</span>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded bg-blue-500 shadow-sm"></div>
-                      <span className="text-[9px] font-black uppercase text-slate-400 tracking-widest">Registered Tenant</span>
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-2.5 h-2.5 rounded-full bg-blue-500"></div>
+                      <span className="text-[10px] font-bold uppercase text-slate-500 dark:text-slate-400 tracking-wider">Tenant</span>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded border-2 border-dashed border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800"></div>
-                      <span className="text-[9px] font-black uppercase text-slate-400 tracking-widest">Unregistered / Vacant</span>
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-2.5 h-2.5 rounded-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900"></div>
+                      <span className="text-[10px] font-bold uppercase text-slate-500 dark:text-slate-400 tracking-wider">Vacant</span>
                     </div>
                   </div>
                 </div>
 
-                <div className="bg-white dark:bg-slate-800/40 p-12 rounded-[3.5rem] border border-slate-100 dark:border-slate-800/60 shadow-inner">
+                <div className="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
                   <div className="flex flex-col gap-6 max-w-4xl mx-auto">
                     {renderFloorGrid(selectedBuilding)}
                     
                     <div className="mt-6 flex items-center gap-8">
                       <div className="w-20" />
                       <div className="flex-1 h-3 bg-slate-100 dark:bg-slate-800 rounded-full relative">
-                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-6 py-1 rounded-full text-[8px] font-black uppercase tracking-widest shadow-xl">
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white dark:bg-slate-700 text-slate-400 dark:text-slate-500 px-4 py-0.5 border border-slate-200 dark:border-slate-600 rounded-full text-[9px] font-bold uppercase tracking-widest shadow-sm">
                           Lobby Entrance
                         </div>
                       </div>
@@ -452,59 +445,59 @@ const Buildings: React.FC = () => {
       {/* Flat & Residents Details Modal */}
       {selectedFlat && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-6">
-          <div className="absolute inset-0 bg-slate-900/80 backdrop-blur-xl animate-in fade-in duration-300" onClick={() => setSelectedFlat(null)} />
-          <div className="relative w-full max-w-2xl bg-white dark:bg-slate-900 rounded-[3.5rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 border border-slate-100 dark:border-slate-800 flex flex-col max-h-[85vh]">
-            <div className="p-10 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-white dark:bg-slate-900 sticky top-0 z-10">
-              <div className="flex items-center gap-5">
-                <div className="w-12 h-12 bg-slate-900 dark:bg-brand-600 rounded-2xl flex items-center justify-center text-white">
-                  <Home size={24} />
+          <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300" onClick={() => setSelectedFlat(null)} />
+          <div className="relative w-full max-w-lg bg-white dark:bg-slate-900 rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col max-h-[85vh] border border-slate-200 dark:border-slate-800">
+            <div className="p-6 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-white dark:bg-slate-900 sticky top-0 z-10">
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 rounded-xl bg-brand-50 dark:bg-brand-900/20 flex items-center justify-center text-brand-600 dark:text-brand-400">
+                  <Home size={20} />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-black text-slate-900 dark:text-white tracking-tighter">{t('unit')} {selectedFlat.unitNumber}</h3>
-                  <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">
+                  <h3 className="text-lg font-bold text-slate-900 dark:text-white tracking-tight">{t('unit')} {selectedFlat.unitNumber}</h3>
+                  <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
                     {selectedFlat.profile ? 'Registered Occupant' : 'Unregistered Profile'}
                   </p>
                 </div>
               </div>
-              <button onClick={() => setSelectedFlat(null)} aria-label="Close Unit Details Modal" className="p-3 text-slate-300 hover:text-slate-900 dark:hover:text-white transition-all"><X size={28} /></button>
+              <button onClick={() => setSelectedFlat(null)} className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-all"><X size={24} /></button>
             </div>
 
-            <div className="p-10 space-y-12 overflow-y-auto flex-1 bg-slate-50/50 dark:bg-slate-900/50">
+            <div className="p-6 space-y-8 overflow-y-auto flex-1 bg-slate-50 dark:bg-slate-950/50">
               {selectedFlat.profile ? (
                 <div className="space-y-4">
-                  <div className="bg-white dark:bg-slate-800 p-8 rounded-3xl border border-slate-100 dark:border-slate-700 flex items-center justify-between group">
-                    <div className="flex items-center gap-6">
-                      <div className="w-20 h-20 bg-brand-50 dark:bg-brand-900/10 rounded-[2rem] overflow-hidden flex items-center justify-center">
-                        <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${selectedFlat.profile.name}`} alt="user" />
+                  <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between group">
+                    <div className="flex items-center gap-4">
+                      <div className="w-16 h-16 rounded-2xl border-2 border-slate-100 dark:border-slate-800 overflow-hidden bg-slate-50 dark:bg-slate-800">
+                        <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${selectedFlat.profile.name}`} alt="user" className="w-full h-full object-cover" />
                       </div>
                       <div>
-                        <p className="font-black text-2xl text-slate-900 dark:text-white tracking-tight">{selectedFlat.profile.name}</p>
-                        <div className="flex items-center gap-3 mt-1">
-                           <span className="px-3 py-1 bg-slate-50 dark:bg-slate-900 rounded-lg text-[9px] font-black uppercase text-slate-400 border border-slate-100 dark:border-slate-700">{selectedFlat.profile.occupancyType}</span>
-                           <span className="text-[10px] font-bold text-brand-600 uppercase tracking-widest">{selectedFlat.profile.status} Member</span>
+                        <p className="font-bold text-lg text-slate-900 dark:text-white">{selectedFlat.profile.name}</p>
+                        <div className="flex items-center gap-2 mt-1">
+                           <span className="px-2 py-0.5 bg-brand-50 dark:bg-brand-900/20 text-brand-600 dark:text-brand-400 text-[10px] font-bold rounded uppercase tracking-wider">{selectedFlat.profile.occupancyType}</span>
+                           <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">{selectedFlat.profile.status} Member</span>
                         </div>
                       </div>
                     </div>
                   </div>
                   
-                  <section className="bg-white dark:bg-slate-800 p-8 rounded-[2.5rem] border border-slate-100 dark:border-slate-700 shadow-sm relative overflow-hidden group">
-                    <div className="flex items-center gap-4 mb-8">
-                      <div className="w-12 h-12 bg-brand-600 text-white rounded-2xl flex items-center justify-center">
-                        <CreditCard size={24} />
+                  <section className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm relative overflow-hidden group">
+                    <div className="flex items-center gap-4 mb-6">
+                      <div className="w-10 h-10 rounded-xl bg-brand-50 dark:bg-brand-900/20 text-brand-600 dark:text-brand-400 flex items-center justify-center">
+                        <CreditCard size={20} />
                       </div>
                       <div>
-                        <h4 className="text-lg font-black tracking-tight">{t('maintenance')} Summary</h4>
-                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Society Dues</p>
+                        <h4 className="text-base font-bold text-slate-900 dark:text-white tracking-tight">{t('maintenance')} Summary</h4>
+                        <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Society Dues</p>
                       </div>
                     </div>
                     <div className="pt-6 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
                       <div>
-                        <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-1">Standard Maintenance</p>
-                        <p className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter">₹{totalMaintenance}</p>
+                        <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-0.5">Total Balance</p>
+                        <p className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">₹{totalMaintenance}</p>
                       </div>
                       <button 
                         onClick={() => {}} 
-                        className="px-10 py-4 bg-brand-600 text-white rounded-[2rem] font-black text-xs uppercase tracking-widest shadow-2xl hover:bg-brand-700 transition-all flex items-center gap-3"
+                        className="px-6 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-lg font-bold text-sm transition-all shadow-lg shadow-brand-600/20"
                       >
                         {t('pay_now')}
                       </button>
@@ -512,15 +505,15 @@ const Buildings: React.FC = () => {
                   </section>
                 </div>
               ) : (
-                <div className="py-20 text-center space-y-6">
-                   <div className="w-32 h-32 bg-slate-100 dark:bg-slate-800 rounded-[3rem] flex items-center justify-center text-slate-300 dark:text-slate-600 mx-auto border-4 border-dashed border-slate-200 dark:border-slate-700">
-                     <Ghost size={64} />
+                <div className="py-12 text-center space-y-4">
+                   <div className="w-20 h-20 rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-800 flex items-center justify-center text-slate-300 dark:text-slate-700 mx-auto">
+                     <Ghost size={40} />
                    </div>
                    <div>
-                      <h4 className="text-2xl font-black text-slate-400 dark:text-slate-600 tracking-tight">No Active Registration</h4>
-                      <p className="text-slate-400 text-sm max-w-xs mx-auto mt-2">This unit has no registered users in the digital portal. Dues are tracked against the property.</p>
+                      <h4 className="text-lg font-bold text-slate-400 dark:text-slate-600 tracking-tight uppercase">No Active Registration</h4>
+                      <p className="text-slate-400 dark:text-slate-600 text-xs font-medium max-w-xs mx-auto mt-1">This unit has no registered users in the digital portal.</p>
                    </div>
-                   <button className="px-8 py-3.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all hover:scale-105">
+                   <button className="px-6 py-2.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-lg font-bold text-xs transition-all hover:bg-slate-200 dark:hover:bg-slate-700">
                      Initiate Offline Ledger
                    </button>
                 </div>

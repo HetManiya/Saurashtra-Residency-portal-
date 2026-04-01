@@ -24,6 +24,24 @@ const SecurityGate: React.FC = () => {
   const [analytics, setAnalytics] = useState<any>(null);
   const scannerRef = useRef<Html5QrcodeScanner | null>(null);
 
+  const [notifications, setNotifications] = useState<any[]>([]);
+
+  const addNotification = (message: string, type: 'CHECK_IN' | 'CHECK_OUT') => {
+    const newNotification = {
+      id: Date.now(),
+      type,
+      message,
+      timestamp: new Date()
+    };
+    
+    setNotifications(prev => [newNotification, ...prev].slice(0, 5));
+    
+    // Auto-remove notification after 5 seconds
+    setTimeout(() => {
+      setNotifications(prev => prev.filter(n => n.id !== newNotification.id));
+    }, 5000);
+  };
+
   useEffect(() => {
     fetchActiveVisitors();
     fetchAnalytics();
@@ -39,14 +57,18 @@ const SecurityGate: React.FC = () => {
 
     newSocket.on('visitor-update', (data: any) => {
       console.log('📡 Real-time update received:', data);
-      // Refresh the list when an update occurs
+      
+      // Refresh data
       fetchActiveVisitors();
       fetchAnalytics();
       
-      // Optional: Show a small toast or notification if needed
-      if (data.type === 'CHECK_IN') {
-        console.log(`New visitor checked in: ${data.visitor.name}`);
-      }
+      // Add notification
+      addNotification(
+        data.type === 'CHECK_IN' 
+          ? `Visitor ${data.visitor.name} checked in` 
+          : `Visitor ${data.visitor.name} checked out`,
+        data.type
+      );
     });
 
     return () => {
@@ -148,8 +170,11 @@ const SecurityGate: React.FC = () => {
   const handleCheckIn = async () => {
     if (!visitor) return;
     setVerifying(true);
+    setError(null);
+    setSuccess(null);
     try {
       await api.checkInVisitor(visitor.passId);
+      addNotification(`Visitor ${visitor.name} checked in`, 'CHECK_IN');
       setSuccess(`Visitor ${visitor.name} checked in successfully!`);
       setVisitor(null);
       setPassId('');
@@ -162,16 +187,53 @@ const SecurityGate: React.FC = () => {
   };
 
   const handleCheckOut = async (id: string) => {
+    const visitorToCheckout = activeVisitors.find(v => v._id === id);
+    setError(null);
+    setSuccess(null);
     try {
       await api.checkOutVisitor(id);
+      if (visitorToCheckout) {
+        addNotification(`Visitor ${visitorToCheckout.name} checked out`, 'CHECK_OUT');
+        setSuccess(`Visitor ${visitorToCheckout.name} checked out successfully!`);
+      } else {
+        setSuccess(`Visitor checked out successfully!`);
+      }
+      setVisitor(null);
+      setPassId('');
       fetchActiveVisitors();
     } catch (e: any) {
-      alert(e.message || 'Check-out failed');
+      setError(e.message || 'Check-out failed');
     }
   };
 
   return (
     <div className="space-y-10 pb-20 page-transition">
+      {/* Notifications Toast Container */}
+      <div className="fixed top-10 right-10 z-[200] space-y-4 w-80 pointer-events-none">
+        {notifications.map((n) => (
+          <div 
+            key={n.id} 
+            className={`p-6 rounded-3xl shadow-2xl border backdrop-blur-md animate-in slide-in-from-right-10 duration-300 pointer-events-auto ${
+              n.type === 'CHECK_IN' 
+                ? 'bg-emerald-500/90 border-emerald-400 text-white' 
+                : 'bg-amber-500/90 border-amber-400 text-white'
+            }`}
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+                {n.type === 'CHECK_IN' ? <LogIn size={20} /> : <LogOut size={20} />}
+              </div>
+              <div>
+                <p className="text-xs font-black uppercase tracking-widest">{n.message}</p>
+                <p className="text-[9px] font-bold opacity-70 uppercase tracking-widest mt-1">
+                  {new Date(n.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </p>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-8 border-b border-slate-200 dark:border-slate-800">
         <div>
           <h1 className="text-4xl font-black text-slate-900 dark:text-white tracking-tighter flex items-center gap-4">

@@ -247,6 +247,50 @@ router.post('/dispute-help', protect, async (req: any, res) => {
 });
 
 /**
+ * @route   POST /api/v1/payments/manual
+ * @desc    Submit a manual payment (UPI or Bank Transfer)
+ */
+router.post('/manual', protect, async (req: any, res) => {
+  try {
+    const { maintenanceId, method, referenceNumber } = req.body;
+    const bill = await Maintenance.findById(maintenanceId);
+
+    if (!bill || bill.status === 'Paid') {
+      return res.status(400).json({ message: 'Invalid or already paid bill' });
+    }
+
+    if (!['UPI', 'BANK_TRANSFER'].includes(method)) {
+      return res.status(400).json({ message: 'Invalid payment method' });
+    }
+
+    if (!referenceNumber) {
+      return res.status(400).json({ message: 'Reference number is required' });
+    }
+
+    // Log the transaction as SUCCESS (assuming auto-approval for demo)
+    await Transaction.create({
+      userId: req.user.id,
+      maintenanceId: bill._id,
+      amount: bill.amount,
+      gatewayOrderId: referenceNumber,
+      paymentGateway: method,
+      status: 'SUCCESS'
+    });
+
+    // Mark Maintenance Bill as Paid
+    await Maintenance.findByIdAndUpdate(bill._id, {
+      status: 'Paid',
+      paidDate: new Date()
+    });
+
+    res.json({ success: true, message: 'Payment recorded successfully.' });
+  } catch (error: any) {
+    console.error('Manual payment failed:', error);
+    res.status(500).json({ message: error.message || 'Payment submission failed' });
+  }
+});
+
+/**
  * @route   POST /api/v1/payments/webhook
  * @desc    Stripe Webhook to handle asynchronous payment success
  */

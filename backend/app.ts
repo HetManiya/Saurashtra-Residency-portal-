@@ -15,6 +15,7 @@ import amenityRoutes from './routes/amenityRoutes';
 import auditRoutes from './routes/auditRoutes';
 import packageRoutes from './routes/packageRoutes';
 import notificationRoutes from './routes/notificationRoutes';
+import complaintRoutes from './routes/complaintRoutes';
 import Building from './models/Building';
 import User from './models/User';
 import Notice from './models/Notice';
@@ -400,6 +401,7 @@ app.use('/api/v1/amenities', amenityRoutes);
 app.use('/api/v1/audit', auditRoutes);
 app.use('/api/society/packages', packageRoutes);
 app.use('/api/v1/notifications', notificationRoutes);
+app.use('/api/v1/complaints', complaintRoutes);
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', db: mongoose.connection.readyState });

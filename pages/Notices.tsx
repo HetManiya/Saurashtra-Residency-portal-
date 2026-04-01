@@ -90,8 +90,8 @@ const Notices: React.FC = () => {
   if (loading && notices.length === 0) {
     return (
       <div className="h-[60vh] flex flex-col items-center justify-center">
-        <Loader2 size={40} className="animate-spin mb-4 text-brand-600" />
-        <span className="text-xs font-black text-slate-400 uppercase tracking-widest">
+        <Loader2 size={40} className="animate-spin mb-4 text-brand-500" />
+        <span className="text-sm font-medium text-slate-500 uppercase tracking-widest">
           Syncing Announcements...
         </span>
       </div>
@@ -102,15 +102,15 @@ const Notices: React.FC = () => {
     <div className="max-w-4xl mx-auto pb-8 animate-fade-in">
       {/* Dynamic Live Ticker */}
       {urgentNotices.length > 0 && (
-        <div className="mb-8 rounded-2xl overflow-hidden border border-red-200 bg-red-50 dark:bg-red-900/10 dark:border-red-900/30 flex items-center">
-           <div className="bg-red-600 text-white px-4 py-3 flex items-center gap-2 z-10 shrink-0">
+        <div className="mb-8 overflow-hidden bg-rose-50 dark:bg-rose-900/10 border border-rose-100 dark:border-rose-800/50 rounded-2xl flex items-center shadow-sm">
+           <div className="bg-rose-600 text-white px-4 py-3 flex items-center gap-2 z-10 shrink-0">
              <Volume2 size={18} className="animate-pulse" />
-             <span className="text-[10px] font-black uppercase tracking-widest whitespace-nowrap">Live Broadcast</span>
+             <span className="text-[10px] font-bold uppercase tracking-widest whitespace-nowrap">Live Broadcast</span>
            </div>
            <div className="flex-grow overflow-hidden relative h-10 flex items-center">
              <div className="absolute whitespace-nowrap animate-marquee">
                {urgentNotices.map((n, idx) => (
-                 <span key={idx} className="mx-8 text-red-600 dark:text-red-400 font-bold text-sm">
+                 <span key={idx} className="mx-8 text-rose-700 dark:text-rose-400 font-semibold text-sm">
                    • {n.title}: {n.content.substring(0, 80)}...
                  </span>
                ))}
@@ -119,13 +119,13 @@ const Notices: React.FC = () => {
         </div>
       )}
 
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-8 pb-6 border-b border-slate-200 dark:border-slate-800">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8 pb-6 border-b border-slate-200 dark:border-slate-800">
         <div className="flex-grow">
-          <h3 className="text-4xl font-black tracking-tighter text-slate-900 dark:text-white">
+          <h3 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white uppercase">
             Society <span className="text-brand-600">Bulletin</span>
           </h3>
-          <p className="text-slate-500 dark:text-slate-400 mt-2 font-medium">
-            Broadcast official updates to residents
+          <p className="text-slate-500 mt-1 text-sm font-medium uppercase tracking-wider">
+            Official updates and announcements
           </p>
         </div>
         <div className="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto">
@@ -137,14 +137,14 @@ const Notices: React.FC = () => {
               aria-label="Search notices"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-brand-500 outline-none transition-all"
+              className="w-full pl-12 pr-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none transition-all"
             />
           </div>
           {isAdmin && (
             <button 
               onClick={() => setShowAddModal(true)}
               aria-label="Post a new notice"
-              className="w-full sm:w-auto flex items-center justify-center gap-2 bg-brand-600 text-white px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-brand-700 transition-colors shadow-lg shadow-brand-600/20 active:scale-95 transform duration-100"
+              className="w-full sm:w-auto flex items-center justify-center gap-2 bg-brand-600 text-white px-6 py-2.5 rounded-2xl font-bold text-sm uppercase tracking-wider hover:bg-brand-700 transition-all shadow-lg shadow-brand-500/20 active:scale-95"
             >
               <Plus size={18} strokeWidth={3} />
               Post Notice
@@ -153,48 +153,49 @@ const Notices: React.FC = () => {
         </div>
       </div>
 
-      <div className="space-y-6">
+      <div className="space-y-4">
         {filteredNotices.length === 0 ? (
-          <div className="py-16 text-center rounded-[2rem] border-2 border-dashed border-slate-200 dark:border-slate-800">
-             <Bell size={64} className="mx-auto mb-4 text-slate-200 dark:text-slate-700" />
-             <h6 className="text-lg font-black text-slate-400">
-               {searchQuery ? `No notices found matching "${searchQuery}"` : "No announcements have been posted yet."}
+          <div className="py-16 text-center bg-slate-50 dark:bg-slate-800/50 rounded-3xl border border-dashed border-slate-200 dark:border-slate-700">
+             <Bell size={48} className="mx-auto mb-4 text-slate-300 dark:text-slate-600" />
+             <h6 className="text-lg font-bold text-slate-900 dark:text-white uppercase tracking-wider">
+               {searchQuery ? `No notices matching "${searchQuery}"` : "No announcements posted"}
              </h6>
+             <p className="text-slate-500 text-sm mt-1">Check back later for updates</p>
           </div>
         ) : (
           filteredNotices.map((notice, i) => (
             <div 
               key={notice.id || notice._id || i} 
-              className="group bg-white dark:bg-slate-900 p-6 md:p-8 rounded-[2rem] border border-slate-200 dark:border-slate-800 relative overflow-hidden transition-all duration-300 hover:border-brand-500 hover:shadow-xl"
+              className="group bg-white dark:bg-slate-900 p-6 md:p-8 rounded-3xl border border-slate-200 dark:border-slate-800 relative overflow-hidden transition-all duration-300 hover:shadow-xl hover:border-brand-500/30 shadow-sm"
             >
               {i === 0 && (
-                <div className="absolute top-0 right-0 bg-brand-600 text-white px-4 py-1.5 rounded-bl-2xl flex items-center gap-2 shadow-md">
+                <div className="absolute top-0 right-0 bg-brand-600 text-white px-4 py-1.5 flex items-center gap-2 rounded-bl-2xl">
                   <Waves size={12} className="animate-pulse" />
-                  <span className="text-[10px] font-black uppercase tracking-widest">Live Update</span>
+                  <span className="text-[10px] font-bold uppercase tracking-widest">New Update</span>
                 </div>
               )}
               
               <div>
                 <div className="flex items-center gap-3 mb-4">
-                  <span className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider border ${
+                  <span className={`px-3 py-1 text-[10px] font-bold uppercase tracking-wider rounded-full ${
                     notice.category === 'Urgent' 
-                      ? 'text-red-600 bg-red-50 border-red-200 dark:bg-red-900/20 dark:border-red-800' 
+                      ? 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400' 
                       : notice.category === 'Event'
-                      ? 'text-green-600 bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800'
-                      : 'text-slate-600 bg-slate-50 border-slate-200 dark:bg-slate-800 dark:border-slate-700'
+                      ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
+                      : 'bg-brand-100 text-brand-700 dark:bg-brand-900/30 dark:text-brand-400'
                   }`}>
                     {notice.category}
                   </span>
-                  <div className="flex items-center gap-1.5 text-slate-400 text-xs font-bold">
+                  <div className="flex items-center gap-1.5 text-slate-400 text-xs font-medium uppercase">
                     <Clock size={14} />
                     <span>{formatDateTime(notice.date)}</span>
                   </div>
                 </div>
                 
-                <h4 className="text-2xl font-black mb-3 text-slate-900 dark:text-white group-hover:text-brand-600 transition-colors">
+                <h4 className="text-xl font-bold mb-3 text-slate-900 dark:text-white group-hover:text-brand-600 transition-colors">
                   {notice.title}
                 </h4>
-                <p className="text-lg text-slate-500 dark:text-slate-400 leading-relaxed font-medium">
+                <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
                   {notice.content}
                 </p>
               </div>
@@ -205,14 +206,14 @@ const Notices: React.FC = () => {
 
       {/* Add Notice Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-fade-in">
-          <div className="bg-white dark:bg-slate-900 w-full max-w-lg rounded-[2rem] shadow-2xl overflow-hidden animate-scale-in">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white dark:bg-slate-900 w-full max-w-lg rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden animate-scale-in relative z-10">
             <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
-              <h4 className="text-2xl font-black text-slate-900 dark:text-white">New Notice</h4>
+              <h4 className="text-xl font-bold text-slate-900 dark:text-white">New Notice</h4>
               <button 
                 onClick={() => setShowAddModal(false)}
                 aria-label="Close notice form"
-                className="w-10 h-10 rounded-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
               >
                 <X size={20} />
               </button>
@@ -221,7 +222,7 @@ const Notices: React.FC = () => {
             <div className="p-6">
               <form onSubmit={handlePostNotice} className="space-y-6">
                 <div>
-                  <label htmlFor="broadcast-method" className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-3">Broadcast Method</label>
+                  <label htmlFor="broadcast-method" className="text-xs font-bold text-slate-500 uppercase tracking-widest block mb-3">Broadcast Method</label>
                   <div id="broadcast-method" className="grid grid-cols-4 gap-3" role="group" aria-label="Select broadcast method">
                     {[
                       { id: 'NONE', icon: Globe, label: 'Portal' },
@@ -235,49 +236,49 @@ const Notices: React.FC = () => {
                         onClick={() => setFormData({...formData, broadcastType: type.id as any})}
                         aria-label={`Broadcast via ${type.label}`}
                         aria-pressed={formData.broadcastType === type.id}
-                        className={`h-20 rounded-2xl flex flex-col items-center justify-center gap-2 border-2 transition-all duration-200 ${
+                        className={`h-20 flex flex-col items-center justify-center gap-2 border-2 rounded-2xl transition-all duration-200 ${
                           formData.broadcastType === type.id 
-                            ? 'border-brand-500 bg-brand-50 dark:bg-brand-900/20 text-brand-600' 
-                            : 'border-slate-100 dark:border-slate-800 bg-transparent text-slate-400 hover:border-brand-200'
+                            ? 'border-brand-500 bg-brand-50 dark:bg-brand-900/20 text-brand-600 dark:text-brand-400' 
+                            : 'border-slate-100 dark:border-slate-800 bg-transparent text-slate-400 hover:border-slate-200 dark:hover:border-slate-700'
                         }`}
                       >
                         <type.icon size={20} />
-                        <span className="text-[10px] font-black uppercase">{type.label}</span>
+                        <span className="text-[10px] font-bold uppercase">{type.label}</span>
                       </button>
                     ))}
                   </div>
                 </div>
 
                 <div>
-                  <label htmlFor="notice-title" className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Title</label>
+                  <label htmlFor="notice-title" className="text-xs font-bold text-slate-500 uppercase tracking-widest block mb-2">Title</label>
                   <input 
                     id="notice-title"
                     type="text"
-                    placeholder="Notice Title..." 
+                    placeholder="Notice title..." 
                     required
                     aria-label="Notice Title"
                     value={formData.title}
                     onChange={(e) => setFormData({...formData, title: e.target.value})}
-                    className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl px-4 py-3 text-slate-900 dark:text-white placeholder-slate-400 font-bold focus:ring-2 focus:ring-brand-500 outline-none transition-all"
+                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white px-4 py-3 rounded-2xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none transition-all"
                   />
                 </div>
 
                 <div>
-                  <label htmlFor="notice-message" className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Message</label>
+                  <label htmlFor="notice-message" className="text-xs font-bold text-slate-500 uppercase tracking-widest block mb-2">Message</label>
                   <textarea 
                     id="notice-message"
                     rows={4}
-                    placeholder="Enter message..."
+                    placeholder="Enter announcement details..."
                     required
                     aria-label="Notice Message Content"
                     value={formData.content}
                     onChange={(e) => setFormData({...formData, content: e.target.value})}
-                    className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl px-4 py-3 text-slate-900 dark:text-white placeholder-slate-400 font-medium focus:ring-2 focus:ring-brand-500 outline-none transition-all resize-none"
+                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white px-4 py-3 rounded-2xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none transition-all resize-none"
                   />
                 </div>
 
                 <div>
-                  <label htmlFor="notice-category" className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-3">Category</label>
+                  <label htmlFor="notice-category" className="text-xs font-bold text-slate-500 uppercase tracking-widest block mb-3">Category</label>
                   <div id="notice-category" className="flex gap-3" role="group" aria-label="Select notice category">
                     {['General', 'Urgent', 'Event'].map(cat => (
                       <button 
@@ -286,10 +287,10 @@ const Notices: React.FC = () => {
                         onClick={() => setFormData({...formData, category: cat as any})}
                         aria-label={`Category: ${cat}`}
                         aria-pressed={formData.category === cat}
-                        className={`flex-1 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider border-2 transition-all ${
+                        className={`flex-1 py-2.5 text-xs font-bold uppercase tracking-wider rounded-2xl border-2 transition-all ${
                           formData.category === cat
-                            ? 'border-brand-500 bg-brand-50 dark:bg-brand-900/20 text-brand-600'
-                            : 'border-slate-100 dark:border-slate-800 text-slate-400 hover:border-brand-200'
+                            ? 'border-brand-500 bg-brand-50 dark:bg-brand-900/20 text-brand-600 dark:text-brand-400'
+                            : 'border-slate-100 dark:border-slate-800 text-slate-400 hover:border-slate-200 dark:hover:border-slate-700'
                         }`}
                       >
                         {cat}
@@ -302,7 +303,7 @@ const Notices: React.FC = () => {
                   type="submit"
                   disabled={isBroadcasting}
                   aria-label={isBroadcasting ? "Publishing notice" : "Publish notice to residency"}
-                  className="w-full bg-brand-600 hover:bg-brand-700 text-white font-black uppercase tracking-widest py-4 rounded-xl transition-all shadow-lg shadow-brand-600/20 active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold uppercase tracking-widest py-4 rounded-2xl transition-all shadow-lg shadow-brand-500/20 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {isBroadcasting ? (
                     <>
